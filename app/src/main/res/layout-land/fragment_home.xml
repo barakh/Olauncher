@@ -66,20 +66,21 @@
         tools:visibility="visible" />
 
     <!-- Home apps-->
-    <LinearLayout
+    <GridLayout
         android:id="@+id/homeAppsLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginHorizontal="74dp"
         android:gravity="center_vertical"
-        android:orientation="vertical"
+        android:columnCount="2"
         android:paddingVertical="@dimen/home_app_padding_vertical">
 
         <TextView
             android:id="@+id/homeApp1"
             style="@style/TextLarge"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
             android:hint="@string/app"
             android:paddingVertical="@dimen/home_app_padding_vertical"
             android:tag="@string/tag_1"
@@ -89,8 +90,9 @@
         <TextView
             android:id="@+id/homeApp2"
             style="@style/TextLarge"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
             android:hint="@string/app"
             android:paddingVertical="@dimen/home_app_padding_vertical"
             android:tag="@string/tag_2"
@@ -100,8 +102,9 @@
         <TextView
             android:id="@+id/homeApp3"
             style="@style/TextLarge"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
             android:hint="@string/app"
             android:paddingVertical="@dimen/home_app_padding_vertical"
             android:tag="@string/tag_3"
@@ -111,8 +114,9 @@
         <TextView
             android:id="@+id/homeApp4"
             style="@style/TextLarge"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
             android:hint="@string/app"
             android:paddingVertical="@dimen/home_app_padding_vertical"
             android:tag="@string/tag_4"
@@ -122,8 +126,9 @@
         <TextView
             android:id="@+id/homeApp5"
             style="@style/TextLarge"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
             android:hint="@string/app"
             android:paddingVertical="@dimen/home_app_padding_vertical"
             android:tag="@string/tag_5"
@@ -133,8 +138,9 @@
         <TextView
             android:id="@+id/homeApp6"
             style="@style/TextLarge"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
             android:hint="@string/app"
             android:paddingVertical="@dimen/home_app_padding_vertical"
             android:tag="@string/tag_6"
@@ -144,8 +150,9 @@
         <TextView
             android:id="@+id/homeApp7"
             style="@style/TextLarge"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
             android:hint="@string/app"
             android:paddingVertical="@dimen/home_app_padding_vertical"
             android:tag="@string/tag_7"
@@ -155,15 +162,16 @@
         <TextView
             android:id="@+id/homeApp8"
             style="@style/TextLarge"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
             android:hint="@string/app"
             android:paddingVertical="@dimen/home_app_padding_vertical"
             android:tag="@string/tag_8"
             android:visibility="gone"
             tools:visibility="visible" />
 
-    </LinearLayout>
+    </GridLayout>
 
     <TextView
         android:id="@+id/firstRunTips"
