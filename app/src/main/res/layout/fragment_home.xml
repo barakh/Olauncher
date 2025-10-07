@@ -82,7 +82,7 @@
             android:layout_height="wrap_content"
             android:layout_columnWeight="1"
             android:hint="@string/app"
-            android:paddingVertical="@dimen/home_app_padding_vertical"
+            android:paddingVertical="10dp"
             android:tag="@string/tag_1"
             android:visibility="gone"
             tools:visibility="visible" />
@@ -118,7 +118,7 @@
             android:layout_height="wrap_content"
             android:layout_columnWeight="1"
             android:hint="@string/app"
-            android:paddingVertical="@dimen/home_app_padding_vertical"
+            android:paddingVertical="10dp"
             android:tag="@string/tag_4"
             android:visibility="gone"
             tools:visibility="visible" />
@@ -167,7 +167,55 @@
             android:layout_columnWeight="1"
             android:hint="@string/app"
             android:paddingVertical="@dimen/home_app_padding_vertical"
-            android:tag="@string/tag_8"
+            android:tag="8"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+        <TextView
+            android:id="@+id/homeApp9"
+            style="@style/TextLarge"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:hint="@string/app"
+            android:paddingVertical="@dimen/home_app_padding_vertical"
+            android:tag="9"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+        <TextView
+            android:id="@+id/homeApp10"
+            style="@style/TextLarge"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:hint="@string/app"
+            android:paddingVertical="@dimen/home_app_padding_vertical"
+            android:tag="10"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+        <TextView
+            android:id="@+id/homeApp11"
+            style="@style/TextLarge"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:hint="@string/app"
+            android:paddingVertical="@dimen/home_app_padding_vertical"
+            android:tag="11"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+        <TextView
+            android:id="@+id/homeApp12"
+            style="@style/TextLarge"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:hint="@string/app"
+            android:paddingVertical="@dimen/home_app_padding_vertical"
+            android:tag="12"
             android:visibility="gone"
             tools:visibility="visible" />
 
