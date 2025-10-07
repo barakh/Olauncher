@@ -138,6 +138,10 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
             R.id.homeApp6 -> showAppList(Constants.FLAG_SET_HOME_APP_6, prefs.appName6.isNotEmpty(), true)
             R.id.homeApp7 -> showAppList(Constants.FLAG_SET_HOME_APP_7, prefs.appName7.isNotEmpty(), true)
             R.id.homeApp8 -> showAppList(Constants.FLAG_SET_HOME_APP_8, prefs.appName8.isNotEmpty(), true)
+            R.id.homeApp9 -> showAppList(Constants.FLAG_SET_HOME_APP_9, prefs.appName9.isNotEmpty(), true)
+            R.id.homeApp10 -> showAppList(Constants.FLAG_SET_HOME_APP_10, prefs.appName10.isNotEmpty(), true)
+            R.id.homeApp11 -> showAppList(Constants.FLAG_SET_HOME_APP_11, prefs.appName11.isNotEmpty(), true)
+            R.id.homeApp12 -> showAppList(Constants.FLAG_SET_HOME_APP_12, prefs.appName12.isNotEmpty(), true)
             R.id.clock -> {
                 showAppList(Constants.FLAG_SET_CLOCK_APP)
                 prefs.clockAppPackage = ""
@@ -201,6 +205,25 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     private fun initSwipeTouchListener() {
         val context = requireContext()
         binding.mainLayout.setOnTouchListener(getSwipeGestureListener(context))
+
+        val defaultPaddingH = 10
+        val defaultPaddingV = 30
+        binding.homeApp1.setPadding(defaultPaddingH, defaultPaddingV, defaultPaddingH, defaultPaddingV)
+        binding.homeApp2.setPadding(defaultPaddingH, defaultPaddingV, defaultPaddingH, defaultPaddingV)
+        binding.homeApp3.setPadding(defaultPaddingH, defaultPaddingV, defaultPaddingH, defaultPaddingV)
+        binding.homeApp4.setPadding(defaultPaddingH, defaultPaddingV, defaultPaddingH, defaultPaddingV)
+        binding.homeApp5.setPadding(defaultPaddingH, defaultPaddingV, defaultPaddingH, defaultPaddingV)
+        binding.homeApp6.setPadding(defaultPaddingH, defaultPaddingV, defaultPaddingH, defaultPaddingV)
+        binding.homeApp7.setPadding(defaultPaddingH, defaultPaddingV, defaultPaddingH, defaultPaddingV)
+        binding.homeApp8.setPadding(defaultPaddingH, defaultPaddingV, defaultPaddingH, defaultPaddingV)
+        binding.homeApp9.setPadding(defaultPaddingH, defaultPaddingV, defaultPaddingH, defaultPaddingV)
+        binding.homeApp10.setPadding(defaultPaddingH, defaultPaddingV, defaultPaddingH, defaultPaddingV)
+        binding.homeApp11.setPadding(defaultPaddingH, defaultPaddingV, defaultPaddingH, defaultPaddingV)
+        binding.homeApp12.setPadding(defaultPaddingH, defaultPaddingV, defaultPaddingH, defaultPaddingV)
+
+
+
+
         binding.homeApp1.setOnTouchListener(getViewSwipeTouchListener(context, binding.homeApp1))
         binding.homeApp2.setOnTouchListener(getViewSwipeTouchListener(context, binding.homeApp2))
         binding.homeApp3.setOnTouchListener(getViewSwipeTouchListener(context, binding.homeApp3))
@@ -209,6 +232,10 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         binding.homeApp6.setOnTouchListener(getViewSwipeTouchListener(context, binding.homeApp6))
         binding.homeApp7.setOnTouchListener(getViewSwipeTouchListener(context, binding.homeApp7))
         binding.homeApp8.setOnTouchListener(getViewSwipeTouchListener(context, binding.homeApp8))
+        binding.homeApp9.setOnTouchListener(getViewSwipeTouchListener(context, binding.homeApp9))
+        binding.homeApp10.setOnTouchListener(getViewSwipeTouchListener(context, binding.homeApp10))
+        binding.homeApp11.setOnTouchListener(getViewSwipeTouchListener(context, binding.homeApp11))
+        binding.homeApp12.setOnTouchListener(getViewSwipeTouchListener(context, binding.homeApp12))
     }
 
     private fun initClickListeners() {
@@ -234,6 +261,10 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         binding.homeApp6.gravity = horizontalGravity
         binding.homeApp7.gravity = horizontalGravity
         binding.homeApp8.gravity = horizontalGravity
+        binding.homeApp9.gravity = horizontalGravity
+        binding.homeApp10.gravity = horizontalGravity
+        binding.homeApp11.gravity = horizontalGravity
+        binding.homeApp12.gravity = horizontalGravity
     }
 
     private fun populateDateTime() {
@@ -345,6 +376,34 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
             prefs.appName8 = ""
             prefs.appPackage8 = ""
         }
+        if (homeAppsNum == 8) return
+
+        binding.homeApp9.visibility = View.VISIBLE
+        if (!setHomeAppText(binding.homeApp9, prefs.appName9, prefs.appPackage9, prefs.appUser9)) {
+            prefs.appName9 = ""
+            prefs.appPackage9 = ""
+        }
+        if (homeAppsNum == 9) return
+
+        binding.homeApp10.visibility = View.VISIBLE
+        if (!setHomeAppText(binding.homeApp10, prefs.appName10, prefs.appPackage10, prefs.appUser10)) {
+            prefs.appName10 = ""
+            prefs.appPackage10 = ""
+        }
+        if (homeAppsNum == 10) return
+
+        binding.homeApp11.visibility = View.VISIBLE
+        if (!setHomeAppText(binding.homeApp11, prefs.appName11, prefs.appPackage11, prefs.appUser11)) {
+            prefs.appName11 = ""
+            prefs.appPackage11 = ""
+        }
+        if (homeAppsNum == 11) return
+
+        binding.homeApp12.visibility = View.VISIBLE
+        if (!setHomeAppText(binding.homeApp12, prefs.appName12, prefs.appPackage12, prefs.appUser12)) {
+            prefs.appName12 = ""
+            prefs.appPackage12 = ""
+        }
     }
 
     private fun setHomeAppText(textView: TextView, appName: String, packageName: String, userString: String): Boolean {
@@ -365,6 +424,10 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         binding.homeApp6.visibility = View.GONE
         binding.homeApp7.visibility = View.GONE
         binding.homeApp8.visibility = View.GONE
+        binding.homeApp9.visibility = View.GONE
+        binding.homeApp10.visibility = View.GONE
+        binding.homeApp11.visibility = View.GONE
+        binding.homeApp12.visibility = View.GONE
     }
 
     private fun homeAppClicked(location: Int) {
