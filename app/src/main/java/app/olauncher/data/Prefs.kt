@@ -215,17 +215,9 @@ class Prefs(context: Context) {
         get() = prefs.getBoolean(ABOUT_CLICKED, false)
         set(value) = prefs.edit().putBoolean(ABOUT_CLICKED, value).apply()
 
-    var rateClicked: Boolean
-        get() = prefs.getBoolean(RATE_CLICKED, false)
-        set(value) = prefs.edit().putBoolean(RATE_CLICKED, value).apply()
-
     var wallpaperMsgShown: Boolean
         get() = prefs.getBoolean(WALLPAPER_MSG_SHOWN, false)
         set(value) = prefs.edit().putBoolean(WALLPAPER_MSG_SHOWN, value).apply()
-
-    var shareShownTime: Long
-        get() = prefs.getLong(SHARE_SHOWN_TIME, 0L)
-        set(value) = prefs.edit().putLong(SHARE_SHOWN_TIME, value).apply()
 
     var swipeDownAction: Int
         get() = prefs.getInt(SWIPE_DOWN_ACTION, Constants.SwipeDownAction.NOTIFICATIONS)
