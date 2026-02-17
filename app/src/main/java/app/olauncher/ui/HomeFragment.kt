@@ -469,18 +469,23 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     private fun showLongPressToast() = requireContext().showToast(getString(R.string.long_press_to_select_app))
 
     private fun showAntiDoomBlockedDialog(info: AntiDoomBlockedInfo) {
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.antidoom_blocked_title)
-            .setMessage(getString(R.string.antidoom_blocked_message, info.remainingMinutes))
-            .setPositiveButton(R.string.antidoom_open_anyway) { dialog, _ ->
-                viewModel.forceLaunchApp(info.appModel)
-                dialog.dismiss()
-            }
-            .setNegativeButton(R.string.antidoom_cancel) { dialog, _ ->
-                dialog.dismiss()
-            }
+        val view = layoutInflater.inflate(R.layout.dialog_antidoom, null)
+        view.findViewById<TextView>(R.id.dialogMessage).text = getString(R.string.antidoom_blocked_message, info.remainingMinutes)
+
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setView(view)
             .setCancelable(true)
-            .show()
+            .create()
+
+        view.findViewById<View>(R.id.btnOpenAnyway).setOnClickListener {
+            viewModel.forceLaunchApp(info.appModel)
+            dialog.dismiss()
+        }
+        view.findViewById<View>(R.id.btnCancel).setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
     }
 
     private fun textOnClick(view: View) = onClick(view)
