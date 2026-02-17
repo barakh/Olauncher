@@ -66,6 +66,7 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
         checkAdminPermission()
 
         binding.homeAppsNum.text = prefs.homeAppsNum.toString()
+        binding.appsNumValue?.text = prefs.homeAppsNum.toString()
         populateProMessage()
         populateKeyboardText()
         populateScreenTimeOnOff()
@@ -124,12 +125,13 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
 
             R.id.tvGestures -> binding.flSwipeDown.visibility = View.VISIBLE
 
-            R.id.maxApps0, R.id.maxApps1, R.id.maxApps2, R.id.maxApps3, R.id.maxApps4,
-            R.id.maxApps5, R.id.maxApps6, R.id.maxApps7, R.id.maxApps8, R.id.maxApps9,
-            R.id.maxApps10, R.id.maxApps11, R.id.maxApps12, R.id.maxApps13, R.id.maxApps14,
-            R.id.maxApps15, R.id.maxApps16 -> {
-                val num = view.tag.toString().toInt()
-                updateHomeAppsNum(num)
+            R.id.appsNumDecrement -> {
+                val newNum = (prefs.homeAppsNum - 1).coerceAtLeast(0)
+                updateHomeAppsNum(newNum)
+            }
+            R.id.appsNumIncrement -> {
+                val newNum = (prefs.homeAppsNum + 1).coerceAtMost(16)
+                updateHomeAppsNum(newNum)
             }
 
 
@@ -218,14 +220,8 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
         binding.twitter.setOnClickListener(this)
         binding.privacy.setOnClickListener(this)
 
-        val maxAppsViews = listOf(
-            binding.maxApps0, binding.maxApps1, binding.maxApps2, binding.maxApps3, binding.maxApps4,
-            binding.maxApps5, binding.maxApps6, binding.maxApps7, binding.maxApps8, binding.maxApps9,
-            binding.maxApps10, binding.maxApps11, binding.maxApps12, binding.maxApps13, binding.maxApps14,
-            binding.maxApps15, binding.maxApps16
-        )
-        maxAppsViews.forEach { it?.setOnClickListener(this) }
-
+        binding.appsNumDecrement?.setOnClickListener(this)
+        binding.appsNumIncrement?.setOnClickListener(this)
 
         binding.textSize1.setOnClickListener(this)
         binding.textSize2.setOnClickListener(this)
@@ -435,7 +431,7 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
 
     private fun updateHomeAppsNum(num: Int) {
         binding.homeAppsNum.text = num.toString()
-        binding.appsNumSelectLayout.visibility = View.GONE
+        binding.appsNumValue?.text = num.toString()
         prefs.homeAppsNum = num
         viewModel.refreshHome(true)
     }
