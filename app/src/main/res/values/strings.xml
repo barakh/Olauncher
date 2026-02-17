@@ -154,4 +154,5 @@
     <string name="alignment_changed">Alignment changed ✅</string>
     <string name="home_screen">Home screen</string>
     <string name="hey">Hey</string>
+    <string name="version_identifier" translatable="false">1.0</string>
 </resources>

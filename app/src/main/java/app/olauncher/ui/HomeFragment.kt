@@ -57,6 +57,13 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
+    private val homeAppViews
+        get() = listOf(
+            binding.homeApp1, binding.homeApp2, binding.homeApp3, binding.homeApp4,
+            binding.homeApp5, binding.homeApp6, binding.homeApp7, binding.homeApp8,
+            binding.homeApp9, binding.homeApp10, binding.homeApp11, binding.homeApp12
+        )
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         return binding.root
@@ -93,7 +100,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
             R.id.setDefaultLauncher -> viewModel.resetLauncherLiveData.call()
             R.id.tvScreenTime -> openScreenTimeDigitalWellbeing()
 
-            else -> {
+            in homeAppViews.map { it.id } -> {
                 try { // Launch app
                     val appLocation = view.tag.toString().toInt()
                     homeAppClicked(appLocation)
@@ -130,18 +137,11 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
 
     override fun onLongClick(view: View): Boolean {
         when (view.id) {
-            R.id.homeApp1 -> showAppList(Constants.FLAG_SET_HOME_APP_1, prefs.appName1.isNotEmpty(), true)
-            R.id.homeApp2 -> showAppList(Constants.FLAG_SET_HOME_APP_2, prefs.appName2.isNotEmpty(), true)
-            R.id.homeApp3 -> showAppList(Constants.FLAG_SET_HOME_APP_3, prefs.appName3.isNotEmpty(), true)
-            R.id.homeApp4 -> showAppList(Constants.FLAG_SET_HOME_APP_4, prefs.appName4.isNotEmpty(), true)
-            R.id.homeApp5 -> showAppList(Constants.FLAG_SET_HOME_APP_5, prefs.appName5.isNotEmpty(), true)
-            R.id.homeApp6 -> showAppList(Constants.FLAG_SET_HOME_APP_6, prefs.appName6.isNotEmpty(), true)
-            R.id.homeApp7 -> showAppList(Constants.FLAG_SET_HOME_APP_7, prefs.appName7.isNotEmpty(), true)
-            R.id.homeApp8 -> showAppList(Constants.FLAG_SET_HOME_APP_8, prefs.appName8.isNotEmpty(), true)
-            R.id.homeApp9 -> showAppList(Constants.FLAG_SET_HOME_APP_9, prefs.appName9.isNotEmpty(), true)
-            R.id.homeApp10 -> showAppList(Constants.FLAG_SET_HOME_APP_10, prefs.appName10.isNotEmpty(), true)
-            R.id.homeApp11 -> showAppList(Constants.FLAG_SET_HOME_APP_11, prefs.appName11.isNotEmpty(), true)
-            R.id.homeApp12 -> showAppList(Constants.FLAG_SET_HOME_APP_12, prefs.appName12.isNotEmpty(), true)
+            in homeAppViews.map { it.id } -> {
+                val location = view.tag.toString().toInt()
+                val flag = Constants.FLAG_SET_HOME_APP_1 + location - 1
+                showAppList(flag, prefs.getAppName(location).isNotEmpty(), true)
+            }
             R.id.clock -> {
                 showAppList(Constants.FLAG_SET_CLOCK_APP)
                 prefs.clockAppPackage = ""
@@ -208,35 +208,12 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
 
         val defaultPaddingH = 10
         val defaultPaddingV = 30
-        binding.homeApp1.setPadding(defaultPaddingH, defaultPaddingV, defaultPaddingH, defaultPaddingV)
-        binding.homeApp2.setPadding(defaultPaddingH, defaultPaddingV, defaultPaddingH, defaultPaddingV)
-        binding.homeApp3.setPadding(defaultPaddingH, defaultPaddingV, defaultPaddingH, defaultPaddingV)
-        binding.homeApp4.setPadding(defaultPaddingH, defaultPaddingV, defaultPaddingH, defaultPaddingV)
-        binding.homeApp5.setPadding(defaultPaddingH, defaultPaddingV, defaultPaddingH, defaultPaddingV)
-        binding.homeApp6.setPadding(defaultPaddingH, defaultPaddingV, defaultPaddingH, defaultPaddingV)
-        binding.homeApp7.setPadding(defaultPaddingH, defaultPaddingV, defaultPaddingH, defaultPaddingV)
-        binding.homeApp8.setPadding(defaultPaddingH, defaultPaddingV, defaultPaddingH, defaultPaddingV)
-        binding.homeApp9.setPadding(defaultPaddingH, defaultPaddingV, defaultPaddingH, defaultPaddingV)
-        binding.homeApp10.setPadding(defaultPaddingH, defaultPaddingV, defaultPaddingH, defaultPaddingV)
-        binding.homeApp11.setPadding(defaultPaddingH, defaultPaddingV, defaultPaddingH, defaultPaddingV)
-        binding.homeApp12.setPadding(defaultPaddingH, defaultPaddingV, defaultPaddingH, defaultPaddingV)
-
-
-
-
-        binding.homeApp1.setOnTouchListener(getViewSwipeTouchListener(context, binding.homeApp1))
-        binding.homeApp2.setOnTouchListener(getViewSwipeTouchListener(context, binding.homeApp2))
-        binding.homeApp3.setOnTouchListener(getViewSwipeTouchListener(context, binding.homeApp3))
-        binding.homeApp4.setOnTouchListener(getViewSwipeTouchListener(context, binding.homeApp4))
-        binding.homeApp5.setOnTouchListener(getViewSwipeTouchListener(context, binding.homeApp5))
-        binding.homeApp6.setOnTouchListener(getViewSwipeTouchListener(context, binding.homeApp6))
-        binding.homeApp7.setOnTouchListener(getViewSwipeTouchListener(context, binding.homeApp7))
-        binding.homeApp8.setOnTouchListener(getViewSwipeTouchListener(context, binding.homeApp8))
-        binding.homeApp9.setOnTouchListener(getViewSwipeTouchListener(context, binding.homeApp9))
-        binding.homeApp10.setOnTouchListener(getViewSwipeTouchListener(context, binding.homeApp10))
-        binding.homeApp11.setOnTouchListener(getViewSwipeTouchListener(context, binding.homeApp11))
-        binding.homeApp12.setOnTouchListener(getViewSwipeTouchListener(context, binding.homeApp12))
+        homeAppViews.forEach {
+            it.setPadding(defaultPaddingH, defaultPaddingV, defaultPaddingH, defaultPaddingV)
+            it.setOnTouchListener(getViewSwipeTouchListener(context, it))
+        }
     }
+
 
     private fun initClickListeners() {
         binding.lock.setOnClickListener(this)
@@ -253,18 +230,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         val verticalGravity = if (prefs.homeBottomAlignment) Gravity.BOTTOM else Gravity.CENTER_VERTICAL
 //        binding.homeAppsLayout.gravity = horizontalGravity or verticalGravity
         binding.dateTimeLayout.gravity = horizontalGravity
-        binding.homeApp1.gravity = horizontalGravity
-        binding.homeApp2.gravity = horizontalGravity
-        binding.homeApp3.gravity = horizontalGravity
-        binding.homeApp4.gravity = horizontalGravity
-        binding.homeApp5.gravity = horizontalGravity
-        binding.homeApp6.gravity = horizontalGravity
-        binding.homeApp7.gravity = horizontalGravity
-        binding.homeApp8.gravity = horizontalGravity
-        binding.homeApp9.gravity = horizontalGravity
-        binding.homeApp10.gravity = horizontalGravity
-        binding.homeApp11.gravity = horizontalGravity
-        binding.homeApp12.gravity = horizontalGravity
+        homeAppViews.forEach { it.gravity = horizontalGravity }
     }
 
     private fun populateDateTime() {
@@ -322,87 +288,13 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         val homeAppsNum = prefs.homeAppsNum
         if (homeAppsNum == 0) return
 
-        binding.homeApp1.visibility = View.VISIBLE
-        if (!setHomeAppText(binding.homeApp1, prefs.appName1, prefs.appPackage1, prefs.appUser1)) {
-            prefs.appName1 = ""
-            prefs.appPackage1 = ""
-        }
-        if (homeAppsNum == 1) return
-
-        binding.homeApp2.visibility = View.VISIBLE
-        if (!setHomeAppText(binding.homeApp2, prefs.appName2, prefs.appPackage2, prefs.appUser2)) {
-            prefs.appName2 = ""
-            prefs.appPackage2 = ""
-        }
-        if (homeAppsNum == 2) return
-
-        binding.homeApp3.visibility = View.VISIBLE
-        if (!setHomeAppText(binding.homeApp3, prefs.appName3, prefs.appPackage3, prefs.appUser3)) {
-            prefs.appName3 = ""
-            prefs.appPackage3 = ""
-        }
-        if (homeAppsNum == 3) return
-
-        binding.homeApp4.visibility = View.VISIBLE
-        if (!setHomeAppText(binding.homeApp4, prefs.appName4, prefs.appPackage4, prefs.appUser4)) {
-            prefs.appName4 = ""
-            prefs.appPackage4 = ""
-        }
-        if (homeAppsNum == 4) return
-
-        binding.homeApp5.visibility = View.VISIBLE
-        if (!setHomeAppText(binding.homeApp5, prefs.appName5, prefs.appPackage5, prefs.appUser5)) {
-            prefs.appName5 = ""
-            prefs.appPackage5 = ""
-        }
-        if (homeAppsNum == 5) return
-
-        binding.homeApp6.visibility = View.VISIBLE
-        if (!setHomeAppText(binding.homeApp6, prefs.appName6, prefs.appPackage6, prefs.appUser6)) {
-            prefs.appName6 = ""
-            prefs.appPackage6 = ""
-        }
-        if (homeAppsNum == 6) return
-
-        binding.homeApp7.visibility = View.VISIBLE
-        if (!setHomeAppText(binding.homeApp7, prefs.appName7, prefs.appPackage7, prefs.appUser7)) {
-            prefs.appName7 = ""
-            prefs.appPackage7 = ""
-        }
-        if (homeAppsNum == 7) return
-
-        binding.homeApp8.visibility = View.VISIBLE
-        if (!setHomeAppText(binding.homeApp8, prefs.appName8, prefs.appPackage8, prefs.appUser8)) {
-            prefs.appName8 = ""
-            prefs.appPackage8 = ""
-        }
-        if (homeAppsNum == 8) return
-
-        binding.homeApp9.visibility = View.VISIBLE
-        if (!setHomeAppText(binding.homeApp9, prefs.appName9, prefs.appPackage9, prefs.appUser9)) {
-            prefs.appName9 = ""
-            prefs.appPackage9 = ""
-        }
-        if (homeAppsNum == 9) return
-
-        binding.homeApp10.visibility = View.VISIBLE
-        if (!setHomeAppText(binding.homeApp10, prefs.appName10, prefs.appPackage10, prefs.appUser10)) {
-            prefs.appName10 = ""
-            prefs.appPackage10 = ""
-        }
-        if (homeAppsNum == 10) return
-
-        binding.homeApp11.visibility = View.VISIBLE
-        if (!setHomeAppText(binding.homeApp11, prefs.appName11, prefs.appPackage11, prefs.appUser11)) {
-            prefs.appName11 = ""
-            prefs.appPackage11 = ""
-        }
-        if (homeAppsNum == 11) return
-
-        binding.homeApp12.visibility = View.VISIBLE
-        if (!setHomeAppText(binding.homeApp12, prefs.appName12, prefs.appPackage12, prefs.appUser12)) {
-            prefs.appName12 = ""
-            prefs.appPackage12 = ""
+        for (i in 1..homeAppsNum) {
+            val view = homeAppViews[i - 1]
+            view.visibility = View.VISIBLE
+            if (!setHomeAppText(view, prefs.getAppName(i), prefs.getAppPackage(i), prefs.getAppUser(i))) {
+                prefs.setAppName(i, "")
+                prefs.setAppPackage(i, "")
+            }
         }
     }
 
@@ -416,18 +308,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     }
 
     private fun hideHomeApps() {
-        binding.homeApp1.visibility = View.GONE
-        binding.homeApp2.visibility = View.GONE
-        binding.homeApp3.visibility = View.GONE
-        binding.homeApp4.visibility = View.GONE
-        binding.homeApp5.visibility = View.GONE
-        binding.homeApp6.visibility = View.GONE
-        binding.homeApp7.visibility = View.GONE
-        binding.homeApp8.visibility = View.GONE
-        binding.homeApp9.visibility = View.GONE
-        binding.homeApp10.visibility = View.GONE
-        binding.homeApp11.visibility = View.GONE
-        binding.homeApp12.visibility = View.GONE
+        homeAppViews.forEach { it.visibility = View.GONE }
     }
 
     private fun homeAppClicked(location: Int) {

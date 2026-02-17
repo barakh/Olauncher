@@ -167,6 +167,7 @@
                             android:layout_weight="1"
                             android:gravity="center"
                             android:paddingVertical="8dp"
+                            android:tag="0"
                             android:text="@string/_0" />
 
                         <TextView
@@ -177,6 +178,7 @@
                             android:layout_weight="1"
                             android:gravity="center"
                             android:paddingVertical="8dp"
+                            android:tag="1"
                             android:text="@string/_1" />
 
                         <TextView
@@ -187,6 +189,7 @@
                             android:layout_weight="1"
                             android:gravity="center"
                             android:paddingVertical="8dp"
+                            android:tag="2"
                             android:text="@string/_2" />
 
                         <TextView
@@ -197,6 +200,7 @@
                             android:layout_weight="1"
                             android:gravity="center"
                             android:paddingVertical="8dp"
+                            android:tag="3"
                             android:text="@string/_3" />
 
                         <TextView
@@ -207,6 +211,7 @@
                             android:layout_weight="1"
                             android:gravity="center"
                             android:paddingVertical="8dp"
+                            android:tag="4"
                             android:text="@string/_4" />
 
                         <TextView
@@ -217,6 +222,7 @@
                             android:layout_weight="1"
                             android:gravity="center"
                             android:paddingVertical="8dp"
+                            android:tag="5"
                             android:text="@string/_5" />
 
                         <TextView
@@ -227,6 +233,7 @@
                             android:layout_weight="1"
                             android:gravity="center"
                             android:paddingVertical="8dp"
+                            android:tag="6"
                             android:text="@string/_6" />
 
                         <TextView
@@ -237,6 +244,7 @@
                             android:layout_weight="1"
                             android:gravity="center"
                             android:paddingVertical="8dp"
+                            android:tag="7"
                             android:text="@string/_7" />
 
                         <TextView
@@ -247,6 +255,7 @@
                             android:layout_weight="1"
                             android:gravity="center"
                             android:paddingVertical="8dp"
+                            android:tag="8"
                             android:text="@string/_8" />
 
                         <TextView
@@ -257,6 +266,7 @@
                             android:layout_weight="1"
                             android:gravity="center"
                             android:paddingVertical="8dp"
+                            android:tag="9"
                             android:text="9" />
 
                         <TextView
@@ -267,6 +277,7 @@
                             android:layout_weight="1"
                             android:gravity="center"
                             android:paddingVertical="8dp"
+                            android:tag="10"
                             android:text="10" />
 
                         <TextView
@@ -277,6 +288,7 @@
                             android:layout_weight="1"
                             android:gravity="center"
                             android:paddingVertical="8dp"
+                            android:tag="11"
                             android:text="11" />
 
                         <TextView
@@ -287,6 +299,7 @@
                             android:layout_weight="1"
                             android:gravity="center"
                             android:paddingVertical="8dp"
+                            android:tag="12"
                             android:text="12" />
 
                     </LinearLayout>
@@ -1017,6 +1030,15 @@
                     android:maxLines="1"
                     android:padding="10dp"
                     android:text="@string/privacy" />
+
+                <TextView
+                    android:id="@+id/version"
+                    style="@style/TextSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:alpha="0.5"
+                    android:padding="10dp"
+                    android:text="@string/version_identifier" />
             </LinearLayout>
 
         </LinearLayout>
