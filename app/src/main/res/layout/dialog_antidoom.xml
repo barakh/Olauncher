@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@drawable/rounded_rectangle_dark"
     android:gravity="center_horizontal"
     android:orientation="vertical"
     android:padding="32dp">
@@ -35,24 +36,26 @@
     <TextView
         android:id="@+id/btnOpenAnyway"
         style="@style/TextMedium"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         android:padding="12dp"
+        android:gravity="center"
         android:text="@string/antidoom_open_anyway"
-        android:background="?attr/selectableItemBackground"
+        android:background="@drawable/bg_antidoom_button"
         android:clickable="true"
         android:focusable="true" />
 
     <TextView
         android:id="@+id/btnCancel"
         style="@style/TextSmall"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="12dp"
         android:padding="12dp"
+        android:gravity="center"
         android:text="@string/antidoom_cancel"
-        android:background="?attr/selectableItemBackground"
+        android:background="@drawable/bg_antidoom_button"
         android:clickable="true"
         android:focusable="true" />
 
