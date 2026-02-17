@@ -310,6 +310,8 @@ class AppDrawerFragment : Fragment() {
             .setCancelable(true)
             .create()
 
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
         view.findViewById<View>(R.id.btnOpenAnyway).setOnClickListener {
             viewModel.forceLaunchApp(info.appModel)
             dialog.dismiss()
