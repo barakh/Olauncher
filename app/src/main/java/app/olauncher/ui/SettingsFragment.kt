@@ -126,7 +126,8 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
 
             R.id.maxApps0, R.id.maxApps1, R.id.maxApps2, R.id.maxApps3, R.id.maxApps4,
             R.id.maxApps5, R.id.maxApps6, R.id.maxApps7, R.id.maxApps8, R.id.maxApps9,
-            R.id.maxApps10, R.id.maxApps11, R.id.maxApps12 -> {
+            R.id.maxApps10, R.id.maxApps11, R.id.maxApps12, R.id.maxApps13, R.id.maxApps14,
+            R.id.maxApps15, R.id.maxApps16 -> {
                 val num = view.tag.toString().toInt()
                 updateHomeAppsNum(num)
             }
@@ -220,9 +221,10 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
         val maxAppsViews = listOf(
             binding.maxApps0, binding.maxApps1, binding.maxApps2, binding.maxApps3, binding.maxApps4,
             binding.maxApps5, binding.maxApps6, binding.maxApps7, binding.maxApps8, binding.maxApps9,
-            binding.maxApps10, binding.maxApps11, binding.maxApps12
+            binding.maxApps10, binding.maxApps11, binding.maxApps12, binding.maxApps13, binding.maxApps14,
+            binding.maxApps15, binding.maxApps16
         )
-        maxAppsViews.forEach { it.setOnClickListener(this) }
+        maxAppsViews.forEach { it?.setOnClickListener(this) }
 
 
         binding.textSize1.setOnClickListener(this)
