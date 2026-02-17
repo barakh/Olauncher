@@ -17,6 +17,7 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import app.olauncher.R
 import app.olauncher.data.AppModel
 import app.olauncher.data.Constants
 import app.olauncher.data.Prefs
@@ -57,6 +58,18 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun selectedApp(appModel: AppModel, flag: Int) {
         when (flag) {
             Constants.FLAG_LAUNCH_APP -> {
+                if (prefs.isAntiDoomApp(appModel.appPackage, appModel.user.toString())) {
+                    val hiddenUntil = prefs.getAntiDoomHiddenUntil(appModel.appPackage, appModel.user.toString())
+                    if (hiddenUntil > System.currentTimeMillis()) {
+                        val remainingMinutes = ((hiddenUntil - System.currentTimeMillis()) / 60000).toInt()
+                        appContext.showToast(appContext.getString(R.string.antidoom_blocked, remainingMinutes.coerceAtLeast(1)))
+                        return
+                    }
+                    prefs.setAntiDoomHiddenUntil(appModel.appPackage, appModel.user.toString(), System.currentTimeMillis() + Constants.ONE_HOUR_IN_MILLIS)
+                    getAppList()
+                    getHiddenApps()
+                    refreshHome(false)
+                }
                 launchApp(appModel.appPackage, appModel.activityClassName, appModel.user)
             }
 

@@ -115,25 +115,43 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     private fun openClockApp() {
         if (prefs.clockAppPackage.isBlank())
             openAlarmApp(requireContext())
-        else
-            launchApp(
-                "Clock",
-                prefs.clockAppPackage,
-                prefs.clockAppClassName,
-                prefs.clockAppUser
-            )
+        else {
+            val packageName = prefs.clockAppPackage
+            val userString = prefs.clockAppUser
+            val hiddenUntil = prefs.getAntiDoomHiddenUntil(packageName, userString)
+            if (hiddenUntil > System.currentTimeMillis()) {
+                val remainingMinutes = ((hiddenUntil - System.currentTimeMillis()) / 60000).toInt()
+                requireContext().showToast(getString(R.string.antidoom_blocked, remainingMinutes.coerceAtLeast(1)))
+            } else {
+                launchApp(
+                    "Clock",
+                    packageName,
+                    prefs.clockAppClassName,
+                    userString
+                )
+            }
+        }
     }
 
     private fun openCalendarApp() {
         if (prefs.calendarAppPackage.isBlank())
             openCalendar(requireContext())
-        else
-            launchApp(
-                "Calendar",
-                prefs.calendarAppPackage,
-                prefs.calendarAppClassName,
-                prefs.calendarAppUser
-            )
+        else {
+            val packageName = prefs.calendarAppPackage
+            val userString = prefs.calendarAppUser
+            val hiddenUntil = prefs.getAntiDoomHiddenUntil(packageName, userString)
+            if (hiddenUntil > System.currentTimeMillis()) {
+                val remainingMinutes = ((hiddenUntil - System.currentTimeMillis()) / 60000).toInt()
+                requireContext().showToast(getString(R.string.antidoom_blocked, remainingMinutes.coerceAtLeast(1)))
+            } else {
+                launchApp(
+                    "Calendar",
+                    packageName,
+                    prefs.calendarAppClassName,
+                    userString
+                )
+            }
+        }
     }
 
     override fun onLongClick(view: View): Boolean {
@@ -314,12 +332,22 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
 
     private fun homeAppClicked(location: Int) {
         if (prefs.getAppName(location).isEmpty()) showLongPressToast()
-        else launchApp(
-            prefs.getAppName(location),
-            prefs.getAppPackage(location),
-            prefs.getAppActivityClassName(location),
-            prefs.getAppUser(location)
-        )
+        else {
+            val packageName = prefs.getAppPackage(location)
+            val userString = prefs.getAppUser(location)
+            val hiddenUntil = prefs.getAntiDoomHiddenUntil(packageName, userString)
+            if (hiddenUntil > System.currentTimeMillis()) {
+                val remainingMinutes = ((hiddenUntil - System.currentTimeMillis()) / 60000).toInt()
+                requireContext().showToast(getString(R.string.antidoom_blocked, remainingMinutes.coerceAtLeast(1)))
+            } else {
+                launchApp(
+                    prefs.getAppName(location),
+                    packageName,
+                    prefs.getAppActivityClassName(location),
+                    userString
+                )
+            }
+        }
     }
 
     private fun launchApp(appName: String, packageName: String, activityClassName: String?, userString: String) {
@@ -367,26 +395,42 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
 
     private fun openSwipeRightApp() {
         if (!prefs.swipeRightEnabled) return
-        if (prefs.appPackageSwipeRight.isNotEmpty())
-            launchApp(
-                prefs.appNameSwipeRight,
-                prefs.appPackageSwipeRight,
-                prefs.appActivityClassNameRight,
-                prefs.appUserSwipeRight
-            )
-        else openDialerApp(requireContext())
+        if (prefs.appPackageSwipeRight.isNotEmpty()) {
+            val packageName = prefs.appPackageSwipeRight
+            val userString = prefs.appUserSwipeRight
+            val hiddenUntil = prefs.getAntiDoomHiddenUntil(packageName, userString)
+            if (hiddenUntil > System.currentTimeMillis()) {
+                val remainingMinutes = ((hiddenUntil - System.currentTimeMillis()) / 60000).toInt()
+                requireContext().showToast(getString(R.string.antidoom_blocked, remainingMinutes.coerceAtLeast(1)))
+            } else {
+                launchApp(
+                    prefs.appNameSwipeRight,
+                    packageName,
+                    prefs.appActivityClassNameRight,
+                    userString
+                )
+            }
+        } else openDialerApp(requireContext())
     }
 
     private fun openSwipeLeftApp() {
         if (!prefs.swipeLeftEnabled) return
-        if (prefs.appPackageSwipeLeft.isNotEmpty())
-            launchApp(
-                prefs.appNameSwipeLeft,
-                prefs.appPackageSwipeLeft,
-                prefs.appActivityClassNameSwipeLeft,
-                prefs.appUserSwipeLeft
-            )
-        else openCameraApp(requireContext())
+        if (prefs.appPackageSwipeLeft.isNotEmpty()) {
+            val packageName = prefs.appPackageSwipeLeft
+            val userString = prefs.appUserSwipeLeft
+            val hiddenUntil = prefs.getAntiDoomHiddenUntil(packageName, userString)
+            if (hiddenUntil > System.currentTimeMillis()) {
+                val remainingMinutes = ((hiddenUntil - System.currentTimeMillis()) / 60000).toInt()
+                requireContext().showToast(getString(R.string.antidoom_blocked, remainingMinutes.coerceAtLeast(1)))
+            } else {
+                launchApp(
+                    prefs.appNameSwipeLeft,
+                    packageName,
+                    prefs.appActivityClassNameSwipeLeft,
+                    userString
+                )
+            }
+        } else openCameraApp(requireContext())
     }
 
     private fun lockPhone() {

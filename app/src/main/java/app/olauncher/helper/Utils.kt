@@ -101,8 +101,10 @@ suspend fun getAppsList(
                                 appList.add(appModel)
                             }
                         } else {
-                            // this is a regular app
-                            if (includeRegularApps) {
+                            val isTemporarilyHidden = prefs.isAntiDoomApp(app.applicationInfo.packageName, profile.toString()) &&
+                                    prefs.isAppTemporarilyHidden(app.applicationInfo.packageName, profile.toString())
+
+                            if (includeRegularApps && !isTemporarilyHidden) {
                                 appList.add(appModel)
                             }
                         }
