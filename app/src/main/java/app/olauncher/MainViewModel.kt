@@ -19,6 +19,7 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import app.olauncher.R
 import app.olauncher.data.AppModel
+import app.olauncher.data.AntiDoomBlockedInfo
 import app.olauncher.data.Constants
 import app.olauncher.data.Prefs
 import app.olauncher.helper.AppUsageStats
@@ -54,6 +55,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val showDialog = SingleLiveEvent<String>()
     val checkForMessages = SingleLiveEvent<Unit?>()
     val resetLauncherLiveData = SingleLiveEvent<Unit?>()
+    val showAntiDoomDialog = SingleLiveEvent<AntiDoomBlockedInfo>()
 
     fun selectedApp(appModel: AppModel, flag: Int) {
         when (flag) {
@@ -62,7 +64,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     val hiddenUntil = prefs.getAntiDoomHiddenUntil(appModel.appPackage, appModel.user.toString())
                     if (hiddenUntil > System.currentTimeMillis()) {
                         val remainingMinutes = ((hiddenUntil - System.currentTimeMillis()) / 60000).toInt()
-                        appContext.showToast(appContext.getString(R.string.antidoom_blocked, remainingMinutes.coerceAtLeast(1)))
+                        showAntiDoomDialog.postValue(AntiDoomBlockedInfo(appModel, remainingMinutes.coerceAtLeast(1)))
                         return
                     }
                     prefs.setAntiDoomHiddenUntil(appModel.appPackage, appModel.user.toString(), System.currentTimeMillis() + Constants.ONE_HOUR_IN_MILLIS)
@@ -114,6 +116,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 prefs.calendarAppClassName = appModel.activityClassName
             }
         }
+    }
+
+    fun forceLaunchApp(appModel: AppModel) {
+        launchApp(appModel.appPackage, appModel.activityClassName, appModel.user)
     }
 
     fun firstOpen(value: Boolean) {
