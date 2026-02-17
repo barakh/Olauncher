@@ -23,6 +23,7 @@ class Prefs(context: Context) {
     private val HOME_ALIGNMENT = "HOME_ALIGNMENT"
     private val HOME_BOTTOM_ALIGNMENT = "HOME_BOTTOM_ALIGNMENT"
     private val APP_LABEL_ALIGNMENT = "APP_LABEL_ALIGNMENT"
+    private val AUTO_LAUNCH_APPS = "AUTO_LAUNCH_APPS"
     private val STATUS_BAR = "STATUS_BAR"
     private val DATE_TIME_VISIBILITY = "DATE_TIME_VISIBILITY"
     private val SWIPE_LEFT_ENABLED = "SWIPE_LEFT_ENABLED"
@@ -87,6 +88,10 @@ class Prefs(context: Context) {
     var autoShowKeyboard: Boolean
         get() = prefs.getBoolean(AUTO_SHOW_KEYBOARD, true)
         set(value) = prefs.edit().putBoolean(AUTO_SHOW_KEYBOARD, value).apply()
+
+    var autoLaunchApps: Boolean
+        get() = prefs.getBoolean(AUTO_LAUNCH_APPS, true)
+        set(value) = prefs.edit().putBoolean(AUTO_LAUNCH_APPS, value).apply()
 
     var keyboardMessageShown: Boolean
         get() = prefs.getBoolean(KEYBOARD_MESSAGE, false)
