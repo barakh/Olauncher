@@ -56,9 +56,11 @@
     <string name="_7">7</string>
     <string name="_8">8</string>
     <string name="app_drawer_tips">Tip: Start typing an app name to auto-launch it</string>
+    <string name="app_drawer_tips_disabled">Tip: Tap an app name to launch it</string>
     <string name="okay">Okay</string>
     <string name="cool">Cool!</string>
     <string name="auto_show_keyboard">Auto show keyboard</string>
+    <string name="auto_launch_apps">Auto launch apps</string>
     <string name="hide">Hide</string>
     <string name="status_bar">Status bar on top</string>
     <string name="rename">Rename</string>
