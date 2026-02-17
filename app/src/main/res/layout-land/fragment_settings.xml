@@ -993,6 +993,16 @@
                     android:padding="10dp"
                     android:text="@string/privacy" />
 
+                <TextView
+                    android:id="@+id/version"
+                    style="@style/TextSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="8dp"
+                    android:alpha="0.5"
+                    android:padding="10dp"
+                    android:text="@string/version_identifier" />
+
             </LinearLayout>
 
         </LinearLayout>
