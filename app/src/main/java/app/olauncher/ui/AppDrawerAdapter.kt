@@ -26,6 +26,7 @@ import java.text.Normalizer
 class AppDrawerAdapter(
     private var flag: Int,
     private val appLabelGravity: Int,
+    private val autoLaunchPreference: Boolean,
     private val appClickListener: (AppModel) -> Unit,
     private val appInfoListener: (AppModel) -> Unit,
     private val appDeleteListener: (AppModel) -> Unit,
@@ -113,6 +114,7 @@ class AppDrawerAdapter(
         try {
             if (itemCount == 1
                 && autoLaunch
+                && autoLaunchPreference
                 && isBangSearch.not()
                 && flag == Constants.FLAG_LAUNCH_APP
                 && appFilteredList.size > 0

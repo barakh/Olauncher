@@ -111,6 +111,7 @@ class AppDrawerFragment : Fragment() {
         adapter = AppDrawerAdapter(
             flag,
             prefs.appLabelAlignment,
+            prefs.autoLaunchApps,
             appClickListener = {
                 if (it.appPackage.isEmpty())
                     return@AppDrawerAdapter
@@ -209,6 +210,10 @@ class AppDrawerFragment : Fragment() {
     private fun initObservers() {
         viewModel.firstOpen.observe(viewLifecycleOwner) {
             if (it && flag == Constants.FLAG_LAUNCH_APP) {
+                binding.appDrawerTip.text = if (prefs.autoLaunchApps)
+                    getString(R.string.app_drawer_tips)
+                else
+                    getString(R.string.app_drawer_tips_disabled)
                 binding.appDrawerTip.visibility = View.VISIBLE
                 binding.appDrawerTip.isSelected = true
             }
