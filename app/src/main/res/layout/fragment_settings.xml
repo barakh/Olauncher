@@ -302,6 +302,50 @@
                             android:tag="12"
                             android:text="12" />
 
+                        <TextView
+                            android:id="@+id/maxApps13"
+                            style="@style/TextSmall"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:paddingVertical="8dp"
+                            android:tag="13"
+                            android:text="13" />
+
+                        <TextView
+                            android:id="@+id/maxApps14"
+                            style="@style/TextSmall"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:paddingVertical="8dp"
+                            android:tag="14"
+                            android:text="14" />
+
+                        <TextView
+                            android:id="@+id/maxApps15"
+                            style="@style/TextSmall"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:paddingVertical="8dp"
+                            android:tag="15"
+                            android:text="15" />
+
+                        <TextView
+                            android:id="@+id/maxApps16"
+                            style="@style/TextSmall"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:paddingVertical="8dp"
+                            android:tag="16"
+                            android:text="16" />
+
                     </LinearLayout>
 
                 </FrameLayout>

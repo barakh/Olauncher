@@ -61,7 +61,8 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         get() = listOf(
             binding.homeApp1, binding.homeApp2, binding.homeApp3, binding.homeApp4,
             binding.homeApp5, binding.homeApp6, binding.homeApp7, binding.homeApp8,
-            binding.homeApp9, binding.homeApp10, binding.homeApp11, binding.homeApp12
+            binding.homeApp9, binding.homeApp10, binding.homeApp11, binding.homeApp12,
+            binding.homeApp13, binding.homeApp14, binding.homeApp15, binding.homeApp16
         )
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -100,7 +101,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
             R.id.setDefaultLauncher -> viewModel.resetLauncherLiveData.call()
             R.id.tvScreenTime -> openScreenTimeDigitalWellbeing()
 
-            in homeAppViews.map { it.id } -> {
+            in homeAppViews.mapNotNull { it?.id } -> {
                 try { // Launch app
                     val appLocation = view.tag.toString().toInt()
                     homeAppClicked(appLocation)
@@ -137,7 +138,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
 
     override fun onLongClick(view: View): Boolean {
         when (view.id) {
-            in homeAppViews.map { it.id } -> {
+            in homeAppViews.mapNotNull { it?.id } -> {
                 val location = view.tag.toString().toInt()
                 val flag = Constants.FLAG_SET_HOME_APP_1 + location - 1
                 showAppList(flag, prefs.getAppName(location).isNotEmpty(), true)
@@ -209,8 +210,8 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         val defaultPaddingH = 10
         val defaultPaddingV = 30
         homeAppViews.forEach {
-            it.setPadding(defaultPaddingH, defaultPaddingV, defaultPaddingH, defaultPaddingV)
-            it.setOnTouchListener(getViewSwipeTouchListener(context, it))
+            it?.setPadding(defaultPaddingH, defaultPaddingV, defaultPaddingH, defaultPaddingV)
+            it?.setOnTouchListener(getViewSwipeTouchListener(context, it))
         }
     }
 
@@ -230,7 +231,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         val verticalGravity = if (prefs.homeBottomAlignment) Gravity.BOTTOM else Gravity.CENTER_VERTICAL
 //        binding.homeAppsLayout.gravity = horizontalGravity or verticalGravity
         binding.dateTimeLayout.gravity = horizontalGravity
-        homeAppViews.forEach { it.gravity = horizontalGravity }
+        homeAppViews.forEach { it?.gravity = horizontalGravity }
     }
 
     private fun populateDateTime() {
@@ -289,7 +290,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         if (homeAppsNum == 0) return
 
         for (i in 1..homeAppsNum) {
-            val view = homeAppViews[i - 1]
+            val view = homeAppViews[i - 1] ?: continue
             view.visibility = View.VISIBLE
             if (!setHomeAppText(view, prefs.getAppName(i), prefs.getAppPackage(i), prefs.getAppUser(i))) {
                 prefs.setAppName(i, "")
@@ -308,7 +309,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     }
 
     private fun hideHomeApps() {
-        homeAppViews.forEach { it.visibility = View.GONE }
+        homeAppViews.forEach { it?.visibility = View.GONE }
     }
 
     private fun homeAppClicked(location: Int) {
