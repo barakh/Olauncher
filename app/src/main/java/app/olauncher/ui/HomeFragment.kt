@@ -26,7 +26,9 @@ import androidx.navigation.fragment.findNavController
 import app.olauncher.MainViewModel
 import app.olauncher.R
 import app.olauncher.data.AppModel
+import app.olauncher.data.AntiDoomBlockedInfo
 import app.olauncher.data.Constants
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import app.olauncher.data.Prefs
 import app.olauncher.databinding.FragmentHomeBinding
 import app.olauncher.helper.appUsagePermissionGranted
@@ -116,20 +118,12 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         if (prefs.clockAppPackage.isBlank())
             openAlarmApp(requireContext())
         else {
-            val packageName = prefs.clockAppPackage
-            val userString = prefs.clockAppUser
-            val hiddenUntil = prefs.getAntiDoomHiddenUntil(packageName, userString)
-            if (hiddenUntil > System.currentTimeMillis()) {
-                val remainingMinutes = ((hiddenUntil - System.currentTimeMillis()) / 60000).toInt()
-                requireContext().showToast(getString(R.string.antidoom_blocked, remainingMinutes.coerceAtLeast(1)))
-            } else {
-                launchApp(
-                    "Clock",
-                    packageName,
-                    prefs.clockAppClassName,
-                    userString
-                )
-            }
+            launchApp(
+                "Clock",
+                prefs.clockAppPackage,
+                prefs.clockAppClassName,
+                prefs.clockAppUser
+            )
         }
     }
 
@@ -137,20 +131,12 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         if (prefs.calendarAppPackage.isBlank())
             openCalendar(requireContext())
         else {
-            val packageName = prefs.calendarAppPackage
-            val userString = prefs.calendarAppUser
-            val hiddenUntil = prefs.getAntiDoomHiddenUntil(packageName, userString)
-            if (hiddenUntil > System.currentTimeMillis()) {
-                val remainingMinutes = ((hiddenUntil - System.currentTimeMillis()) / 60000).toInt()
-                requireContext().showToast(getString(R.string.antidoom_blocked, remainingMinutes.coerceAtLeast(1)))
-            } else {
-                launchApp(
-                    "Calendar",
-                    packageName,
-                    prefs.calendarAppClassName,
-                    userString
-                )
-            }
+            launchApp(
+                "Calendar",
+                prefs.calendarAppPackage,
+                prefs.calendarAppClassName,
+                prefs.calendarAppUser
+            )
         }
     }
 
@@ -218,6 +204,9 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         }
         viewModel.screenTimeValue.observe(viewLifecycleOwner) {
             it?.let { binding.tvScreenTime.text = it }
+        }
+        viewModel.showAntiDoomDialog.observe(viewLifecycleOwner) { info ->
+            info?.let { showAntiDoomBlockedDialog(it) }
         }
     }
 
@@ -333,20 +322,12 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     private fun homeAppClicked(location: Int) {
         if (prefs.getAppName(location).isEmpty()) showLongPressToast()
         else {
-            val packageName = prefs.getAppPackage(location)
-            val userString = prefs.getAppUser(location)
-            val hiddenUntil = prefs.getAntiDoomHiddenUntil(packageName, userString)
-            if (hiddenUntil > System.currentTimeMillis()) {
-                val remainingMinutes = ((hiddenUntil - System.currentTimeMillis()) / 60000).toInt()
-                requireContext().showToast(getString(R.string.antidoom_blocked, remainingMinutes.coerceAtLeast(1)))
-            } else {
-                launchApp(
-                    prefs.getAppName(location),
-                    packageName,
-                    prefs.getAppActivityClassName(location),
-                    userString
-                )
-            }
+            launchApp(
+                prefs.getAppName(location),
+                prefs.getAppPackage(location),
+                prefs.getAppActivityClassName(location),
+                prefs.getAppUser(location)
+            )
         }
     }
 
@@ -396,40 +377,24 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     private fun openSwipeRightApp() {
         if (!prefs.swipeRightEnabled) return
         if (prefs.appPackageSwipeRight.isNotEmpty()) {
-            val packageName = prefs.appPackageSwipeRight
-            val userString = prefs.appUserSwipeRight
-            val hiddenUntil = prefs.getAntiDoomHiddenUntil(packageName, userString)
-            if (hiddenUntil > System.currentTimeMillis()) {
-                val remainingMinutes = ((hiddenUntil - System.currentTimeMillis()) / 60000).toInt()
-                requireContext().showToast(getString(R.string.antidoom_blocked, remainingMinutes.coerceAtLeast(1)))
-            } else {
-                launchApp(
-                    prefs.appNameSwipeRight,
-                    packageName,
-                    prefs.appActivityClassNameRight,
-                    userString
-                )
-            }
+            launchApp(
+                prefs.appNameSwipeRight,
+                prefs.appPackageSwipeRight,
+                prefs.appActivityClassNameRight,
+                prefs.appUserSwipeRight
+            )
         } else openDialerApp(requireContext())
     }
 
     private fun openSwipeLeftApp() {
         if (!prefs.swipeLeftEnabled) return
         if (prefs.appPackageSwipeLeft.isNotEmpty()) {
-            val packageName = prefs.appPackageSwipeLeft
-            val userString = prefs.appUserSwipeLeft
-            val hiddenUntil = prefs.getAntiDoomHiddenUntil(packageName, userString)
-            if (hiddenUntil > System.currentTimeMillis()) {
-                val remainingMinutes = ((hiddenUntil - System.currentTimeMillis()) / 60000).toInt()
-                requireContext().showToast(getString(R.string.antidoom_blocked, remainingMinutes.coerceAtLeast(1)))
-            } else {
-                launchApp(
-                    prefs.appNameSwipeLeft,
-                    packageName,
-                    prefs.appActivityClassNameSwipeLeft,
-                    userString
-                )
-            }
+            launchApp(
+                prefs.appNameSwipeLeft,
+                prefs.appPackageSwipeLeft,
+                prefs.appActivityClassNameSwipeLeft,
+                prefs.appUserSwipeLeft
+            )
         } else openCameraApp(requireContext())
     }
 
@@ -502,6 +467,21 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     }
 
     private fun showLongPressToast() = requireContext().showToast(getString(R.string.long_press_to_select_app))
+
+    private fun showAntiDoomBlockedDialog(info: AntiDoomBlockedInfo) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.antidoom_blocked_title)
+            .setMessage(getString(R.string.antidoom_blocked_message, info.remainingMinutes))
+            .setPositiveButton(R.string.antidoom_open_anyway) { dialog, _ ->
+                viewModel.forceLaunchApp(info.appModel)
+                dialog.dismiss()
+            }
+            .setNegativeButton(R.string.antidoom_cancel) { dialog, _ ->
+                dialog.dismiss()
+            }
+            .setCancelable(true)
+            .show()
+    }
 
     private fun textOnClick(view: View) = onClick(view)
 
