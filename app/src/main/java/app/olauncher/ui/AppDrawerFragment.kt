@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.Recycler
 import app.olauncher.MainViewModel
 import app.olauncher.R
+import app.olauncher.data.AntiDoomBlockedInfo
 import app.olauncher.data.Constants
 import app.olauncher.data.Prefs
 import app.olauncher.databinding.FragmentAppDrawerBinding
@@ -28,6 +29,7 @@ import app.olauncher.helper.showKeyboard
 import app.olauncher.helper.showToast
 import app.olauncher.helper.uninstall
 import app.olauncher.data.Constants.ONE_HOUR_IN_MILLIS
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 
 class AppDrawerFragment : Fragment() {
@@ -225,6 +227,9 @@ class AppDrawerFragment : Fragment() {
                 }
             }
         }
+        viewModel.showAntiDoomDialog.observe(viewLifecycleOwner) { info ->
+            info?.let { showAntiDoomBlockedDialog(it) }
+        }
     }
 
     private fun initClickListeners() {
@@ -289,6 +294,21 @@ class AppDrawerFragment : Fragment() {
     override fun onStop() {
         binding.search.hideKeyboard()
         super.onStop()
+    }
+
+    private fun showAntiDoomBlockedDialog(info: AntiDoomBlockedInfo) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.antidoom_blocked_title)
+            .setMessage(getString(R.string.antidoom_blocked_message, info.remainingMinutes))
+            .setPositiveButton(R.string.antidoom_open_anyway) { dialog, _ ->
+                viewModel.forceLaunchApp(info.appModel)
+                dialog.dismiss()
+            }
+            .setNegativeButton(R.string.antidoom_cancel) { dialog, _ ->
+                dialog.dismiss()
+            }
+            .setCancelable(true)
+            .show()
     }
 
     override fun onDestroyView() {

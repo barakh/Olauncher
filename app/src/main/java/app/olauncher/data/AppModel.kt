@@ -16,3 +16,8 @@ data class AppModel(
         else -> appLabel.compareTo(other.appLabel, true)
     }
 }
+
+data class AntiDoomBlockedInfo(
+    val appModel: AppModel,
+    val remainingMinutes: Int
+)
