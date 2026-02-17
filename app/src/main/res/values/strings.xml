@@ -146,8 +146,8 @@
     <string name="antidoom">AntiDoom</string>
     <string name="antidoom_enabled">AntiDoom enabled for 1 hour</string>
     <string name="antidoom_disabled">AntiDoom disabled</string>
-    <string name="antidoom_blocked_title">AntiDoom Block</string>
-    <string name="antidoom_blocked_message">This app is blocked by AntiDoom.\nTime remaining: %1$d minutes</string>
+    <string name="antidoom_blocked_title">AntiDoom</string>
+    <string name="antidoom_blocked_message">This app is blocked by AntiDoom.\n\nTime remaining: %1$d minutes</string>
     <string name="antidoom_open_anyway">Open Anyway</string>
     <string name="antidoom_cancel">Cancel</string>
     <string name="are_you_using_your_phone_or_is_your_phone_using_you">Are you using your phone, or is your phone using you?</string>
