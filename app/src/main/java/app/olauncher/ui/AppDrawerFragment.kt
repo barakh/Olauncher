@@ -27,6 +27,7 @@ import app.olauncher.helper.openUrl
 import app.olauncher.helper.showKeyboard
 import app.olauncher.helper.showToast
 import app.olauncher.helper.uninstall
+import app.olauncher.data.Constants.ONE_HOUR_IN_MILLIS
 
 
 class AppDrawerFragment : Fragment() {
@@ -161,6 +162,22 @@ class AppDrawerFragment : Fragment() {
             appRenameListener = { appModel, renameLabel ->
                 prefs.setAppRenameLabel(appModel.appPackage, renameLabel)
                 viewModel.getAppList()
+            },
+            appAntiDoomListener = { appModel ->
+                val userString = appModel.user.toString()
+                val isAntiDoom = prefs.isAntiDoomApp(appModel.appPackage, userString)
+
+                if (isAntiDoom) {
+                    prefs.removeAntiDoomApp(appModel.appPackage, userString)
+                    prefs.clearAntiDoomHiddenUntil(appModel.appPackage, userString)
+                    requireContext().showToast(getString(R.string.antidoom_disabled))
+                } else {
+                    prefs.addAntiDoomApp(appModel.appPackage, userString)
+                    prefs.clearAntiDoomHiddenUntil(appModel.appPackage, userString)
+                    requireContext().showToast(getString(R.string.antidoom_enabled))
+                }
+                viewModel.getAppList()
+                adapter.notifyDataSetChanged()
             }
         )
 

@@ -31,6 +31,7 @@ class AppDrawerAdapter(
     private val appDeleteListener: (AppModel) -> Unit,
     private val appHideListener: (AppModel, Int) -> Unit,
     private val appRenameListener: (AppModel, String) -> Unit,
+    private val appAntiDoomListener: (AppModel) -> Unit,
 ) : ListAdapter<AppModel, AppDrawerAdapter.ViewHolder>(DIFF_CALLBACK), Filterable {
 
     companion object {
@@ -67,7 +68,8 @@ class AppDrawerAdapter(
                 appDeleteListener,
                 appInfoListener,
                 appHideListener,
-                appRenameListener
+                appRenameListener,
+                appAntiDoomListener
             )
         } catch (e: Exception) {
             e.printStackTrace()
@@ -153,6 +155,7 @@ class AppDrawerAdapter(
             appInfoListener: (AppModel) -> Unit,
             appHideListener: (AppModel, Int) -> Unit,
             appRenameListener: (AppModel, String) -> Unit,
+            appAntiDoomListener: (AppModel) -> Unit,
         ) =
             with(binding) {
                 appHideLayout.visibility = View.GONE
@@ -173,6 +176,7 @@ class AppDrawerAdapter(
                         appTitle.visibility = View.INVISIBLE
                         appHideLayout.visibility = View.VISIBLE
                         appRename.isVisible = flag != Constants.FLAG_HIDDEN_APPS
+                        appAntiDoom.isVisible = flag != Constants.FLAG_HIDDEN_APPS
                     }
                     true
                 }
@@ -254,6 +258,7 @@ class AppDrawerAdapter(
                     appTitle.visibility = View.VISIBLE
                 }
                 appHide.setOnClickListener { appHideListener(appModel, bindingAdapterPosition) }
+                appAntiDoom.setOnClickListener { appAntiDoomListener(appModel) }
             }
 
         private fun getAppName(context: Context, appPackage: String): String {

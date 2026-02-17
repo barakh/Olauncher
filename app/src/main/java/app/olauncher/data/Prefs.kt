@@ -29,6 +29,8 @@ class Prefs(context: Context) {
     private val SWIPE_RIGHT_ENABLED = "SWIPE_RIGHT_ENABLED"
     private val HIDDEN_APPS = "HIDDEN_APPS"
     private val HIDDEN_APPS_UPDATED = "HIDDEN_APPS_UPDATED"
+    private val ANTIDOOM_APPS = "ANTIDOOM_APPS"
+    private val ANTIDOOM_HIDDEN_UNTIL_PREFIX = "ANTIDOOM_HIDDEN_UNTIL_"
     private val SHOW_HINT_COUNTER = "SHOW_HINT_COUNTER"
     private val APP_THEME = "APP_THEME"
     private val ABOUT_CLICKED = "ABOUT_CLICKED"
@@ -246,4 +248,43 @@ class Prefs(context: Context) {
 
     fun getAppRenameLabel(appPackage: String): String = prefs.getString(appPackage, "").toString()
     fun setAppRenameLabel(appPackage: String, renameLabel: String) = prefs.edit().putString(appPackage, renameLabel).apply()
+
+    var antiDoomApps: MutableSet<String>
+        get() = prefs.getStringSet(ANTIDOOM_APPS, mutableSetOf()) as MutableSet<String>
+        set(value) = prefs.edit().putStringSet(ANTIDOOM_APPS, value).apply()
+
+    fun isAntiDoomApp(appPackage: String, user: String): Boolean {
+        return antiDoomApps.contains("$appPackage|$user")
+    }
+
+    fun addAntiDoomApp(appPackage: String, user: String) {
+        val newSet = mutableSetOf<String>()
+        newSet.addAll(antiDoomApps)
+        newSet.add("$appPackage|$user")
+        antiDoomApps = newSet
+    }
+
+    fun removeAntiDoomApp(appPackage: String, user: String) {
+        val newSet = mutableSetOf<String>()
+        newSet.addAll(antiDoomApps)
+        newSet.remove("$appPackage|$user")
+        antiDoomApps = newSet
+    }
+
+    fun getAntiDoomHiddenUntil(appPackage: String, user: String): Long {
+        return prefs.getLong("$ANTIDOOM_HIDDEN_UNTIL_PREFIX$appPackage|$user", 0L)
+    }
+
+    fun setAntiDoomHiddenUntil(appPackage: String, user: String, timestamp: Long) {
+        prefs.edit().putLong("$ANTIDOOM_HIDDEN_UNTIL_PREFIX$appPackage|$user", timestamp).apply()
+    }
+
+    fun clearAntiDoomHiddenUntil(appPackage: String, user: String) {
+        prefs.edit().remove("$ANTIDOOM_HIDDEN_UNTIL_PREFIX$appPackage|$user").apply()
+    }
+
+    fun isAppTemporarilyHidden(appPackage: String, user: String): Boolean {
+        val hiddenUntil = getAntiDoomHiddenUntil(appPackage, user)
+        return hiddenUntil > System.currentTimeMillis()
+    }
 }
