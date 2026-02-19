@@ -33,6 +33,7 @@ class AppDrawerAdapter(
     private val appHideListener: (AppModel, Int) -> Unit,
     private val appRenameListener: (AppModel, String) -> Unit,
     private val appAntiDoomListener: (AppModel) -> Unit,
+    private val isAppHidden: ((AppModel) -> Boolean)? = null,
 ) : ListAdapter<AppModel, AppDrawerAdapter.ViewHolder>(DIFF_CALLBACK), Filterable {
 
     companion object {
@@ -70,7 +71,8 @@ class AppDrawerAdapter(
                 appInfoListener,
                 appHideListener,
                 appRenameListener,
-                appAntiDoomListener
+                appAntiDoomListener,
+                isAppHidden
             )
         } catch (e: Exception) {
             e.printStackTrace()
@@ -158,13 +160,29 @@ class AppDrawerAdapter(
             appHideListener: (AppModel, Int) -> Unit,
             appRenameListener: (AppModel, String) -> Unit,
             appAntiDoomListener: (AppModel) -> Unit,
+            isAppHidden: ((AppModel) -> Boolean)? = null,
         ) =
             with(binding) {
                 appHideLayout.visibility = View.GONE
                 renameLayout.visibility = View.GONE
                 appTitle.visibility = View.VISIBLE
-                appTitle.text = appModel.appLabel + if (appModel.isNew == true) " ✦" else ""
+                val title = appModel.appLabel + if (appModel.isNew == true) " ✦" else ""
+                appTitle.text = title
                 appTitle.gravity = appLabelGravity
+
+                if (appModel.appPackage.isEmpty()) {
+                    appTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
+                    return@with
+                }
+
+                if (flag == Constants.FLAG_ANTIDOOM_APPS && isAppHidden != null) {
+                    val isHidden = isAppHidden(appModel)
+                    val iconRes = if (isHidden) R.drawable.ic_hide else R.drawable.ic_show
+                    appTitle.setCompoundDrawablesWithIntrinsicBounds(iconRes, 0, 0, 0)
+                    appTitle.compoundDrawablePadding = 24
+                } else {
+                    appTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
+                }
                 otherProfileIndicator.isVisible = appModel.user != myUserHandle
 
                 appTitle.setOnClickListener { clickListener(appModel) }

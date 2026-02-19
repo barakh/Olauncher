@@ -164,4 +164,6 @@
     <string name="home_screen">Home screen</string>
     <string name="hey">Hey</string>
     <string name="version_identifier" translatable="false">1.0</string>
+    <string name="antidoom_apps">AntiDoom apps</string>
+    <string name="no_antidoom_apps">No apps with AntiDoom</string>
 </resources>
