@@ -71,6 +71,8 @@ class AppDrawerFragment : Fragment() {
     private fun initViews() {
         if (flag == Constants.FLAG_HIDDEN_APPS)
             binding.search.queryHint = getString(R.string.hidden_apps)
+        else if (flag == Constants.FLAG_ANTIDOOM_APPS)
+            binding.search.queryHint = getString(R.string.antidoom_apps)
         else if (flag in Constants.HOME_APP_FLAGS || flag in Constants.FLAG_SET_SWIPE_LEFT_APP..Constants.FLAG_SET_CALENDAR_APP)
             binding.search.queryHint = "Please select an app"
         try {
@@ -116,7 +118,7 @@ class AppDrawerFragment : Fragment() {
                 if (it.appPackage.isEmpty())
                     return@AppDrawerAdapter
                 viewModel.selectedApp(it, flag)
-                if (flag == Constants.FLAG_LAUNCH_APP || flag == Constants.FLAG_HIDDEN_APPS)
+                if (flag == Constants.FLAG_LAUNCH_APP || flag == Constants.FLAG_HIDDEN_APPS || flag == Constants.FLAG_ANTIDOOM_APPS)
                     findNavController().popBackStack(R.id.mainFragment, false)
                 else
                     findNavController().popBackStack()
@@ -180,7 +182,11 @@ class AppDrawerFragment : Fragment() {
                     requireContext().showToast(getString(R.string.antidoom_enabled))
                 }
                 viewModel.getAppList()
+                if (flag == Constants.FLAG_ANTIDOOM_APPS) viewModel.getAntiDoomApps()
                 adapter.notifyDataSetChanged()
+            },
+            isAppHidden = { appModel ->
+                prefs.isAppTemporarilyHidden(appModel.appPackage, appModel.user.toString())
             }
         )
 
@@ -220,6 +226,12 @@ class AppDrawerFragment : Fragment() {
         }
         if (flag == Constants.FLAG_HIDDEN_APPS) {
             viewModel.hiddenApps.observe(viewLifecycleOwner) {
+                it?.let {
+                    adapter.setAppList(it.toMutableList())
+                }
+            }
+        } else if (flag == Constants.FLAG_ANTIDOOM_APPS) {
+            viewModel.antiDoomApps.observe(viewLifecycleOwner) {
                 it?.let {
                     adapter.setAppList(it.toMutableList())
                 }

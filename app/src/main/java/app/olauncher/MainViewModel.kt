@@ -47,6 +47,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val updateSwipeApps = MutableLiveData<Any>()
     val appList = MutableLiveData<List<AppModel>?>()
     val hiddenApps = MutableLiveData<List<AppModel>?>()
+    val antiDoomApps = MutableLiveData<List<AppModel>?>()
     val isOlauncherDefault = MutableLiveData<Boolean>()
     val launcherResetFailed = MutableLiveData<Boolean>()
     val homeAppAlignment = MutableLiveData<Int>()
@@ -59,7 +60,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun selectedApp(appModel: AppModel, flag: Int) {
         when (flag) {
-            Constants.FLAG_LAUNCH_APP -> {
+            Constants.FLAG_LAUNCH_APP, Constants.FLAG_ANTIDOOM_APPS -> {
                 if (prefs.isAntiDoomApp(appModel.appPackage, appModel.user.toString())) {
                     val hiddenUntil = prefs.getAntiDoomHiddenUntil(appModel.appPackage, appModel.user.toString())
                     if (hiddenUntil > System.currentTimeMillis()) {
@@ -179,6 +180,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun getHiddenApps() {
         viewModelScope.launch {
             hiddenApps.value = getAppsList(appContext, prefs, includeRegularApps = false, includeHiddenApps = true)
+        }
+    }
+
+    fun getAntiDoomApps() {
+        viewModelScope.launch {
+            antiDoomApps.value = getAppsList(appContext, prefs, includeRegularApps = false, includeHiddenApps = false, includeAntiDoomApps = true)
         }
     }
 

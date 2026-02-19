@@ -68,6 +68,7 @@ suspend fun getAppsList(
     prefs: Prefs,
     includeRegularApps: Boolean = true,
     includeHiddenApps: Boolean = false,
+    includeAntiDoomApps: Boolean = false,
 ): MutableList<AppModel> {
     return withContext(Dispatchers.IO) {
         val appList: MutableList<AppModel> = mutableListOf()
@@ -95,17 +96,23 @@ suspend fun getAppsList(
 
                     // if the current app is not OLauncher
                     if (app.applicationInfo.packageName != BuildConfig.APPLICATION_ID) {
-                        // is this a hidden app?
-                        if (hiddenApps.contains(app.applicationInfo.packageName + "|" + profile.toString())) {
-                            if (includeHiddenApps) {
+                        if (includeAntiDoomApps) {
+                            if (prefs.isAntiDoomApp(app.applicationInfo.packageName, profile.toString())) {
                                 appList.add(appModel)
                             }
                         } else {
-                            val isTemporarilyHidden = prefs.isAntiDoomApp(app.applicationInfo.packageName, profile.toString()) &&
-                                    prefs.isAppTemporarilyHidden(app.applicationInfo.packageName, profile.toString())
+                            // is this a hidden app?
+                            if (hiddenApps.contains(app.applicationInfo.packageName + "|" + profile.toString())) {
+                                if (includeHiddenApps) {
+                                    appList.add(appModel)
+                                }
+                            } else {
+                                val isTemporarilyHidden = prefs.isAntiDoomApp(app.applicationInfo.packageName, profile.toString()) &&
+                                        prefs.isAppTemporarilyHidden(app.applicationInfo.packageName, profile.toString())
 
-                            if (includeRegularApps && !isTemporarilyHidden) {
-                                appList.add(appModel)
+                                if (includeRegularApps && !isTemporarilyHidden) {
+                                    appList.add(appModel)
+                                }
                             }
                         }
                     }

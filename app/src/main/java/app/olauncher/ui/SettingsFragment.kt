@@ -96,6 +96,7 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
 
         when (view.id) {
             R.id.olauncherHiddenApps -> showHiddenApps()
+            R.id.antidoomApps -> showAntiDoomApps()
             R.id.olauncherPro -> requireContext().openUrl(Constants.URL_OLAUNCHER_PRO)
             R.id.screenTimeOnOff -> viewModel.showDialog.postValue(Constants.Dialog.DIGITAL_WELLBEING)
             R.id.appInfo -> openAppInfo(requireContext(), Process.myUserHandle(), BuildConfig.APPLICATION_ID)
@@ -184,6 +185,7 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
 
     private fun initClickListeners() {
         binding.olauncherHiddenApps.setOnClickListener(this)
+        binding.antidoomApps?.setOnClickListener(this)
         binding.scrollLayout.setOnClickListener(this)
         binding.appInfo.setOnClickListener(this)
         binding.setLauncher.setOnClickListener(this)
@@ -344,6 +346,18 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
         findNavController().navigate(
             R.id.action_settingsFragment_to_appListFragment,
             bundleOf(Constants.Key.FLAG to Constants.FLAG_HIDDEN_APPS)
+        )
+    }
+
+    private fun showAntiDoomApps() {
+        if (prefs.antiDoomApps.isEmpty()) {
+            requireContext().showToast(getString(R.string.no_antidoom_apps))
+            return
+        }
+        viewModel.getAntiDoomApps()
+        findNavController().navigate(
+            R.id.action_settingsFragment_to_appListFragment,
+            bundleOf(Constants.Key.FLAG to Constants.FLAG_ANTIDOOM_APPS)
         )
     }
 

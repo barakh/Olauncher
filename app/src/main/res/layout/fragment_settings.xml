@@ -93,6 +93,16 @@
                     android:layout_marginBottom="8dp"
                     android:text="@string/olauncher_pro" />
 
+                <TextView
+                    android:id="@+id/antidoomApps"
+                    style="@style/TextSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="8dp"
+                    android:text="@string/antidoom_apps" />
+
             </LinearLayout>
 
             <LinearLayout
