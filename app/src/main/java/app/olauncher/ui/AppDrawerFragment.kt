@@ -112,8 +112,7 @@ class AppDrawerFragment : Fragment() {
     private fun initAdapter() {
         adapter = AppDrawerAdapter(
             flag,
-            prefs.appLabelAlignment,
-            prefs.autoLaunchApps,
+            prefs,
             appClickListener = {
                 if (it.appPackage.isEmpty())
                     return@AppDrawerAdapter

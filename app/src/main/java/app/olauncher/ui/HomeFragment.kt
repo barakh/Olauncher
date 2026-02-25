@@ -309,8 +309,18 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
 
     private fun setHomeAppText(textView: TextView, appName: String, packageName: String, userString: String): Boolean {
         if (isPackageInstalled(requireContext(), packageName, userString)) {
+            val isTemporarilyHidden = prefs.isAppTemporarilyHidden(packageName, userString)
+            if (prefs.hideDoomscrolledApps && isTemporarilyHidden) {
+                textView.visibility = View.GONE
+                return true
+            }
+
             textView.text = appName
-            if (prefs.isAntiDoomApp(packageName, userString) && prefs.getAntiDoomHiddenUntil(packageName, userString) > System.currentTimeMillis()) {
+            textView.visibility = View.VISIBLE
+
+            if (prefs.paintAntidoomedAppsRed && prefs.isAntiDoomApp(packageName, userString)) {
+                textView.setTextColor(requireContext().getColor(R.color.red))
+            } else if (isTemporarilyHidden) {
                 textView.setTextColor(requireContext().getColor(R.color.red))
             } else {
                 val typedValue = TypedValue()
@@ -320,6 +330,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
             return true
         }
         textView.text = ""
+        textView.visibility = View.GONE
         return false
     }
 
