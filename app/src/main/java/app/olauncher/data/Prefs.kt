@@ -160,7 +160,7 @@ class Prefs(context: Context) {
         set(value) = prefs.edit().putLong(SCREEN_TIME_LAST_UPDATED, value).apply()
 
     var hideDoomscrolledApps: Boolean
-        get() = prefs.getBoolean(HIDE_DOOMSCROLLED_APPS, false)
+        get() = prefs.getBoolean(HIDE_DOOMSCROLLED_APPS, true)
         set(value) = prefs.edit().putBoolean(HIDE_DOOMSCROLLED_APPS, value).apply()
 
     var paintAntidoomedAppsRed: Boolean
