@@ -28,4 +28,5 @@
     <color name="blackInverseTrans80">#CCFFFFFF</color>
     <color name="blackInverseTrans90">#E6FFFFFF</color>
 
+    <color name="red">#FF0000</color>
 </resources>
