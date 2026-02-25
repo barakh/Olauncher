@@ -7,6 +7,7 @@ import android.content.res.Configuration
 import android.os.BatteryManager
 import android.os.Build
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -309,6 +310,13 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     private fun setHomeAppText(textView: TextView, appName: String, packageName: String, userString: String): Boolean {
         if (isPackageInstalled(requireContext(), packageName, userString)) {
             textView.text = appName
+            if (prefs.isAntiDoomApp(packageName, userString) && prefs.getAntiDoomHiddenUntil(packageName, userString) > System.currentTimeMillis()) {
+                textView.setTextColor(requireContext().getColor(R.color.red))
+            } else {
+                val typedValue = TypedValue()
+                requireContext().theme.resolveAttribute(R.attr.primaryColor, typedValue, true)
+                textView.setTextColor(typedValue.data)
+            }
             return true
         }
         textView.text = ""
