@@ -82,7 +82,7 @@
             android:layout_height="wrap_content"
             android:layout_columnWeight="1"
             android:hint="@string/app"
-            android:paddingVertical="10dp"
+            android:paddingVertical="@dimen/home_app_padding_vertical"
             android:tag="1"
             android:visibility="gone"
             tools:visibility="visible" />
@@ -118,7 +118,7 @@
             android:layout_height="wrap_content"
             android:layout_columnWeight="1"
             android:hint="@string/app"
-            android:paddingVertical="10dp"
+            android:paddingVertical="@dimen/home_app_padding_vertical"
             android:tag="4"
             android:visibility="gone"
             tools:visibility="visible" />
