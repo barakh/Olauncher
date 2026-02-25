@@ -21,12 +21,13 @@ import app.olauncher.databinding.AdapterAppDrawerBinding
 import app.olauncher.helper.hideKeyboard
 import app.olauncher.helper.isSystemApp
 import app.olauncher.helper.showKeyboard
+import android.util.TypedValue
+import app.olauncher.data.Prefs
 import java.text.Normalizer
 
 class AppDrawerAdapter(
     private var flag: Int,
-    private val appLabelGravity: Int,
-    private val autoLaunchPreference: Boolean,
+    private val prefs: Prefs,
     private val appClickListener: (AppModel) -> Unit,
     private val appInfoListener: (AppModel) -> Unit,
     private val appDeleteListener: (AppModel) -> Unit,
@@ -63,7 +64,7 @@ class AppDrawerAdapter(
             val appModel = appFilteredList[holder.bindingAdapterPosition]
             holder.bind(
                 flag,
-                appLabelGravity,
+                prefs,
                 myUserHandle,
                 appModel,
                 appClickListener,
@@ -87,12 +88,16 @@ class AppDrawerAdapter(
                 isBangSearch = charSearch?.startsWith("!") ?: false
                 autoLaunch = charSearch?.startsWith(" ")?.not() ?: true
 
-                val appFilteredList = (if (charSearch.isNullOrBlank()) appsList
+                var appFilteredList = (if (charSearch.isNullOrBlank()) appsList
                 else appsList.filter { app ->
                     appLabelMatches(app.appLabel, charSearch)
-//                }.sortedByDescending {
-//                    charSearch.contentEquals(it.appLabel, true)
                 } as MutableList<AppModel>)
+
+                if (prefs.hideDoomscrolledApps) {
+                    appFilteredList = appFilteredList.filter { app ->
+                        app.appPackage.isEmpty() || !prefs.isAppTemporarilyHidden(app.appPackage, app.user.toString())
+                    }.toMutableList()
+                }
 
                 val filterResults = FilterResults()
                 filterResults.values = appFilteredList
@@ -116,7 +121,7 @@ class AppDrawerAdapter(
         try {
             if (itemCount == 1
                 && autoLaunch
-                && autoLaunchPreference
+                && prefs.autoLaunchApps
                 && isBangSearch.not()
                 && flag == Constants.FLAG_LAUNCH_APP
                 && appFilteredList.size > 0
@@ -151,7 +156,7 @@ class AppDrawerAdapter(
 
         fun bind(
             flag: Int,
-            appLabelGravity: Int,
+            prefs: Prefs,
             myUserHandle: UserHandle,
             appModel: AppModel,
             clickListener: (AppModel) -> Unit,
@@ -168,7 +173,20 @@ class AppDrawerAdapter(
                 appTitle.visibility = View.VISIBLE
                 val title = appModel.appLabel + if (appModel.isNew == true) " ✦" else ""
                 appTitle.text = title
-                appTitle.gravity = appLabelGravity
+                appTitle.gravity = prefs.appLabelAlignment
+
+                if (appModel.appPackage.isNotEmpty()) {
+                    val isTemporarilyHidden = prefs.isAppTemporarilyHidden(appModel.appPackage, appModel.user.toString())
+                    if (prefs.paintAntidoomedAppsRed && prefs.isAntiDoomApp(appModel.appPackage, appModel.user.toString())) {
+                        appTitle.setTextColor(root.context.getColor(R.color.red))
+                    } else if (isTemporarilyHidden) {
+                        appTitle.setTextColor(root.context.getColor(R.color.red))
+                    } else {
+                        val typedValue = TypedValue()
+                        root.context.theme.resolveAttribute(R.attr.primaryColor, typedValue, true)
+                        appTitle.setTextColor(typedValue.data)
+                    }
+                }
 
                 if (appModel.appPackage.isEmpty()) {
                     appTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)

@@ -166,4 +166,6 @@
     <string name="version_identifier" translatable="false">1.0</string>
     <string name="antidoom_apps">AntiDoom apps</string>
     <string name="no_antidoom_apps">No apps with AntiDoom</string>
+    <string name="hide_doomscrolled_apps">Hide doomscrolled apps</string>
+    <string name="paint_antidoomed_apps_red">Paint AntiDoom apps red</string>
 </resources>
