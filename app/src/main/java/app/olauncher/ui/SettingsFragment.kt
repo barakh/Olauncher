@@ -78,6 +78,7 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
         populateAlignment()
         populateStatusBar()
         populateDateTime()
+        populateAntiDoomOptions()
         populateSwipeApps()
         populateSwipeDownAction()
         populateActionHints()
@@ -97,6 +98,8 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
         when (view.id) {
             R.id.olauncherHiddenApps -> showHiddenApps()
             R.id.antidoomApps -> showAntiDoomApps()
+            R.id.hideDoomscrolledApps -> toggleHideDoomscrolledApps()
+            R.id.paintAntidoomedAppsRed -> togglePaintAntidoomedAppsRed()
             R.id.olauncherPro -> requireContext().openUrl(Constants.URL_OLAUNCHER_PRO)
             R.id.screenTimeOnOff -> viewModel.showDialog.postValue(Constants.Dialog.DIGITAL_WELLBEING)
             R.id.appInfo -> openAppInfo(requireContext(), Process.myUserHandle(), BuildConfig.APPLICATION_ID)
@@ -186,6 +189,8 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
     private fun initClickListeners() {
         binding.olauncherHiddenApps.setOnClickListener(this)
         binding.antidoomApps?.setOnClickListener(this)
+        binding.hideDoomscrolledApps?.setOnClickListener(this)
+        binding.paintAntidoomedAppsRed?.setOnClickListener(this)
         binding.scrollLayout.setOnClickListener(this)
         binding.appInfo.setOnClickListener(this)
         binding.setLauncher.setOnClickListener(this)
@@ -314,6 +319,23 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
                 else -> R.string.off
             }
         )
+    }
+
+    private fun populateAntiDoomOptions() {
+        binding.hideDoomscrolledApps?.text = getString(if (prefs.hideDoomscrolledApps) R.string.on else R.string.off)
+        binding.paintAntidoomedAppsRed?.text = getString(if (prefs.paintAntidoomedAppsRed) R.string.on else R.string.off)
+    }
+
+    private fun toggleHideDoomscrolledApps() {
+        prefs.hideDoomscrolledApps = !prefs.hideDoomscrolledApps
+        populateAntiDoomOptions()
+        viewModel.refreshHome(true)
+    }
+
+    private fun togglePaintAntidoomedAppsRed() {
+        prefs.paintAntidoomedAppsRed = !prefs.paintAntidoomedAppsRed
+        populateAntiDoomOptions()
+        viewModel.refreshHome(true)
     }
 
     private fun showStatusBar() {
