@@ -310,10 +310,6 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     private fun setHomeAppText(textView: TextView, appName: String, packageName: String, userString: String): Boolean {
         if (isPackageInstalled(requireContext(), packageName, userString)) {
             val isTemporarilyHidden = prefs.isAppTemporarilyHidden(packageName, userString)
-            if (prefs.hideDoomscrolledApps && isTemporarilyHidden) {
-                textView.visibility = View.GONE
-                return true
-            }
 
             textView.text = appName
             textView.visibility = View.VISIBLE
