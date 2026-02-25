@@ -58,7 +58,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val resetLauncherLiveData = SingleLiveEvent<Unit?>()
     val showAntiDoomDialog = SingleLiveEvent<AntiDoomBlockedInfo>()
 
-    fun selectedApp(appModel: AppModel, flag: Int) {
+    fun selectedApp(appModel: AppModel, flag: Int): Boolean {
         when (flag) {
             Constants.FLAG_LAUNCH_APP, Constants.FLAG_ANTIDOOM_APPS -> {
                 if (prefs.isAntiDoomApp(appModel.appPackage, appModel.user.toString())) {
@@ -66,7 +66,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     if (hiddenUntil > System.currentTimeMillis()) {
                         val remainingMinutes = ((hiddenUntil - System.currentTimeMillis()) / 60000).toInt()
                         showAntiDoomDialog.postValue(AntiDoomBlockedInfo(appModel, remainingMinutes.coerceAtLeast(1)))
-                        return
+                        return false
                     }
                     prefs.setAntiDoomHiddenUntil(appModel.appPackage, appModel.user.toString(), System.currentTimeMillis() + Constants.ONE_HOUR_IN_MILLIS)
                     getAppList()
@@ -117,6 +117,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 prefs.calendarAppClassName = appModel.activityClassName
             }
         }
+        return true
     }
 
     fun forceLaunchApp(appModel: AppModel) {

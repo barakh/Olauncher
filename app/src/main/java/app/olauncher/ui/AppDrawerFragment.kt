@@ -243,9 +243,6 @@ class AppDrawerFragment : Fragment() {
                 }
             }
         }
-        viewModel.showAntiDoomDialog.observe(viewLifecycleOwner) { info ->
-            info?.let { showAntiDoomBlockedDialog(it) }
-        }
     }
 
     private fun initClickListeners() {
@@ -310,28 +307,6 @@ class AppDrawerFragment : Fragment() {
     override fun onStop() {
         binding.search.hideKeyboard()
         super.onStop()
-    }
-
-    private fun showAntiDoomBlockedDialog(info: AntiDoomBlockedInfo) {
-        val view = layoutInflater.inflate(R.layout.dialog_antidoom, null)
-        view.findViewById<TextView>(R.id.dialogMessage).text = getString(R.string.antidoom_blocked_message, info.remainingMinutes)
-
-        val dialog = MaterialAlertDialogBuilder(requireContext())
-            .setView(view)
-            .setCancelable(true)
-            .create()
-
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-
-        view.findViewById<View>(R.id.btnOpenAnyway).setOnClickListener {
-            viewModel.forceLaunchApp(info.appModel)
-            dialog.dismiss()
-        }
-        view.findViewById<View>(R.id.btnCancel).setOnClickListener {
-            dialog.dismiss()
-        }
-
-        dialog.show()
     }
 
     override fun onDestroyView() {

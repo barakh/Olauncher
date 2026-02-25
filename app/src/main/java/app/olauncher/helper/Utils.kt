@@ -107,7 +107,8 @@ suspend fun getAppsList(
                                     appList.add(appModel)
                                 }
                             } else {
-                                val isTemporarilyHidden = prefs.isAntiDoomApp(app.applicationInfo.packageName, profile.toString()) &&
+                                val isTemporarilyHidden = prefs.hideDoomscrolledApps &&
+                                        prefs.isAntiDoomApp(app.applicationInfo.packageName, profile.toString()) &&
                                         prefs.isAppTemporarilyHidden(app.applicationInfo.packageName, profile.toString())
 
                                 if (includeRegularApps && !isTemporarilyHidden) {
