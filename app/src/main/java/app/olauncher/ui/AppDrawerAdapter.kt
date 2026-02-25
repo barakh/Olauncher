@@ -177,9 +177,7 @@ class AppDrawerAdapter(
 
                 if (appModel.appPackage.isNotEmpty()) {
                     val isTemporarilyHidden = prefs.isAppTemporarilyHidden(appModel.appPackage, appModel.user.toString())
-                    if (prefs.paintAntidoomedAppsRed && prefs.isAntiDoomApp(appModel.appPackage, appModel.user.toString())) {
-                        appTitle.setTextColor(root.context.getColor(R.color.red))
-                    } else if (isTemporarilyHidden) {
+                    if (prefs.paintAntidoomedAppsRed && isTemporarilyHidden && prefs.isAntiDoomApp(appModel.appPackage, appModel.user.toString())) {
                         appTitle.setTextColor(root.context.getColor(R.color.red))
                     } else {
                         val typedValue = TypedValue()
