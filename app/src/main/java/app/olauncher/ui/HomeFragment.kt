@@ -314,7 +314,9 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
             textView.visibility = View.VISIBLE
 
             if (prefs.paintAntidoomedAppsRed && isTemporarilyHidden && prefs.isAntiDoomApp(packageName, userString)) {
-                textView.setTextColor(requireContext().getColor(R.color.red))
+                val remainingMinutes = prefs.getAntiDoomRemainingMinutes(packageName, userString)
+                val color = if (remainingMinutes < 10) R.color.light_red else R.color.red
+                textView.setTextColor(requireContext().getColor(color))
             } else {
                 val typedValue = TypedValue()
                 requireContext().theme.resolveAttribute(R.attr.primaryColor, typedValue, true)
