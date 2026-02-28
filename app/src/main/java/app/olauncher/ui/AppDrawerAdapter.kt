@@ -176,9 +176,12 @@ class AppDrawerAdapter(
                 appTitle.gravity = prefs.appLabelAlignment
 
                 if (appModel.appPackage.isNotEmpty()) {
-                    val isTemporarilyHidden = prefs.isAppTemporarilyHidden(appModel.appPackage, appModel.user.toString())
-                    if (prefs.paintAntidoomedAppsRed && isTemporarilyHidden && prefs.isAntiDoomApp(appModel.appPackage, appModel.user.toString())) {
-                        appTitle.setTextColor(root.context.getColor(R.color.red))
+                    val user = appModel.user.toString()
+                    val isTemporarilyHidden = prefs.isAppTemporarilyHidden(appModel.appPackage, user)
+                    if (prefs.paintAntidoomedAppsRed && isTemporarilyHidden && prefs.isAntiDoomApp(appModel.appPackage, user)) {
+                        val remainingMinutes = prefs.getAntiDoomRemainingMinutes(appModel.appPackage, user)
+                        val color = if (remainingMinutes < 10) R.color.light_red else R.color.red
+                        appTitle.setTextColor(root.context.getColor(color))
                     } else {
                         val typedValue = TypedValue()
                         root.context.theme.resolveAttribute(R.attr.primaryColor, typedValue, true)

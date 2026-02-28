@@ -303,6 +303,11 @@ class Prefs(context: Context) {
         prefs.edit().remove("$ANTIDOOM_HIDDEN_UNTIL_PREFIX$appPackage|$user").apply()
     }
 
+    fun getAntiDoomRemainingMinutes(appPackage: String, user: String): Int {
+        val hiddenUntil = getAntiDoomHiddenUntil(appPackage, user)
+        return ((hiddenUntil - System.currentTimeMillis()) / (60 * 1000)).toInt()
+    }
+
     fun isAppTemporarilyHidden(appPackage: String, user: String): Boolean {
         val hiddenUntil = getAntiDoomHiddenUntil(appPackage, user)
         return hiddenUntil > System.currentTimeMillis()
