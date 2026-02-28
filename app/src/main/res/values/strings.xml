@@ -168,4 +168,5 @@
     <string name="no_antidoom_apps">No apps with AntiDoom</string>
     <string name="hide_doomscrolled_apps">Hide doomscrolled apps</string>
     <string name="paint_antidoomed_apps_red">Paint AntiDoom apps red</string>
+    <string name="show_antidoom_apps_first">Show AntiDoom apps first</string>
 </resources>

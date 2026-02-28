@@ -45,6 +45,7 @@ class Prefs(context: Context) {
     private val SCREEN_TIME_LAST_UPDATED = "SCREEN_TIME_LAST_UPDATED"
     private val HIDE_DOOMSCROLLED_APPS = "HIDE_DOOMSCROLLED_APPS"
     private val PAINT_ANTIDOOMED_APPS_RED = "PAINT_ANTIDOOMED_APPS_RED"
+    private val SHOW_ANTIDOOM_FIRST = "SHOW_ANTIDOOM_FIRST"
 
     private val APP_NAME_SWIPE_LEFT = "APP_NAME_SWIPE_LEFT"
     private val APP_NAME_SWIPE_RIGHT = "APP_NAME_SWIPE_RIGHT"
@@ -166,6 +167,10 @@ class Prefs(context: Context) {
     var paintAntidoomedAppsRed: Boolean
         get() = prefs.getBoolean(PAINT_ANTIDOOMED_APPS_RED, false)
         set(value) = prefs.edit().putBoolean(PAINT_ANTIDOOMED_APPS_RED, value).apply()
+
+    var showAntiDoomFirst: Boolean
+        get() = prefs.getBoolean(SHOW_ANTIDOOM_FIRST, false)
+        set(value) = prefs.edit().putBoolean(SHOW_ANTIDOOM_FIRST, value).apply()
 
     var hiddenApps: MutableSet<String>
         get() = prefs.getStringSet(HIDDEN_APPS, mutableSetOf()) as MutableSet<String>
