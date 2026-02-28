@@ -66,7 +66,6 @@
     <string name="follow">Takip etmek</string>
     <string name="email">E-posta</string>
 
-    <string name="donate">Bağış yapmak</string>
     <string name="swipe_up_for_apps">1. Tüm uygulamalar için yukarı kaydırın\n2. Ayarlar için herhangi bir yere uzun basın</string>
     <string name="apps_on_home_screen">Ana ekrandaki uygulamalar</string>
     <string name="daily_wallpaper_update">Günlük yeni duvar kağıdı</string>
@@ -89,23 +88,15 @@
     <string name="light">Işık</string>
     <string name="welcome_to_olauncher_settings">Ayarlar sayfasına hoş geldiniz!
         \n\nUnutmayın, herhangi bir sorunuz varsa, Hakkında sayfamızda cevap var.</string>
-    <string name="rate_us_message">Merhaba, bu mesajı bir daha görmeyeceksiniz.
-        \n\nOlauncher\'ı beğendiyseniz, lütfen bize 5 yıldız verebilir misiniz? Sıralamamızı yükseltmemize yardımcı oluyor ve bizi mutlu ediyor. Teşekkür ederim!</string>
-    <string name="share_message">Merhaba, yardımınıza ihtiyacımız var! Geçen yıl bir milyon indirmeyi geçtik. Bu yıl bir milyona daha ulaşmak istiyoruz ama bunu tek başımıza yapamayız.
-        \n\nOlauncher\'ı arkadaşlarınızla paylaşma nezaketini gösterir misiniz lütfen? Teşekkür ederim ve harika bir gün geçirmenizi dilerim!</string>
     <string name="keyboard_message">Merhaba, klavye, Olauncher\'da uygulamaları bulmanın ve başlatmanın en hızlı yoludur. Bunu birkaç gün daha Açık tutmanızı ve sonra karar vermenizi rica edebilir miyiz?
         \n\nSeçim her zaman senindir.</string>
     <string name="digital_wellbeing_message">Belirli uygulamalar için zaman sınırları belirlemek istiyorsanız Android\'in Dijital Denge özelliği bunu yapmanıza yardımcı olabilir.
         \n\nLütfen telefon ayarlarınızda Dijital Refah\'ı arayın ve etkinleştirin.</string>
     <string name="app_usage_message">Ana ekranınızda ekran sürenizi göstermek/gizlemek için lütfen uygulama kullanım iznini onaylayın veya reddedin.
         \n\nNot: Uygulama kullanım verileri toplanmaz. Her şey cihazınızda işlenir.</string>
-    <string name="pro_message">Olauncher\'ın Pro Launcher adında bir pro versiyonu da var. Hava durumu, widget\'lar, yazı tipleri, klasörler, AMOLED duvar kağıtları gibi ekstra özelliklere sahip.
-        \n\nAyrıca Olauncher geliştiricilerini desteklemenin en iyi yolu. Göz atın!</string>
     <string name="wallpaper_message">Olauncher her gün güzel yeni duvar kağıtları sunuyor. Ana ekranınıza her gün taze bir görünüm kazandırın, ücretsiz!
         \n\nDenemek ister misiniz?</string>
     <string name="accessibility_service_description">Kilitlemek için çift dokunmayı etkinleştirmek için erişilebilirlik izni gereklidir. Olauncher tarafından bu hizmet aracılığıyla elde edilen hiçbir veri cihazınızdan ayrılmayacaktır.</string>
-    <string name="support_olauncher_for_free">Amazon ortaklık bağlantımızı kullanarak Olauncher\'ı ücretsiz olarak destekleyin.</string>
-    <string name="support_olauncher_message">Bağlantımızı kullanarak her bir şey satın aldığınızda, küçük bir komisyon alırız. Lütfen bağlantıyı kaydedin ve çevrimiçi alışveriş yaptığınızda kullanın. Teşekkür ederim!</string>
     <string name="open">Linki aç</string>
     <string name="copy">kopyala</string>
     <string name="close">Kapalı</string>
@@ -119,7 +110,6 @@
     <string name="bottom_on">Alt: Açık</string>
     <string name="bottom_off">Alt: Kapalı</string>
     <string name="please_set_olauncher_as_default_first">Lütfen önce Olauncher\'ı varsayılan başlatıcınız olarak ayarlayın</string>
-    <string name="affiliate">ortak</string>
     <string name="app_not_found">Uygulama bulunamadı</string>
     <string name="unable_to_launch_app">Uygulama başlatılamıyor</string>
     <string name="search_for_Launcher_or_home_app">Başlatıcı veya Ev uygulamasını arayın</string>
