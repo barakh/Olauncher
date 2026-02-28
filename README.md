@@ -12,6 +12,14 @@ Olauncher is a minimal, open-source launcher for Android that helps you reduce y
 | :---: | :---: | :---: |
 | ![Home Screen](screenshots/home_screen_antidoom_red.png) | ![AntiDoom Block](screenshots/antidoom_dialog_59_mins.png) | ![App Drawer](screenshots/app_drawer_antidoom_red.png) |
 
+## AntiDoom Features
+This fork introduces several features designed to break the habit of doomscrolling:
+
+- **App Blocking:** Set time-based blocks for distracting apps to regain control of your attention.
+- **Visual Indicators:** Blocked apps are highlighted in **red** on the home screen and app drawer.
+- **Countdown Awareness:** When less than 10 minutes remain on a block, the app label changes to **light red**, providing a subtle visual cue of the impending unblock.
+- **Open Anyway:** A deliberate "Open Anyway" option in the block dialog ensures you have the final say, while still introducing a "speed bump" to mindless scrolling.
+
 ## Install
 You can build the APK from source using the provided Gradle wrapper.
 
