@@ -21,7 +21,6 @@
     <string name="follow">Prati</string>
     <string name="email">E-pošta</string>
     <string name="github">Github</string>
-    <string name="donate">Doniraj</string>
     <string name="swipe_up_for_apps">1. Povuci prema gore za aplikacije\n2. Dugo pritisnite bilo gdje za postavke</string>
     <string name="apps_on_home_screen">Aplikacije na početnoj stranici</string>
     <string name="daily_wallpaper_update">Dnevne pozadine</string>
@@ -56,24 +55,16 @@
     <string name="light">Svijetla</string>
     <string name="welcome_to_olauncher_settings">Dobrodošli u postavke!
         \n\nZapamtite, ako imate bilo kakvih pitanja, naša stranica O nama ima odgovor.</string>
-    <string name="rate_us_message">Ovu poruku više nećeš vidjeti.
-        \n\nBok, ako uživaš u korištenju Olaunchera, možeš li nam dati recenziju s 5 zvijezdica? To nam donosi više korisnika i usrećuje nas.\nHvala ti i sretan ostatak dana!</string>
-    <string name="share_message">Bok, trebamo tvoju pomoć! Prošle godine prešli smo milijun preuzimanja. Ove godine želimo doseći milijun više, ali ne možemo sami.
-        \n\nHoćete li, molim vas, biti ljubazni podijeliti Olauncher sa svojim prijateljima? Hvala i ugodan dan!</string>
     <string name="keyboard_message">Bok, tipkovnica je najbrži način za pronalaženje i pokretanje aplikacija u Olauncheru. Možemo li vas zamoliti da to zadržite uključeno još nekoliko dana, a zatim odlučite?
         \n\nIzbor je uvijek vaš.</string>
     <string name="digital_wellbeing_message">Ako želite postaviti vremenska ograničenja za određene aplikacije, značajka Digital Wellbeing na Androidu može vam pomoći u tome.
         \n\nPotražite Digital Wellbeing u postavkama telefona i omogućite ga.</string>
     <string name="app_usage_message">Da biste prikazali/sakrili vrijeme korištenja ekrana na početnom zaslonu, molimo dozvolite ili onemogućite dopuštenje korištenja aplikacije.
         \n\nNapomena: Ne prikupljaju se podaci o korištenju aplikacije. Sve se obrađuje na vašem uređaju.</string>
-    <string name="pro_message">Olauncher također ima pro verziju pod nazivom Pro Launcher. Ima dodatne značajke poput vremena, widgeta, fontova, mapa, AMOLED pozadina itd.
-        \n\nTo je također najbolji način da podržite programere Olauncher-a. Pogledajte!</string>
     <string name="wallpaper_message">Olauncher nudi predivne nove pozadine svaki dan. Daj svom početnom ekranu svjež izgled svaki dan, besplatno!
         \n\nŽeliš li isprobati?</string>
     <string name="accessibility_service_description">Dozvola za pristupačnost potrebna je za omogućavanje zaključavanja dvostrukim dodirom. Bilo koji podatci prikupljeni ovim servisom neće napustiti tvoj uređaj.</string>
     <string name="lock_layout_description">lock layout description to be used a unique id to lock screen</string>
-    <string name="support_olauncher_for_free">Besplatno podrži Olauncher korištenjem naše sponzorske poveznice za Amazon.</string>
-    <string name="support_olauncher_message">Svaki puta kada kupiš nešto pomoću naše poveznice, mi primimo malu naknadu. Molimo spremi poveznicu i koristi ju svaki puta kada kupuješ online.\nHvala ti!</string>
     <string name="open">Otvori poveznicu</string>
     <string name="copy">Kopiraj</string>
     <string name="close">Zatvori</string>
@@ -87,7 +78,6 @@
     <string name="bottom_on">Dno: uklj.</string>
     <string name="bottom_off">Dno: isklj.</string>
     <string name="please_set_olauncher_as_default_first">Prvo postavite Olauncher kao zadani pokretač</string>
-    <string name="affiliate">Sponzorstvo</string>
     <string name="tip_start_typing_for_rename">Savjet: počni pisati za opciju preimenovanja aplikacija</string>
     <string name="hidden_apps_message">Pazi: Dodirni \'Olauncher\' na vrhu da pronađeš svoje skrivene aplikacije.\n\nViše detalja dostupno dolje na našoj stranici Informacije.</string>
     <string name="swipe_down_for">Povuci prema dolje za</string>
