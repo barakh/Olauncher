@@ -119,7 +119,12 @@ suspend fun getAppsList(
                     }
                 }
             }
-            appList.sortBy { it.appLabel.lowercase() }
+            if (prefs.showAntiDoomFirst) {
+                appList.sortWith(compareByDescending<AppModel> { prefs.isAntiDoomApp(it.appPackage, it.user.toString()) }
+                    .thenBy { it.appLabel.lowercase() })
+            } else {
+                appList.sortBy { it.appLabel.lowercase() }
+            }
 
         } catch (e: Exception) {
             e.printStackTrace()
