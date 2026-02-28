@@ -67,7 +67,6 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
 
         binding.homeAppsNum.text = prefs.homeAppsNum.toString()
         binding.appsNumValue?.text = prefs.homeAppsNum.toString()
-        populateProMessage()
         populateKeyboardText()
         populateAutoLaunchText()
         populateScreenTimeOnOff()
@@ -81,7 +80,6 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
         populateAntiDoomOptions()
         populateSwipeApps()
         populateSwipeDownAction()
-        populateActionHints()
         initClickListeners()
         initObservers()
     }
@@ -101,7 +99,6 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
             R.id.hideDoomscrolledApps -> toggleHideDoomscrolledApps()
             R.id.paintAntidoomedAppsRed -> togglePaintAntidoomedAppsRed()
             R.id.showAntiDoomFirst -> toggleShowAntiDoomFirst()
-            R.id.olauncherPro -> requireContext().openUrl(Constants.URL_OLAUNCHER_PRO)
             R.id.screenTimeOnOff -> viewModel.showDialog.postValue(Constants.Dialog.DIGITAL_WELLBEING)
             R.id.appInfo -> openAppInfo(requireContext(), Process.myUserHandle(), BuildConfig.APPLICATION_ID)
             R.id.setLauncher -> viewModel.resetLauncherLiveData.call()
@@ -128,7 +125,6 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
             R.id.textSizeValue -> binding.textSizesLayout.visibility = View.VISIBLE
             R.id.actionAccessibility -> openAccessibilityService()
             R.id.closeAccessibility -> toggleAccessibilityVisibility(false)
-            R.id.notWorking -> requireContext().openUrl(Constants.URL_DOUBLE_TAP)
 
             R.id.tvGestures -> binding.flSwipeDown.visibility = View.VISIBLE
 
@@ -155,14 +151,6 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
             R.id.swipeDownAction -> binding.swipeDownSelectLayout.visibility = View.VISIBLE
             R.id.notifications -> updateSwipeDownAction(Constants.SwipeDownAction.NOTIFICATIONS)
             R.id.search -> updateSwipeDownAction(Constants.SwipeDownAction.SEARCH)
-
-            R.id.aboutOlauncher -> {
-                prefs.aboutClicked = true
-                requireContext().openUrl(Constants.URL_ABOUT_OLAUNCHER)
-            }
-
-            R.id.twitter -> requireContext().openUrl(Constants.URL_TWITTER_TANUJ)
-            R.id.privacy -> requireContext().openUrl(Constants.URL_OLAUNCHER_PRIVACY)
         }
     }
 
@@ -196,8 +184,6 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
         binding.scrollLayout.setOnClickListener(this)
         binding.appInfo.setOnClickListener(this)
         binding.setLauncher.setOnClickListener(this)
-        binding.aboutOlauncher.setOnClickListener(this)
-        binding.olauncherPro.setOnClickListener(this)
         binding.autoShowKeyboard.setOnClickListener(this)
         binding.autoLaunchApps?.setOnClickListener(this)
         binding.toggleLock.setOnClickListener(this)
@@ -227,10 +213,6 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
         binding.textSizeValue.setOnClickListener(this)
         binding.actionAccessibility.setOnClickListener(this)
         binding.closeAccessibility.setOnClickListener(this)
-        binding.notWorking.setOnClickListener(this)
-
-        binding.twitter.setOnClickListener(this)
-        binding.privacy.setOnClickListener(this)
 
         binding.appsNumDecrement?.setOnClickListener(this)
         binding.appsNumIncrement?.setOnClickListener(this)
@@ -653,19 +635,6 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
             R.id.action_settingsFragment_to_appListFragment,
             bundleOf(Constants.Key.FLAG to flag)
         )
-    }
-
-    private fun populateActionHints() {
-        if (prefs.aboutClicked.not())
-            binding.aboutOlauncher.setCompoundDrawablesWithIntrinsicBounds(0, 0, android.R.drawable.stat_notify_more, 0)
-        if (viewModel.isOlauncherDefault.value != true) return
-    }
-
-    private fun populateProMessage() {
-        if (prefs.proMessageShown.not() && prefs.userState == Constants.UserState.SHARE) {
-            prefs.proMessageShown = true
-            viewModel.showDialog.postValue(Constants.Dialog.PRO_MESSAGE)
-        }
     }
 
     override fun onDestroyView() {

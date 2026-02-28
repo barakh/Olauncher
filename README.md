@@ -24,7 +24,7 @@ This fork introduces several features designed to break the habit of doomscrolli
 You can build the APK from source using the provided Gradle wrapper.
 
 To maintain the simplicity of the launcher, a few niche features are available but hidden.
-Please check out the [About](https://tanujnotes.substack.com/p/olauncher-minimal-af-launcher?utm_source=github) page in the Olauncher settings for a complete list of features and FAQs.
+Check out the FAQ in the app's settings for more details.
 
 ## License
 License: [GNU GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html)
