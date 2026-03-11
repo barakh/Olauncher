@@ -22,6 +22,9 @@ import androidx.annotation.RequiresApi
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.core.view.setPadding
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -272,6 +275,21 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
             if (prefs.permanentNoteText != it.toString()) {
                 prefs.permanentNoteText = it.toString()
             }
+        }
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.etPermanentNote) { view, insets ->
+            val imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
+            val imeHeight = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
+
+            view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                val baseMargin = 80.dpToPx()
+                bottomMargin = if (imeVisible) {
+                    imeHeight + 16.dpToPx()
+                } else {
+                    baseMargin
+                }
+            }
+            insets
         }
     }
 
