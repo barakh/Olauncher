@@ -157,4 +157,5 @@
     <string name="show_antidoom_apps_first">Show AntiDoom apps first</string>
     <string name="auto_order_apps">Auto-order apps</string>
     <string name="auto_order_apps_enabled_toast">Auto-order is enabled. Home apps are updated automatically.</string>
+    <string name="show_app_icons">Show app icons</string>
 </resources>

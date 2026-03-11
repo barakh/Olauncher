@@ -78,6 +78,7 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
         populateStatusBar()
         populateDateTime()
         populateAutoOrder()
+        populateShowAppIcons()
         populateAntiDoomOptions()
         populateSwipeApps()
         populateSwipeDownAction()
@@ -97,6 +98,7 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
         when (view.id) {
             R.id.olauncherHiddenApps -> showHiddenApps()
             R.id.autoOrderApps -> toggleAutoOrder()
+            R.id.showAppIcons -> toggleShowAppIcons()
             R.id.antidoomApps -> showAntiDoomApps()
             R.id.hideDoomscrolledApps -> toggleHideDoomscrolledApps()
             R.id.paintAntidoomedAppsRed -> togglePaintAntidoomedAppsRed()
@@ -180,6 +182,7 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
     private fun initClickListeners() {
         binding.olauncherHiddenApps.setOnClickListener(this)
         binding.autoOrderApps.setOnClickListener(this)
+        binding.showAppIcons.setOnClickListener(this)
         binding.antidoomApps?.setOnClickListener(this)
         binding.hideDoomscrolledApps?.setOnClickListener(this)
         binding.paintAntidoomedAppsRed?.setOnClickListener(this)
@@ -316,6 +319,15 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
 
     private fun populateAutoOrder() {
         binding.autoOrderApps.text = getString(if (prefs.autoOrderApps) R.string.on else R.string.off)
+    }
+
+    private fun toggleShowAppIcons() {
+        prefs.showAppIcons = !prefs.showAppIcons
+        populateShowAppIcons()
+    }
+
+    private fun populateShowAppIcons() {
+        binding.showAppIcons.text = getString(if (prefs.showAppIcons) R.string.on else R.string.off)
     }
 
     private fun populateAntiDoomOptions() {

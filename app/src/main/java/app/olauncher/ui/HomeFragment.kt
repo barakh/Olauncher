@@ -3,10 +3,12 @@ package app.olauncher.ui
 import android.app.admin.DevicePolicyManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.LauncherApps
 import android.content.res.Configuration
 import android.os.BatteryManager
 import android.os.Build
 import android.os.Bundle
+import android.os.UserHandle
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -324,7 +326,26 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         if (isPackageInstalled(requireContext(), packageName, userString)) {
             val isTemporarilyHidden = prefs.isAppTemporarilyHidden(packageName, userString)
 
-            textView.text = appName
+            if (prefs.showAppIcons) {
+                val userHandle = getUserHandleFromString(requireContext(), userString)
+                val launcherApps = requireContext().getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
+                val activityList = launcherApps.getActivityList(packageName, userHandle)
+                if (activityList.isNotEmpty()) {
+                    val icon = activityList[0].getIcon(0)
+                    val iconSize = 48.dpToPx()
+                    icon.setBounds(0, 0, iconSize, iconSize)
+                    textView.setCompoundDrawables(null, icon, null, null)
+                }
+                textView.text = if (appName.length > 8) appName.substring(0, 8) else appName
+                textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, resources.getDimension(R.dimen.text_small))
+                textView.gravity = Gravity.CENTER
+            } else {
+                textView.setCompoundDrawables(null, null, null, null)
+                textView.text = appName
+                textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, resources.getDimension(R.dimen.text_large))
+                textView.gravity = prefs.homeAlignment
+            }
+
             textView.visibility = View.VISIBLE
 
             if (prefs.paintAntidoomedAppsRed && isTemporarilyHidden && prefs.isAntiDoomApp(packageName, userString)) {
