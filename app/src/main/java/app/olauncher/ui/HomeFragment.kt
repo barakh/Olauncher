@@ -220,8 +220,8 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         val context = requireContext()
         binding.mainLayout.setOnTouchListener(getSwipeGestureListener(context))
 
-        val defaultPaddingH = 10
-        val defaultPaddingV = 30
+        val defaultPaddingH = 4.dpToPx()
+        val defaultPaddingV = 8.dpToPx()
         homeAppViews.forEach {
             it.setPadding(defaultPaddingH, defaultPaddingV, defaultPaddingH, defaultPaddingV)
             it.setOnTouchListener(getViewSwipeTouchListener(context, it))
