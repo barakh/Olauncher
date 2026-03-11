@@ -47,7 +47,8 @@ class Prefs(context: Context) {
     private val PAINT_ANTIDOOMED_APPS_RED = "PAINT_ANTIDOOMED_APPS_RED"
     private val SHOW_ANTIDOOM_FIRST = "SHOW_ANTIDOOM_FIRST"
     private val AUTO_ORDER_APPS = "AUTO_ORDER_APPS"
-    private val SHOW_APP_ICONS = "SHOW_APP_ICONS"
+    private val SHOW_APP_ICONS_HOME = "SHOW_APP_ICONS"
+    private val SHOW_APP_ICONS_APP_DRAWER = "SHOW_APP_ICONS_APP_DRAWER"
     private val LAST_CLICKED_TIME_PREFIX = "LAST_CLICKED_TIME_"
 
     private val APP_NAME_SWIPE_LEFT = "APP_NAME_SWIPE_LEFT"
@@ -179,9 +180,13 @@ class Prefs(context: Context) {
         get() = prefs.getBoolean(AUTO_ORDER_APPS, false)
         set(value) = prefs.edit().putBoolean(AUTO_ORDER_APPS, value).apply()
 
-    var showAppIcons: Boolean
-        get() = prefs.getBoolean(SHOW_APP_ICONS, false)
-        set(value) = prefs.edit().putBoolean(SHOW_APP_ICONS, value).apply()
+    var showAppIconsHome: Boolean
+        get() = prefs.getBoolean(SHOW_APP_ICONS_HOME, false)
+        set(value) = prefs.edit().putBoolean(SHOW_APP_ICONS_HOME, value).apply()
+
+    var showAppIconsAppDrawer: Boolean
+        get() = prefs.getBoolean(SHOW_APP_ICONS_APP_DRAWER, false)
+        set(value) = prefs.edit().putBoolean(SHOW_APP_ICONS_APP_DRAWER, value).apply()
 
     fun getLastClickedTime(appPackage: String, user: String): Long {
         return prefs.getLong("$LAST_CLICKED_TIME_PREFIX$appPackage|$user", 0L)
