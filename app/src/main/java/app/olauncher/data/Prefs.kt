@@ -46,6 +46,8 @@ class Prefs(context: Context) {
     private val HIDE_DOOMSCROLLED_APPS = "HIDE_DOOMSCROLLED_APPS"
     private val PAINT_ANTIDOOMED_APPS_RED = "PAINT_ANTIDOOMED_APPS_RED"
     private val SHOW_ANTIDOOM_FIRST = "SHOW_ANTIDOOM_FIRST"
+    private val AUTO_ORDER_APPS = "AUTO_ORDER_APPS"
+    private val LAST_CLICKED_TIME_PREFIX = "LAST_CLICKED_TIME_"
 
     private val APP_NAME_SWIPE_LEFT = "APP_NAME_SWIPE_LEFT"
     private val APP_NAME_SWIPE_RIGHT = "APP_NAME_SWIPE_RIGHT"
@@ -171,6 +173,18 @@ class Prefs(context: Context) {
     var showAntiDoomFirst: Boolean
         get() = prefs.getBoolean(SHOW_ANTIDOOM_FIRST, false)
         set(value) = prefs.edit().putBoolean(SHOW_ANTIDOOM_FIRST, value).apply()
+
+    var autoOrderApps: Boolean
+        get() = prefs.getBoolean(AUTO_ORDER_APPS, false)
+        set(value) = prefs.edit().putBoolean(AUTO_ORDER_APPS, value).apply()
+
+    fun getLastClickedTime(appPackage: String, user: String): Long {
+        return prefs.getLong("$LAST_CLICKED_TIME_PREFIX$appPackage|$user", 0L)
+    }
+
+    fun setLastClickedTime(appPackage: String, user: String, time: Long) {
+        prefs.edit().putLong("$LAST_CLICKED_TIME_PREFIX$appPackage|$user", time).apply()
+    }
 
     var hiddenApps: MutableSet<String>
         get() = prefs.getStringSet(HIDDEN_APPS, mutableSetOf()) as MutableSet<String>

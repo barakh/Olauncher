@@ -77,6 +77,7 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
         populateAlignment()
         populateStatusBar()
         populateDateTime()
+        populateAutoOrder()
         populateAntiDoomOptions()
         populateSwipeApps()
         populateSwipeDownAction()
@@ -95,6 +96,7 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
 
         when (view.id) {
             R.id.olauncherHiddenApps -> showHiddenApps()
+            R.id.autoOrderApps -> toggleAutoOrder()
             R.id.antidoomApps -> showAntiDoomApps()
             R.id.hideDoomscrolledApps -> toggleHideDoomscrolledApps()
             R.id.paintAntidoomedAppsRed -> togglePaintAntidoomedAppsRed()
@@ -177,6 +179,7 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
 
     private fun initClickListeners() {
         binding.olauncherHiddenApps.setOnClickListener(this)
+        binding.autoOrderApps.setOnClickListener(this)
         binding.antidoomApps?.setOnClickListener(this)
         binding.hideDoomscrolledApps?.setOnClickListener(this)
         binding.paintAntidoomedAppsRed?.setOnClickListener(this)
@@ -303,6 +306,16 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
                 else -> R.string.off
             }
         )
+    }
+
+    private fun toggleAutoOrder() {
+        prefs.autoOrderApps = !prefs.autoOrderApps
+        populateAutoOrder()
+        if (prefs.autoOrderApps) viewModel.getAutoOrderedApps()
+    }
+
+    private fun populateAutoOrder() {
+        binding.autoOrderApps.text = getString(if (prefs.autoOrderApps) R.string.on else R.string.off)
     }
 
     private fun populateAntiDoomOptions() {
