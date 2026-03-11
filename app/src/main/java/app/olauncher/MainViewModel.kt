@@ -284,7 +284,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun getTodaysScreenTime() {
-        if (prefs.screenTimeLastUpdated.hasBeenMinutes(1).not()) return
+        if (screenTimeValue.value != null && prefs.screenTimeLastUpdated.hasBeenMinutes(1).not()) return
 
         val usageStatsManager = appContext.getSystemService(USAGE_STATS_SERVICE) as UsageStatsManager
         val appUsageStatsHashMap: MutableMap<String, AppUsageStats> = HashMap()
