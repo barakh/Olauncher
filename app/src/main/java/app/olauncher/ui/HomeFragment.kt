@@ -309,6 +309,8 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
             populateScreenTime()
 
+        binding.homeAppsLayout.columnCount = if (prefs.showAppIcons) 4 else 2
+
         val homeAppsNum = prefs.homeAppsNum
         if (homeAppsNum == 0) return
 
