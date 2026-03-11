@@ -160,4 +160,6 @@
     <string name="auto_order_apps_enabled_toast">Auto-order is enabled. Home apps are updated automatically.</string>
     <string name="show_app_icons_home">Show app icons on home</string>
     <string name="show_app_icons_app_drawer">Show app icons in drawer</string>
+    <string name="permanent_note">Permanent note</string>
+    <string name="permanent_note_placeholder">_</string>
 </resources>

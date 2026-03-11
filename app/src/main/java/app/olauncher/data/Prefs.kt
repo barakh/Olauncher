@@ -49,6 +49,8 @@ class Prefs(context: Context) {
     private val AUTO_ORDER_APPS = "AUTO_ORDER_APPS"
     private val SHOW_APP_ICONS_HOME = "SHOW_APP_ICONS"
     private val SHOW_APP_ICONS_APP_DRAWER = "SHOW_APP_ICONS_APP_DRAWER"
+    private val SHOW_PERMANENT_NOTE = "SHOW_PERMANENT_NOTE"
+    private val PERMANENT_NOTE_TEXT = "PERMANENT_NOTE_TEXT"
     private val LAST_CLICKED_TIME_PREFIX = "LAST_CLICKED_TIME_"
 
     private val APP_NAME_SWIPE_LEFT = "APP_NAME_SWIPE_LEFT"
@@ -187,6 +189,14 @@ class Prefs(context: Context) {
     var showAppIconsAppDrawer: Boolean
         get() = prefs.getBoolean(SHOW_APP_ICONS_APP_DRAWER, false)
         set(value) = prefs.edit().putBoolean(SHOW_APP_ICONS_APP_DRAWER, value).apply()
+
+    var showPermanentNote: Boolean
+        get() = prefs.getBoolean(SHOW_PERMANENT_NOTE, false)
+        set(value) = prefs.edit().putBoolean(SHOW_PERMANENT_NOTE, value).apply()
+
+    var permanentNoteText: String
+        get() = prefs.getString(PERMANENT_NOTE_TEXT, "").toString()
+        set(value) = prefs.edit().putString(PERMANENT_NOTE_TEXT, value).apply()
 
     fun getLastClickedTime(appPackage: String, user: String): Long {
         return prefs.getLong("$LAST_CLICKED_TIME_PREFIX$appPackage|$user", 0L)
