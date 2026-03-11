@@ -26,6 +26,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import androidx.core.widget.doAfterTextChanged
 import app.olauncher.MainViewModel
 import app.olauncher.R
 import app.olauncher.data.AppModel
@@ -49,6 +50,7 @@ import app.olauncher.helper.setPlainWallpaperByTheme
 import app.olauncher.helper.showToast
 import app.olauncher.listener.OnSwipeTouchListener
 import app.olauncher.listener.ViewSwipeTouchListener
+import app.olauncher.helper.hideKeyboard
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -88,6 +90,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         setHomeAlignment(prefs.homeAlignment)
         initSwipeTouchListener()
         initClickListeners()
+        initPermanentNote()
     }
 
     override fun onResume() {
@@ -264,6 +267,23 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         )
     }
 
+    private fun initPermanentNote() {
+        binding.etPermanentNote.doAfterTextChanged {
+            if (prefs.permanentNoteText != it.toString()) {
+                prefs.permanentNoteText = it.toString()
+            }
+        }
+    }
+
+    private fun populatePermanentNote() {
+        binding.etPermanentNote.isVisible = prefs.showPermanentNote
+        if (prefs.showPermanentNote) {
+            if (binding.etPermanentNote.text.toString() != prefs.permanentNoteText) {
+                binding.etPermanentNote.setText(prefs.permanentNoteText)
+            }
+        }
+    }
+
     private fun setHomeAlignment(horizontalGravity: Int = prefs.homeAlignment) {
 //        binding.homeAppsLayout.gravity = horizontalGravity or verticalGravity
         binding.dateTimeLayout.gravity = horizontalGravity
@@ -318,6 +338,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     private fun populateHomeScreen(appCountUpdated: Boolean) {
         if (appCountUpdated) hideHomeApps()
         populateDateTime()
+        populatePermanentNote()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
             populateScreenTime()
@@ -600,6 +621,8 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
             override fun onClick() {
                 super.onClick()
                 viewModel.checkForMessages.call()
+                binding.etPermanentNote.clearFocus()
+                binding.etPermanentNote.hideKeyboard()
             }
         }
     }
