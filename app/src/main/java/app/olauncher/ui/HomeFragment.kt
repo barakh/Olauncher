@@ -213,7 +213,10 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
             populateDateTime()
         }
         viewModel.screenTimeValue.observe(viewLifecycleOwner) {
-            it?.let { binding.tvScreenTime.text = it }
+            it?.let {
+                binding.tvScreenTime.text = it
+                binding.tvScreenTime.visibility = View.VISIBLE
+            }
         }
         viewModel.quarantineCount.observe(viewLifecycleOwner) { count ->
             if (count > 0) {
