@@ -1,6 +1,7 @@
 package app.olauncher.ui
 
 import android.content.Context
+import android.content.pm.LauncherApps
 import android.os.UserHandle
 import android.text.Editable
 import android.text.TextWatcher
@@ -18,6 +19,7 @@ import app.olauncher.R
 import app.olauncher.data.AppModel
 import app.olauncher.data.Constants
 import app.olauncher.databinding.AdapterAppDrawerBinding
+import app.olauncher.helper.dpToPx
 import app.olauncher.helper.hideKeyboard
 import app.olauncher.helper.isSystemApp
 import app.olauncher.helper.showKeyboard
@@ -190,7 +192,7 @@ class AppDrawerAdapter(
                 }
 
                 if (appModel.appPackage.isEmpty()) {
-                    appTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
+                    appTitle.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null)
                     return@with
                 }
 
@@ -199,6 +201,18 @@ class AppDrawerAdapter(
                     val iconRes = if (isHidden) R.drawable.ic_hide else R.drawable.ic_show
                     appTitle.setCompoundDrawablesWithIntrinsicBounds(iconRes, 0, 0, 0)
                     appTitle.compoundDrawablePadding = 24
+                } else if (prefs.showAppIconsAppDrawer) {
+                    val launcherApps = root.context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
+                    val activityList = launcherApps.getActivityList(appModel.appPackage, appModel.user)
+                    if (activityList.isNotEmpty()) {
+                        val icon = activityList[0].getIcon(0)
+                        val iconSize = 24.dpToPx()
+                        icon.setBounds(0, 0, iconSize, iconSize)
+                        appTitle.setCompoundDrawables(icon, null, null, null)
+                        appTitle.compoundDrawablePadding = 24
+                    } else {
+                        appTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
+                    }
                 } else {
                     appTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
                 }
