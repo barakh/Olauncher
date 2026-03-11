@@ -107,6 +107,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
             R.id.date -> openCalendarApp()
             R.id.setDefaultLauncher -> viewModel.resetLauncherLiveData.call()
             R.id.tvScreenTime -> openScreenTimeDigitalWellbeing()
+            R.id.quarantineLayout -> showQuarantinedApps()
 
             in homeAppViews.map { it.id } -> {
                 try { // Launch app
@@ -249,6 +250,15 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         binding.setDefaultLauncher.setOnClickListener(this)
         binding.setDefaultLauncher.setOnLongClickListener(this)
         binding.tvScreenTime.setOnClickListener(this)
+        binding.quarantineLayout.setOnClickListener(this)
+    }
+
+    private fun showQuarantinedApps() {
+        viewModel.getQuarantinedApps()
+        findNavController().navigate(
+            R.id.action_mainFragment_to_appListFragment,
+            bundleOf(Constants.Key.FLAG to Constants.FLAG_QUARANTINED_APPS)
+        )
     }
 
     private fun setHomeAlignment(horizontalGravity: Int = prefs.homeAlignment) {

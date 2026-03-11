@@ -49,6 +49,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val appList = MutableLiveData<List<AppModel>?>()
     val hiddenApps = MutableLiveData<List<AppModel>?>()
     val antiDoomApps = MutableLiveData<List<AppModel>?>()
+    val quarantinedApps = MutableLiveData<List<AppModel>?>()
     val isOlauncherDefault = MutableLiveData<Boolean>()
     val launcherResetFailed = MutableLiveData<Boolean>()
     val homeAppAlignment = MutableLiveData<Int>()
@@ -63,7 +64,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun selectedApp(appModel: AppModel, flag: Int): Boolean {
         when (flag) {
-            Constants.FLAG_LAUNCH_APP, Constants.FLAG_ANTIDOOM_APPS -> {
+            Constants.FLAG_LAUNCH_APP, Constants.FLAG_ANTIDOOM_APPS, Constants.FLAG_QUARANTINED_APPS -> {
                 prefs.setLastClickedTime(appModel.appPackage, appModel.user.toString(), System.currentTimeMillis())
                 if (prefs.autoOrderApps) {
                     getAutoOrderedApps()
@@ -194,6 +195,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun getAntiDoomApps() {
         viewModelScope.launch {
             antiDoomApps.value = getAppsList(appContext, prefs, includeRegularApps = false, includeHiddenApps = false, includeAntiDoomApps = true)
+        }
+    }
+
+    fun getQuarantinedApps() {
+        viewModelScope.launch {
+            quarantinedApps.value = getAppsList(appContext, prefs, includeRegularApps = false, includeHiddenApps = false, includeAntiDoomApps = false, includeQuarantinedApps = true)
         }
     }
 
