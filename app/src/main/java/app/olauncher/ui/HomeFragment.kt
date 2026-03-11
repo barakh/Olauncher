@@ -93,6 +93,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         if (prefs.autoOrderApps) viewModel.getAutoOrderedApps()
         else populateHomeScreen(false)
         viewModel.isOlauncherDefault()
+        viewModel.updateQuarantineCount()
         if (prefs.showStatusBar) showStatusBar()
         else hideStatusBar()
     }
@@ -210,6 +211,14 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         }
         viewModel.screenTimeValue.observe(viewLifecycleOwner) {
             it?.let { binding.tvScreenTime.text = it }
+        }
+        viewModel.quarantineCount.observe(viewLifecycleOwner) { count ->
+            if (count > 0) {
+                binding.quarantineLayout?.visibility = View.VISIBLE
+                binding.tvQuarantineCount?.text = count.toString()
+            } else {
+                binding.quarantineLayout?.visibility = View.GONE
+            }
         }
         viewModel.showAntiDoomDialog.observe(viewLifecycleOwner) { info ->
             info?.let { showAntiDoomBlockedDialog(it) }

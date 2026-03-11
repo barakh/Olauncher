@@ -33,6 +33,7 @@ import app.olauncher.helper.hasBeenMinutes
 import app.olauncher.helper.isOlauncherDefault
 import app.olauncher.helper.showToast
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
 import java.util.concurrent.TimeUnit
 import kotlin.math.max
 
@@ -53,6 +54,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val homeAppAlignment = MutableLiveData<Int>()
     val screenTimeValue = MutableLiveData<String>()
     val autoOrderedApps = MutableLiveData<List<AppModel>>()
+    val quarantineCount = MutableLiveData<Int>()
 
     val showDialog = SingleLiveEvent<String>()
     val checkForMessages = SingleLiveEvent<Unit?>()
@@ -223,6 +225,22 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun isOlauncherDefault() {
         isOlauncherDefault.value = isOlauncherDefault(appContext)
+    }
+
+    fun updateQuarantineCount() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val antiDoomApps = prefs.antiDoomApps
+            var count = 0
+            for (app in antiDoomApps) {
+                val parts = app.split("|")
+                if (parts.size == 2) {
+                    if (prefs.isAppTemporarilyHidden(parts[0], parts[1])) {
+                        count++
+                    }
+                }
+            }
+            quarantineCount.postValue(count)
+        }
     }
 
 //    fun resetDefaultLauncherApp(context: Context) {
