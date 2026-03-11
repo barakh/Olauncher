@@ -90,7 +90,8 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
 
     override fun onResume() {
         super.onResume()
-        populateHomeScreen(false)
+        if (prefs.autoOrderApps) viewModel.getAutoOrderedApps()
+        else populateHomeScreen(false)
         viewModel.isOlauncherDefault()
         if (prefs.showStatusBar) showStatusBar()
         else hideStatusBar()
@@ -144,6 +145,10 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     override fun onLongClick(view: View): Boolean {
         when (view.id) {
             in homeAppViews.map { it.id } -> {
+                if (prefs.autoOrderApps) {
+                    requireContext().showToast(R.string.auto_order_apps_enabled_toast)
+                    return true
+                }
                 val location = view.tag.toString().toInt()
                 val flag = Constants.FLAG_SET_HOME_APP_1 + location - 1
                 showAppList(flag, prefs.getAppName(location).isNotEmpty(), true)

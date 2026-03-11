@@ -52,6 +52,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val launcherResetFailed = MutableLiveData<Boolean>()
     val homeAppAlignment = MutableLiveData<Int>()
     val screenTimeValue = MutableLiveData<String>()
+    val autoOrderedApps = MutableLiveData<List<AppModel>>()
 
     val showDialog = SingleLiveEvent<String>()
     val checkForMessages = SingleLiveEvent<Unit?>()
@@ -61,6 +62,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun selectedApp(appModel: AppModel, flag: Int): Boolean {
         when (flag) {
             Constants.FLAG_LAUNCH_APP, Constants.FLAG_ANTIDOOM_APPS -> {
+                prefs.setLastClickedTime(appModel.appPackage, appModel.user.toString(), System.currentTimeMillis())
+                if (prefs.autoOrderApps) {
+                    getAutoOrderedApps()
+                }
                 if (prefs.isAntiDoomApp(appModel.appPackage, appModel.user.toString())) {
                     val hiddenUntil = prefs.getAntiDoomHiddenUntil(appModel.appPackage, appModel.user.toString())
                     if (hiddenUntil > System.currentTimeMillis()) {
@@ -187,6 +192,32 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun getAntiDoomApps() {
         viewModelScope.launch {
             antiDoomApps.value = getAppsList(appContext, prefs, includeRegularApps = false, includeHiddenApps = false, includeAntiDoomApps = true)
+        }
+    }
+
+    fun getAutoOrderedApps() {
+        viewModelScope.launch {
+            val allApps = getAppsList(appContext, prefs, includeRegularApps = true, includeHiddenApps = false)
+            val filteredApps = allApps.filter { app ->
+                !(prefs.isAntiDoomApp(app.appPackage, app.user.toString()) && prefs.isAppTemporarilyHidden(app.appPackage, app.user.toString()))
+            }
+            val sortedApps = filteredApps.sortedByDescending { prefs.getLastClickedTime(it.appPackage, it.user.toString()) }
+            val topApps = sortedApps.take(prefs.homeAppsNum)
+
+            topApps.forEachIndexed { index, app ->
+                val location = index + 1
+                prefs.setAppName(location, app.appLabel)
+                prefs.setAppPackage(location, app.appPackage)
+                prefs.setAppUser(location, app.user.toString())
+                prefs.setAppActivityClassName(location, app.activityClassName)
+            }
+            for (i in (topApps.size + 1)..16) {
+                prefs.setAppName(i, "")
+                prefs.setAppPackage(i, "")
+                prefs.setAppUser(i, "")
+                prefs.setAppActivityClassName(i, "")
+            }
+            refreshHome.postValue(false)
         }
     }
 

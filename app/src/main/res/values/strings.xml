@@ -155,4 +155,6 @@
     <string name="hide_doomscrolled_apps">Hide doomscrolled apps</string>
     <string name="paint_antidoomed_apps_red">Paint AntiDoom apps red</string>
     <string name="show_antidoom_apps_first">Show AntiDoom apps first</string>
+    <string name="auto_order_apps">Auto-order apps</string>
+    <string name="auto_order_apps_enabled_toast">Auto-order is enabled. Home apps are updated automatically.</string>
 </resources>
