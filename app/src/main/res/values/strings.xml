@@ -148,6 +148,7 @@
         \n\nWe hope you enjoy it. Tell us what you think.</string>
     <string name="alignment_changed">Alignment changed ✅</string>
     <string name="home_screen">Home screen</string>
+    <string name="app_drawer">App drawer</string>
     <string name="hey">Hey</string>
     <string name="version_identifier" translatable="false">1.0</string>
     <string name="antidoom_apps">AntiDoom apps</string>
@@ -157,5 +158,6 @@
     <string name="show_antidoom_apps_first">Show AntiDoom apps first</string>
     <string name="auto_order_apps">Auto-order apps</string>
     <string name="auto_order_apps_enabled_toast">Auto-order is enabled. Home apps are updated automatically.</string>
-    <string name="show_app_icons">Show app icons</string>
+    <string name="show_app_icons_home">Show app icons on home</string>
+    <string name="show_app_icons_app_drawer">Show app icons in drawer</string>
 </resources>

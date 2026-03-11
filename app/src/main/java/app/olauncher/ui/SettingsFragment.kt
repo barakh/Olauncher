@@ -78,7 +78,8 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
         populateStatusBar()
         populateDateTime()
         populateAutoOrder()
-        populateShowAppIcons()
+        populateShowAppIconsHome()
+        populateShowAppIconsAppDrawer()
         populateAntiDoomOptions()
         populateSwipeApps()
         populateSwipeDownAction()
@@ -98,7 +99,8 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
         when (view.id) {
             R.id.olauncherHiddenApps -> showHiddenApps()
             R.id.autoOrderApps -> toggleAutoOrder()
-            R.id.showAppIcons -> toggleShowAppIcons()
+            R.id.showAppIconsHome -> toggleShowAppIconsHome()
+            R.id.showAppIconsAppDrawer -> toggleShowAppIconsAppDrawer()
             R.id.antidoomApps -> showAntiDoomApps()
             R.id.hideDoomscrolledApps -> toggleHideDoomscrolledApps()
             R.id.paintAntidoomedAppsRed -> togglePaintAntidoomedAppsRed()
@@ -182,7 +184,8 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
     private fun initClickListeners() {
         binding.olauncherHiddenApps.setOnClickListener(this)
         binding.autoOrderApps.setOnClickListener(this)
-        binding.showAppIcons.setOnClickListener(this)
+        binding.showAppIconsHome.setOnClickListener(this)
+        binding.showAppIconsAppDrawer.setOnClickListener(this)
         binding.antidoomApps?.setOnClickListener(this)
         binding.hideDoomscrolledApps?.setOnClickListener(this)
         binding.paintAntidoomedAppsRed?.setOnClickListener(this)
@@ -321,13 +324,23 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
         binding.autoOrderApps.text = getString(if (prefs.autoOrderApps) R.string.on else R.string.off)
     }
 
-    private fun toggleShowAppIcons() {
-        prefs.showAppIcons = !prefs.showAppIcons
-        populateShowAppIcons()
+    private fun toggleShowAppIconsHome() {
+        prefs.showAppIconsHome = !prefs.showAppIconsHome
+        populateShowAppIconsHome()
+        viewModel.refreshHome(true)
     }
 
-    private fun populateShowAppIcons() {
-        binding.showAppIcons.text = getString(if (prefs.showAppIcons) R.string.on else R.string.off)
+    private fun populateShowAppIconsHome() {
+        binding.showAppIconsHome.text = getString(if (prefs.showAppIconsHome) R.string.on else R.string.off)
+    }
+
+    private fun toggleShowAppIconsAppDrawer() {
+        prefs.showAppIconsAppDrawer = !prefs.showAppIconsAppDrawer
+        populateShowAppIconsAppDrawer()
+    }
+
+    private fun populateShowAppIconsAppDrawer() {
+        binding.showAppIconsAppDrawer.text = getString(if (prefs.showAppIconsAppDrawer) R.string.on else R.string.off)
     }
 
     private fun populateAntiDoomOptions() {

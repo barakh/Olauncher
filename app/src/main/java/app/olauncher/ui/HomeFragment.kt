@@ -309,7 +309,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
             populateScreenTime()
 
-        binding.homeAppsLayout.columnCount = if (prefs.showAppIcons) 4 else 2
+        binding.homeAppsLayout.columnCount = if (prefs.showAppIconsHome) 4 else 2
 
         val homeAppsNum = prefs.homeAppsNum
         if (homeAppsNum == 0) return
@@ -328,7 +328,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         if (isPackageInstalled(requireContext(), packageName, userString)) {
             val isTemporarilyHidden = prefs.isAppTemporarilyHidden(packageName, userString)
 
-            if (prefs.showAppIcons) {
+            if (prefs.showAppIconsHome) {
                 val userHandle = getUserHandleFromString(requireContext(), userString)
                 val launcherApps = requireContext().getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
                 val activityList = launcherApps.getActivityList(packageName, userHandle)
