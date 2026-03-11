@@ -69,6 +69,7 @@ suspend fun getAppsList(
     includeRegularApps: Boolean = true,
     includeHiddenApps: Boolean = false,
     includeAntiDoomApps: Boolean = false,
+    includeQuarantinedApps: Boolean = false,
 ): MutableList<AppModel> {
     return withContext(Dispatchers.IO) {
         val appList: MutableList<AppModel> = mutableListOf()
@@ -98,6 +99,12 @@ suspend fun getAppsList(
                     if (app.applicationInfo.packageName != BuildConfig.APPLICATION_ID) {
                         if (includeAntiDoomApps) {
                             if (prefs.isAntiDoomApp(app.applicationInfo.packageName, profile.toString())) {
+                                appList.add(appModel)
+                            }
+                        } else if (includeQuarantinedApps) {
+                            if (prefs.isAntiDoomApp(app.applicationInfo.packageName, profile.toString()) &&
+                                prefs.isAppTemporarilyHidden(app.applicationInfo.packageName, profile.toString())
+                            ) {
                                 appList.add(appModel)
                             }
                         } else {

@@ -73,6 +73,8 @@ class AppDrawerFragment : Fragment() {
             binding.search.queryHint = getString(R.string.hidden_apps)
         else if (flag == Constants.FLAG_ANTIDOOM_APPS)
             binding.search.queryHint = getString(R.string.antidoom_apps)
+        else if (flag == Constants.FLAG_QUARANTINED_APPS)
+            binding.search.queryHint = "Quarantined apps"
         else if (flag in Constants.HOME_APP_FLAGS || flag in Constants.FLAG_SET_SWIPE_LEFT_APP..Constants.FLAG_SET_CALENDAR_APP)
             binding.search.queryHint = "Please select an app"
         try {
@@ -231,6 +233,12 @@ class AppDrawerFragment : Fragment() {
             }
         } else if (flag == Constants.FLAG_ANTIDOOM_APPS) {
             viewModel.antiDoomApps.observe(viewLifecycleOwner) {
+                it?.let {
+                    adapter.setAppList(it.toMutableList())
+                }
+            }
+        } else if (flag == Constants.FLAG_QUARANTINED_APPS) {
+            viewModel.quarantinedApps.observe(viewLifecycleOwner) {
                 it?.let {
                     adapter.setAppList(it.toMutableList())
                 }
