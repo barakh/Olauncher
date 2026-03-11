@@ -196,7 +196,7 @@ class AppDrawerAdapter(
                     return@with
                 }
 
-                if (flag == Constants.FLAG_ANTIDOOM_APPS && isAppHidden != null) {
+                if ((flag == Constants.FLAG_ANTIDOOM_APPS || flag == Constants.FLAG_QUARANTINED_APPS) && isAppHidden != null) {
                     val isHidden = isAppHidden(appModel)
                     val iconRes = if (isHidden) R.drawable.ic_hide else R.drawable.ic_show
                     appTitle.setCompoundDrawablesWithIntrinsicBounds(iconRes, 0, 0, 0)
