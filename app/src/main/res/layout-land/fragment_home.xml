@@ -351,13 +351,14 @@
             android:textColor="?attr/primaryColor"
             android:textColorHint="?attr/primaryColor" />
 
-        <ImageView
+        <TextView
             android:id="@+id/btnClearNote"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end|center_vertical"
             android:padding="8dp"
-            android:src="@drawable/ic_close"
+            android:text="🧹"
+            android:textSize="18sp"
             android:visibility="gone"
             tools:visibility="visible" />
 
