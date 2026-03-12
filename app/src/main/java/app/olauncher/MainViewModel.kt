@@ -61,6 +61,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val checkForMessages = SingleLiveEvent<Unit?>()
     val resetLauncherLiveData = SingleLiveEvent<Unit?>()
     val showAntiDoomDialog = SingleLiveEvent<AntiDoomBlockedInfo>()
+    val clearPermanentNoteFocus = SingleLiveEvent<Unit?>()
 
     fun selectedApp(appModel: AppModel, flag: Int): Boolean {
         when (flag) {
