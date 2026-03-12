@@ -282,6 +282,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         }
 
         binding.etPermanentNote.setOnFocusChangeListener { _, hasFocus ->
+            binding.btnClearNote.isVisible = hasFocus
             if (hasFocus) {
                 binding.etPermanentNote.maxLines = Int.MAX_VALUE
                 val typedValue = TypedValue()
@@ -301,7 +302,11 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
             }
         }
 
-        ViewCompat.setOnApplyWindowInsetsListener(binding.etPermanentNote) { view, insets ->
+        binding.btnClearNote.setOnClickListener {
+            binding.etPermanentNote.setText("")
+        }
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.permanentNoteContainer) { view, insets ->
             val imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
             val imeHeight = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
 
@@ -318,7 +323,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     }
 
     private fun populatePermanentNote() {
-        binding.etPermanentNote.isVisible = prefs.showPermanentNote
+        binding.permanentNoteContainer.isVisible = prefs.showPermanentNote
         if (prefs.showPermanentNote) {
             if (binding.etPermanentNote.text.toString() != prefs.permanentNoteText) {
                 binding.etPermanentNote.setText(prefs.permanentNoteText)
