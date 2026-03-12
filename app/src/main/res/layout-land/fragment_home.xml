@@ -328,22 +328,39 @@
 
     </LinearLayout>
 
-    <androidx.appcompat.widget.AppCompatEditText
-        android:id="@+id/etPermanentNote"
-        style="@style/TextSmall"
+    <FrameLayout
+        android:id="@+id/permanentNoteContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:layout_marginHorizontal="20dp"
         android:layout_marginBottom="80dp"
-        android:background="@null"
-        android:gravity="center"
-        android:hint="@string/permanent_note_placeholder"
-        android:inputType="textCapSentences|textMultiLine"
-        android:maxLines="1"
-        android:textColor="?attr/primaryColor"
-        android:textColorHint="?attr/primaryColor"
         android:visibility="gone"
-        tools:visibility="visible" />
+        tools:visibility="visible">
+
+        <androidx.appcompat.widget.AppCompatEditText
+            android:id="@+id/etPermanentNote"
+            style="@style/TextSmall"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:gravity="center"
+            android:hint="@string/permanent_note_placeholder"
+            android:inputType="textCapSentences|textMultiLine"
+            android:maxLines="1"
+            android:textColor="?attr/primaryColor"
+            android:textColorHint="?attr/primaryColor" />
+
+        <ImageView
+            android:id="@+id/btnClearNote"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end|center_vertical"
+            android:padding="8dp"
+            android:src="@drawable/ic_close"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+    </FrameLayout>
 
 </FrameLayout>
