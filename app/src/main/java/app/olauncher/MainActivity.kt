@@ -49,8 +49,14 @@ class MainActivity : AppCompatActivity() {
     private var timerJob: Job? = null
 
     override fun onBackPressed() {
-        if (navController.currentDestination?.id != R.id.mainFragment)
+        if (navController.currentDestination?.id != R.id.mainFragment) {
             super.onBackPressed()
+            return
+        }
+
+        if (viewModel.clearPermanentNoteFocus.hasObservers()) {
+            viewModel.clearPermanentNoteFocus.call()
+        }
     }
 
     override fun attachBaseContext(context: Context) {

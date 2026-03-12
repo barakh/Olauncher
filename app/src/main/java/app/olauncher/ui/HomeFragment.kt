@@ -235,6 +235,10 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         viewModel.showAntiDoomDialog.observe(viewLifecycleOwner) { info ->
             info?.let { showAntiDoomBlockedDialog(it) }
         }
+        viewModel.clearPermanentNoteFocus.observe(viewLifecycleOwner) {
+            binding.etPermanentNote.clearFocus()
+            binding.etPermanentNote.hideKeyboard()
+        }
     }
 
     private fun initSwipeTouchListener() {
@@ -274,6 +278,26 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         binding.etPermanentNote.doAfterTextChanged {
             if (prefs.permanentNoteText != it.toString()) {
                 prefs.permanentNoteText = it.toString()
+            }
+        }
+
+        binding.etPermanentNote.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                binding.etPermanentNote.maxLines = Int.MAX_VALUE
+                val typedValue = TypedValue()
+                requireContext().theme.resolveAttribute(R.attr.dialogShadeColor, typedValue, true)
+                binding.etPermanentNote.setBackgroundColor(typedValue.data)
+                val paddingH = 16.dpToPx()
+                val paddingV = 8.dpToPx()
+                binding.etPermanentNote.setPadding(paddingH, paddingV, paddingH, paddingV)
+            } else {
+                binding.etPermanentNote.maxLines = 1
+                binding.etPermanentNote.setBackgroundResource(0)
+                binding.etPermanentNote.setPadding(0, 0, 0, 0)
+                if (binding.etPermanentNote.text?.isNotEmpty() == true) {
+                    binding.etPermanentNote.setSelection(0)
+                }
+                binding.etPermanentNote.hideKeyboard()
             }
         }
 
