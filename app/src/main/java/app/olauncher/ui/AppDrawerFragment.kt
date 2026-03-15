@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.widget.TextView
 import androidx.appcompat.widget.SearchView
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
@@ -251,6 +252,14 @@ class AppDrawerFragment : Fragment() {
                 }
             }
         }
+        viewModel.quarantineCount.observe(viewLifecycleOwner) { count ->
+            if (count > 0 && flag != Constants.FLAG_QUARANTINED_APPS) {
+                binding.quarantineLayout.visibility = View.VISIBLE
+                binding.tvQuarantineCount.text = count.toString()
+            } else {
+                binding.quarantineLayout.visibility = View.GONE
+            }
+        }
     }
 
     private fun initClickListeners() {
@@ -271,6 +280,13 @@ class AppDrawerFragment : Fragment() {
                 prefs.setAppName(location, name)
             }
             findNavController().popBackStack()
+        }
+        binding.quarantineLayout.setOnClickListener {
+            viewModel.getQuarantinedApps()
+            findNavController().navigate(
+                R.id.appListFragment,
+                bundleOf(Constants.Key.FLAG to Constants.FLAG_QUARANTINED_APPS)
+            )
         }
     }
 
