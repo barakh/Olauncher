@@ -130,6 +130,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun forceLaunchApp(appModel: AppModel) {
+        if (prefs.isAntiDoomApp(appModel.appPackage, appModel.user.toString())) {
+            prefs.setAntiDoomHiddenUntil(appModel.appPackage, appModel.user.toString(), System.currentTimeMillis() + Constants.ONE_HOUR_IN_MILLIS)
+        }
         launchApp(appModel.appPackage, appModel.activityClassName, appModel.user)
     }
 
