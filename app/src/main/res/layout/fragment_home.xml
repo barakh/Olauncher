@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mainLayout"
     android:layout_width="match_parent"
@@ -396,5 +397,15 @@
             tools:visibility="visible" />
 
     </FrameLayout>
+
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/dailyRemindersContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="120dp"
+        android:paddingHorizontal="16dp"
+        app:chipSpacingHorizontal="8dp"
+        app:chipSpacingVertical="4dp" />
 
 </FrameLayout>
