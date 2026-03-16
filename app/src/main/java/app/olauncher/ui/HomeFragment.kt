@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.LauncherApps
 import android.content.res.Configuration
+import android.graphics.Color
 import android.graphics.Paint
 import android.os.BatteryManager
 import android.os.Build
@@ -439,7 +440,39 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
             }
             .start()
 
-        requireContext().showToast(getString(R.string.reminder_completed))
+        showConfetti()
+    }
+
+    private fun showConfetti() {
+        val colors = listOf(Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW, Color.CYAN, Color.MAGENTA)
+        val particleCount = 60
+        val root = binding.confettiContainer
+        val screenWidth = root.width
+        val screenHeight = root.height
+
+        if (screenWidth == 0 || screenHeight == 0) return
+
+        for (i in 0 until particleCount) {
+            val particle = View(requireContext())
+            val size = (10..20).random().dpToPx()
+            val params = FrameLayout.LayoutParams(size, size)
+            particle.layoutParams = params
+            particle.setBackgroundColor(colors.random())
+            particle.x = (0..screenWidth).random().toFloat()
+            particle.y = -size.toFloat()
+            particle.rotation = (0..360).random().toFloat()
+            root.addView(particle)
+
+            particle.animate()
+                .translationY(screenHeight.toFloat() + size)
+                .rotationBy((360..1080).random().toFloat())
+                .setDuration((1000..2500).random().toLong())
+                .setInterpolator(AccelerateDecelerateInterpolator())
+                .withEndAction {
+                    root.removeView(particle)
+                }
+                .start()
+        }
     }
 
     private fun setHomeAlignment(horizontalGravity: Int = prefs.homeAlignment) {

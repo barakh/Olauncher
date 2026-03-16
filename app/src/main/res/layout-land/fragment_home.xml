@@ -407,4 +407,10 @@
         app:chipSpacingHorizontal="8dp"
         app:chipSpacingVertical="4dp" />
 
+    <FrameLayout
+        android:id="@+id/confettiContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:elevation="10dp" />
+
 </FrameLayout>
