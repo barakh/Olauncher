@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.LauncherApps
 import android.content.res.Configuration
+import android.graphics.Paint
 import android.os.BatteryManager
 import android.os.Build
 import android.os.Bundle
@@ -15,7 +16,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets
+import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.FrameLayout
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -35,6 +38,7 @@ import app.olauncher.R
 import app.olauncher.data.AppModel
 import app.olauncher.data.AntiDoomBlockedInfo
 import app.olauncher.data.Constants
+import app.olauncher.data.DailyReminder
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import app.olauncher.data.Prefs
 import app.olauncher.databinding.FragmentHomeBinding
@@ -42,6 +46,7 @@ import app.olauncher.helper.appUsagePermissionGranted
 import app.olauncher.helper.dpToPx
 import app.olauncher.helper.expandNotificationDrawer
 import app.olauncher.helper.getChangedAppTheme
+import app.olauncher.helper.getColorFromAttr
 import app.olauncher.helper.getUserHandleFromString
 import app.olauncher.helper.isPackageInstalled
 import app.olauncher.helper.openAlarmApp
@@ -55,8 +60,10 @@ import app.olauncher.listener.OnSwipeTouchListener
 import app.olauncher.listener.ViewSwipeTouchListener
 import app.olauncher.helper.hideKeyboard
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+
 
 class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener {
 
@@ -94,6 +101,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         initSwipeTouchListener()
         initClickListeners()
         initPermanentNote()
+        initDailyReminder()
     }
 
     override fun onResume() {
@@ -357,6 +365,83 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         }
     }
 
+    private fun initDailyReminder() {
+        // No-op for now, we'll populate dynamically
+    }
+
+    private fun populateDailyReminder() {
+        binding.dailyRemindersContainer.removeAllViews()
+        if (!prefs.showDailyReminder) return
+
+        val currentDay = Calendar.getInstance().get(Calendar.DAY_OF_YEAR)
+        val currentTime = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
+
+        prefs.dailyReminders.forEach { reminder ->
+            if (reminder.text.isNotBlank() && reminder.lastCompletedDay != currentDay && currentTime >= reminder.time) {
+                val ticker = createReminderTicker(reminder)
+                binding.dailyRemindersContainer.addView(ticker)
+            }
+        }
+    }
+
+    private fun createReminderTicker(reminder: DailyReminder): TextView {
+        val textView = TextView(requireContext())
+        textView.text = reminder.text
+        textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, resources.getDimension(R.dimen.text_small))
+        textView.setTextColor(requireContext().getColorFromAttr(R.attr.primaryColor))
+        textView.setBackgroundResource(R.drawable.rounded_rect_shade_color)
+        
+        val paddingH = 16.dpToPx()
+        val paddingV = 8.dpToPx()
+        textView.setPadding(paddingH, paddingV, paddingH, paddingV)
+        
+        val params = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        )
+        params.setMargins(0, 0, 0, 8.dpToPx())
+        textView.layoutParams = params
+        
+        textView.setOnClickListener {
+            markReminderAsCompleted(textView, reminder)
+        }
+        
+        return textView
+    }
+
+    private fun markReminderAsCompleted(view: TextView, reminder: DailyReminder) {
+        view.paintFlags = view.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
+        
+        val list = prefs.dailyReminders.toMutableList()
+        val index = list.indexOfFirst { it.id == reminder.id }
+        if (index != -1) {
+            list[index].lastCompletedDay = Calendar.getInstance().get(Calendar.DAY_OF_YEAR)
+            prefs.dailyReminders = list
+        }
+
+        // Success effect
+        view.animate()
+            .scaleX(1.2f)
+            .scaleY(1.2f)
+            .setDuration(200)
+            .setInterpolator(AccelerateDecelerateInterpolator())
+            .withEndAction {
+                view.animate()
+                    .scaleX(1.0f)
+                    .scaleY(1.0f)
+                    .alpha(0f)
+                    .setDuration(500)
+                    .setStartDelay(1000)
+                    .withEndAction {
+                        binding.dailyRemindersContainer.removeView(view)
+                    }
+                    .start()
+            }
+            .start()
+
+        requireContext().showToast(getString(R.string.reminder_completed))
+    }
+
     private fun setHomeAlignment(horizontalGravity: Int = prefs.homeAlignment) {
 //        binding.homeAppsLayout.gravity = horizontalGravity or verticalGravity
         binding.dateTimeLayout.gravity = horizontalGravity
@@ -412,6 +497,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         if (appCountUpdated) hideHomeApps()
         populateDateTime()
         populatePermanentNote()
+        populateDailyReminder()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
             populateScreenTime()
