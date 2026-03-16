@@ -450,7 +450,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
                 textView.gravity = Gravity.CENTER
             } else {
                 textView.setCompoundDrawables(null, null, null, null)
-                textView.text = appName
+                textView.text = if (appName.length > 15) appName.substring(0, 15) else appName
                 textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, resources.getDimension(R.dimen.text_large))
                 textView.gravity = prefs.homeAlignment
             }
