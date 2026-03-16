@@ -77,7 +77,6 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
         populateAlignment()
         populateStatusBar()
         populateDateTime()
-        populateAutoOrder()
         populateShowAppIconsHome()
         populateShowAppIconsAppDrawer()
         populateAntiDoomOptions()
@@ -98,7 +97,6 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
 
         when (view.id) {
             R.id.olauncherHiddenApps -> showHiddenApps()
-            R.id.autoOrderApps -> toggleAutoOrder()
             R.id.showAppIconsHome -> toggleShowAppIconsHome()
             R.id.showAppIconsAppDrawer -> toggleShowAppIconsAppDrawer()
             R.id.plugins -> findNavController().navigate(R.id.action_settingsFragment_to_pluginsFragment)
@@ -184,7 +182,6 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
 
     private fun initClickListeners() {
         binding.olauncherHiddenApps.setOnClickListener(this)
-        binding.autoOrderApps.setOnClickListener(this)
         binding.showAppIconsHome.setOnClickListener(this)
         binding.showAppIconsAppDrawer.setOnClickListener(this)
         binding.plugins.setOnClickListener(this)
@@ -314,16 +311,6 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
                 else -> R.string.off
             }
         )
-    }
-
-    private fun toggleAutoOrder() {
-        prefs.autoOrderApps = !prefs.autoOrderApps
-        populateAutoOrder()
-        if (prefs.autoOrderApps) viewModel.getAutoOrderedApps()
-    }
-
-    private fun populateAutoOrder() {
-        binding.autoOrderApps.text = getString(if (prefs.autoOrderApps) R.string.on else R.string.off)
     }
 
     private fun toggleShowAppIconsHome() {

@@ -47,6 +47,7 @@ class Prefs(context: Context) {
     private val PAINT_ANTIDOOMED_APPS_RED = "PAINT_ANTIDOOMED_APPS_RED"
     private val SHOW_ANTIDOOM_FIRST = "SHOW_ANTIDOOM_FIRST"
     private val AUTO_ORDER_APPS = "AUTO_ORDER_APPS"
+    private val PINNED_LOCATIONS = "PINNED_LOCATIONS"
     private val SHOW_APP_ICONS_HOME = "SHOW_APP_ICONS"
     private val SHOW_APP_ICONS_APP_DRAWER = "SHOW_APP_ICONS_APP_DRAWER"
     private val SHOW_PERMANENT_NOTE = "SHOW_PERMANENT_NOTE"
@@ -179,8 +180,30 @@ class Prefs(context: Context) {
         set(value) = prefs.edit().putBoolean(SHOW_ANTIDOOM_FIRST, value).apply()
 
     var autoOrderApps: Boolean
-        get() = prefs.getBoolean(AUTO_ORDER_APPS, false)
+        get() = prefs.getBoolean(AUTO_ORDER_APPS, true)
         set(value) = prefs.edit().putBoolean(AUTO_ORDER_APPS, value).apply()
+
+    var pinnedLocations: MutableSet<String>
+        get() = prefs.getStringSet(PINNED_LOCATIONS, mutableSetOf()) as MutableSet<String>
+        set(value) = prefs.edit().putStringSet(PINNED_LOCATIONS, value).apply()
+
+    fun isLocationPinned(location: Int): Boolean {
+        return pinnedLocations.contains(location.toString())
+    }
+
+    fun pinLocation(location: Int) {
+        val newSet = mutableSetOf<String>()
+        newSet.addAll(pinnedLocations)
+        newSet.add(location.toString())
+        pinnedLocations = newSet
+    }
+
+    fun unpinLocation(location: Int) {
+        val newSet = mutableSetOf<String>()
+        newSet.addAll(pinnedLocations)
+        newSet.remove(location.toString())
+        pinnedLocations = newSet
+    }
 
     var showAppIconsHome: Boolean
         get() = prefs.getBoolean(SHOW_APP_ICONS_HOME, false)

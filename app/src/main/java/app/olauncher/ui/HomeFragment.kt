@@ -155,13 +155,39 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     override fun onLongClick(view: View): Boolean {
         when (view.id) {
             in homeAppViews.map { it.id } -> {
-                if (prefs.autoOrderApps) {
-                    requireContext().showToast(R.string.auto_order_apps_enabled_toast)
-                    return true
-                }
                 val location = view.tag.toString().toInt()
+                val packageName = prefs.getAppPackage(location)
+                val userString = prefs.getAppUser(location)
+                val isPinned = prefs.isLocationPinned(location)
                 val flag = Constants.FLAG_SET_HOME_APP_1 + location - 1
-                showAppList(flag, prefs.getAppName(location).isNotEmpty(), true)
+
+                val options = mutableListOf<String>()
+                options.add(getString(R.string.select_app))
+                if (packageName.isNotEmpty()) {
+                    options.add(if (isPinned) getString(R.string.unpin_app) else getString(R.string.pin_app))
+                    options.add(getString(R.string.rename))
+                }
+
+                MaterialAlertDialogBuilder(requireContext())
+                    .setItems(options.toTypedArray()) { _, which ->
+                        when (options[which]) {
+                            getString(R.string.select_app) -> {
+                                showAppList(flag, false, true)
+                            }
+                            getString(R.string.pin_app) -> {
+                                prefs.pinLocation(location)
+                                viewModel.getAutoOrderedApps()
+                            }
+                            getString(R.string.unpin_app) -> {
+                                prefs.unpinLocation(location)
+                                viewModel.getAutoOrderedApps()
+                            }
+                            getString(R.string.rename) -> {
+                                showAppList(flag, true, true)
+                            }
+                        }
+                    }
+                    .show()
             }
             R.id.clock -> {
                 showAppList(Constants.FLAG_SET_CLOCK_APP)

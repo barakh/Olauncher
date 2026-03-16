@@ -95,6 +95,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 prefs.setAppPackage(location, appModel.appPackage)
                 prefs.setAppUser(location, appModel.user.toString())
                 prefs.setAppActivityClassName(location, appModel.activityClassName)
+                prefs.pinLocation(location)
                 refreshHome(false)
             }
 
@@ -214,23 +215,63 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             val filteredApps = allApps.filter { app ->
                 !(prefs.isAntiDoomApp(app.appPackage, app.user.toString()) && prefs.isAppTemporarilyHidden(app.appPackage, app.user.toString()))
             }
-            val sortedApps = filteredApps.sortedByDescending { prefs.getLastClickedTime(it.appPackage, it.user.toString()) }
-            val topApps = sortedApps.take(prefs.homeAppsNum)
 
-            topApps.forEachIndexed { index, app ->
-                val location = index + 1
-                prefs.setAppName(location, app.appLabel)
-                prefs.setAppPackage(location, app.appPackage)
-                prefs.setAppUser(location, app.user.toString())
-                prefs.setAppActivityClassName(location, app.activityClassName)
+            // Apps that are currently in pinned slots
+            val appsInPinnedSlots = mutableSetOf<String>()
+            for (i in 1..16) {
+                if (prefs.isLocationPinned(i)) {
+                    val pkg = prefs.getAppPackage(i)
+                    val user = prefs.getAppUser(i)
+                    if (pkg.isNotEmpty()) appsInPinnedSlots.add("$pkg|$user")
+                }
             }
-            for (i in (topApps.size + 1)..16) {
-                prefs.setAppName(i, "")
-                prefs.setAppPackage(i, "")
-                prefs.setAppUser(i, "")
-                prefs.setAppActivityClassName(i, "")
+
+            // Apps available for auto-ordering (not in any pinned slot)
+            val availableRecentApps = filteredApps
+                .filter { !appsInPinnedSlots.contains("${it.appPackage}|${it.user}") }
+                .sortedByDescending { prefs.getLastClickedTime(it.appPackage, it.user.toString()) }
+
+            var poolIndex = 0
+            val homeAppsNum = prefs.homeAppsNum
+
+            for (i in 1..16) {
+                if (i <= homeAppsNum) {
+                    if (prefs.isLocationPinned(i)) {
+                        val pkg = prefs.getAppPackage(i)
+                        val user = prefs.getAppUser(i)
+                        // If empty pinned slot or app uninstalled, treat as auto-order slot and unpin
+                        if (pkg.isEmpty() || !app.olauncher.helper.isPackageInstalled(appContext, pkg, user)) {
+                            prefs.unpinLocation(i)
+                            fillSlot(i, availableRecentApps, poolIndex++)
+                        }
+                        // else: Keep what's there
+                    } else {
+                        fillSlot(i, availableRecentApps, poolIndex++)
+                    }
+                } else {
+                    // Beyond homeAppsNum, clear it
+                    prefs.setAppName(i, "")
+                    prefs.setAppPackage(i, "")
+                    prefs.setAppUser(i, "")
+                    prefs.setAppActivityClassName(i, "")
+                }
             }
             refreshHome.postValue(false)
+        }
+    }
+
+    private fun fillSlot(location: Int, pool: List<AppModel>, index: Int) {
+        if (index < pool.size) {
+            val app = pool[index]
+            prefs.setAppName(location, app.appLabel)
+            prefs.setAppPackage(location, app.appPackage)
+            prefs.setAppUser(location, app.user.toString())
+            prefs.setAppActivityClassName(location, app.activityClassName)
+        } else {
+            prefs.setAppName(location, "")
+            prefs.setAppPackage(location, "")
+            prefs.setAppUser(location, "")
+            prefs.setAppActivityClassName(location, "")
         }
     }
 
