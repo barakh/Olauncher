@@ -80,7 +80,6 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
         populateAutoOrder()
         populateShowAppIconsHome()
         populateShowAppIconsAppDrawer()
-        populatePermanentNoteToggle()
         populateAntiDoomOptions()
         populateSwipeApps()
         populateSwipeDownAction()
@@ -102,7 +101,7 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
             R.id.autoOrderApps -> toggleAutoOrder()
             R.id.showAppIconsHome -> toggleShowAppIconsHome()
             R.id.showAppIconsAppDrawer -> toggleShowAppIconsAppDrawer()
-            R.id.showPermanentNote -> togglePermanentNote()
+            R.id.plugins -> findNavController().navigate(R.id.action_settingsFragment_to_pluginsFragment)
             R.id.antidoomApps -> showAntiDoomApps()
             R.id.hideDoomscrolledApps -> toggleHideDoomscrolledApps()
             R.id.paintAntidoomedAppsRed -> togglePaintAntidoomedAppsRed()
@@ -188,7 +187,7 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
         binding.autoOrderApps.setOnClickListener(this)
         binding.showAppIconsHome.setOnClickListener(this)
         binding.showAppIconsAppDrawer.setOnClickListener(this)
-        binding.showPermanentNote.setOnClickListener(this)
+        binding.plugins.setOnClickListener(this)
         binding.antidoomApps?.setOnClickListener(this)
         binding.hideDoomscrolledApps?.setOnClickListener(this)
         binding.paintAntidoomedAppsRed?.setOnClickListener(this)
@@ -344,16 +343,6 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
 
     private fun populateShowAppIconsAppDrawer() {
         binding.showAppIconsAppDrawer.text = getString(if (prefs.showAppIconsAppDrawer) R.string.on else R.string.off)
-    }
-
-    private fun togglePermanentNote() {
-        prefs.showPermanentNote = !prefs.showPermanentNote
-        populatePermanentNoteToggle()
-        viewModel.refreshHome(true)
-    }
-
-    private fun populatePermanentNoteToggle() {
-        binding.showPermanentNote.text = getString(if (prefs.showPermanentNote) R.string.on else R.string.off)
     }
 
     private fun populateAntiDoomOptions() {

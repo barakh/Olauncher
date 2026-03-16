@@ -53,6 +53,19 @@
             app:exitAnim="@anim/fade_exit"
             app:popEnterAnim="@anim/fade_enter"
             app:popExitAnim="@anim/fade_exit" />
+        <action
+            android:id="@+id/action_settingsFragment_to_pluginsFragment"
+            app:destination="@id/pluginsFragment"
+            app:enterAnim="@anim/fade_enter"
+            app:exitAnim="@anim/fade_exit"
+            app:popEnterAnim="@anim/fade_enter"
+            app:popExitAnim="@anim/fade_exit" />
     </fragment>
+
+    <fragment
+        android:id="@+id/pluginsFragment"
+        android:name="app.olauncher.ui.PluginsFragment"
+        android:label="PluginsFragment"
+        tools:layout="@layout/fragment_plugins" />
 
 </navigation>
