@@ -452,21 +452,30 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
 
         if (screenWidth == 0 || screenHeight == 0) return
 
+        val centerX = screenWidth / 2f
+        val startY = screenHeight.toFloat()
+
         for (i in 0 until particleCount) {
             val particle = View(requireContext())
-            val size = (10..20).random().dpToPx()
+            val size = (8..16).random().dpToPx()
             val params = FrameLayout.LayoutParams(size, size)
             particle.layoutParams = params
             particle.setBackgroundColor(colors.random())
-            particle.x = (0..screenWidth).random().toFloat()
-            particle.y = -size.toFloat()
+            
+            particle.x = centerX
+            particle.y = startY
             particle.rotation = (0..360).random().toFloat()
             root.addView(particle)
 
+            val targetX = (centerX - screenWidth * 0.4f) + (Math.random() * screenWidth * 0.8f).toFloat()
+            val targetY = (Math.random() * screenHeight * 0.3f).toFloat() // Shoot up to top 30%
+
             particle.animate()
-                .translationY(screenHeight.toFloat() + size)
+                .translationX(targetX)
+                .translationY(targetY)
                 .rotationBy((360..1080).random().toFloat())
-                .setDuration((1000..2500).random().toLong())
+                .alpha(0f)
+                .setDuration((1500..2500).random().toLong())
                 .setInterpolator(AccelerateDecelerateInterpolator())
                 .withEndAction {
                     root.removeView(particle)
