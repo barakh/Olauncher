@@ -11,6 +11,8 @@ import android.os.Bundle
 import android.provider.Settings
 import android.view.View
 import android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.ViewModelProvider
@@ -48,14 +50,15 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private var timerJob: Job? = null
 
-    override fun onBackPressed() {
-        if (navController.currentDestination?.id != R.id.mainFragment) {
-            super.onBackPressed()
-            return
+    private val launcherSelectorLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            resetLauncherViaFakeActivity()
         }
+    }
 
-        if (viewModel.clearPermanentNoteFocus.hasObservers()) {
-            viewModel.clearPermanentNoteFocus.call()
+    private val adminEnableLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            prefs.lockModeOn = true
         }
     }
 
@@ -89,6 +92,22 @@ class MainActivity : AppCompatActivity() {
         setupOrientation()
 
         window.addFlags(FLAG_LAYOUT_NO_LIMITS)
+        setupBackPressedDispatcher()
+    }
+
+    private fun setupBackPressedDispatcher() {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (navController.currentDestination?.id != R.id.mainFragment) {
+                    navController.popBackStack()
+                    return
+                }
+
+                if (viewModel.clearPermanentNoteFocus.hasObservers()) {
+                    viewModel.clearPermanentNoteFocus.call()
+                }
+            }
+        })
     }
 
     override fun onStart() {
@@ -128,18 +147,18 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initObservers(viewModel: MainViewModel) {
-        viewModel.launcherResetFailed.observe(this) {
-            openLauncherChooser(it)
-        }
+        viewModel.launcherResetFailed.observe(this) { openLauncherChooser(it) }
         viewModel.resetLauncherLiveData.observe(this) {
             if (isDefaultLauncher() || Build.VERSION.SDK_INT < Build.VERSION_CODES.Q)
                 resetLauncherViaFakeActivity()
             else
-                showLauncherSelector(Constants.REQUEST_CODE_LAUNCHER_SELECTOR)
+                showLauncherSelector(launcherSelectorLauncher)
         }
-        viewModel.checkForMessages.observe(this) {
-            checkForMessages()
-        }
+        viewModel.checkForMessages.observe(this) { checkForMessages() }
+        initDialogObserver(viewModel)
+    }
+
+    private fun initDialogObserver(viewModel: MainViewModel) {
         viewModel.showDialog.observe(this) {
             when (it) {
                 Constants.Dialog.ABOUT -> {
@@ -241,22 +260,6 @@ class MainActivity : AppCompatActivity() {
             if ((prefs.appTheme == AppCompatDelegate.MODE_NIGHT_YES && getColorFromAttr(R.attr.primaryColor) != getColor(R.color.white))
                 || (prefs.appTheme == AppCompatDelegate.MODE_NIGHT_NO && getColorFromAttr(R.attr.primaryColor) != getColor(R.color.black))
             ) recreate()
-        }
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        when (requestCode) {
-            Constants.REQUEST_CODE_ENABLE_ADMIN -> {
-                if (resultCode == Activity.RESULT_OK)
-                    prefs.lockModeOn = true
-            }
-
-            Constants.REQUEST_CODE_LAUNCHER_SELECTOR -> {
-                if (resultCode == Activity.RESULT_OK)
-                    resetLauncherViaFakeActivity()
-            }
         }
     }
 }

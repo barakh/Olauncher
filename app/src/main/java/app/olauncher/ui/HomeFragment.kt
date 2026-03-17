@@ -164,77 +164,84 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     override fun onLongClick(view: View): Boolean {
         when (view.id) {
             in homeAppViews.map { it.id } -> {
-                val location = view.tag.toString().toInt()
-                val packageName = prefs.getAppPackage(location)
-                val userString = prefs.getAppUser(location)
-                val isPinned = prefs.isLocationPinned(location)
-                val flag = Constants.FLAG_SET_HOME_APP_1 + location - 1
-
-                val options = mutableListOf<String>()
-                options.add(getString(R.string.select_app))
-                if (packageName.isNotEmpty()) {
-                    options.add(if (isPinned) getString(R.string.unpin_app) else getString(R.string.pin_app))
-                    options.add(getString(R.string.rename))
-                }
-
-                MaterialAlertDialogBuilder(requireContext())
-                    .setItems(options.toTypedArray()) { _, which ->
-                        when (options[which]) {
-                            getString(R.string.select_app) -> {
-                                showAppList(flag, false, true)
-                            }
-                            getString(R.string.pin_app) -> {
-                                prefs.pinLocation(location)
-                                viewModel.getAutoOrderedApps()
-                            }
-                            getString(R.string.unpin_app) -> {
-                                prefs.unpinLocation(location)
-                                viewModel.getAutoOrderedApps()
-                            }
-                            getString(R.string.rename) -> {
-                                showAppList(flag, true, true)
-                            }
-                        }
-                    }
-                    .show()
+                onHomeAppLongClick(view)
             }
             R.id.clock -> {
                 showAppList(Constants.FLAG_SET_CLOCK_APP)
-                prefs.clockAppPackage = ""
-                prefs.clockAppClassName = ""
-                prefs.clockAppUser = ""
+                prefs.clearClockApp()
             }
 
             R.id.date -> {
                 showAppList(Constants.FLAG_SET_CALENDAR_APP)
-                prefs.calendarAppPackage = ""
-                prefs.calendarAppClassName = ""
-                prefs.calendarAppUser = ""
+                prefs.clearCalendarApp()
             }
 
             R.id.setDefaultLauncher -> {
-                prefs.hideSetDefaultLauncher = true
-                binding.setDefaultLauncher.visibility = View.GONE
-                if (viewModel.isOlauncherDefault.value != true) {
-                    requireContext().showToast(R.string.set_as_default_launcher)
-                    findNavController().navigate(R.id.action_mainFragment_to_settingsFragment)
-                }
+                onSetDefaultLauncherLongClick()
             }
         }
         return true
     }
 
+    private fun onHomeAppLongClick(view: View) {
+        val location = view.tag.toString().toInt()
+        val packageName = prefs.getAppPackage(location)
+        val isPinned = prefs.isLocationPinned(location)
+        val flag = Constants.FLAG_SET_HOME_APP_1 + location - 1
+
+        val options = mutableListOf<String>()
+        options.add(getString(R.string.select_app))
+        if (packageName.isNotEmpty()) {
+            options.add(if (isPinned) getString(R.string.unpin_app) else getString(R.string.pin_app))
+            options.add(getString(R.string.rename))
+        }
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setItems(options.toTypedArray()) { _, which ->
+                when (options[which]) {
+                    getString(R.string.select_app) -> showAppList(flag, false, true)
+                    getString(R.string.pin_app) -> {
+                        prefs.pinLocation(location)
+                        viewModel.getAutoOrderedApps()
+                    }
+                    getString(R.string.unpin_app) -> {
+                        prefs.unpinLocation(location)
+                        viewModel.getAutoOrderedApps()
+                    }
+                    getString(R.string.rename) -> showAppList(flag, true, true)
+                }
+            }
+            .show()
+    }
+
+    private fun onSetDefaultLauncherLongClick() {
+        prefs.hideSetDefaultLauncher = true
+        binding.setDefaultLauncher.visibility = View.GONE
+        if (viewModel.isOlauncherDefault.value != true) {
+            requireContext().showToast(R.string.set_as_default_launcher)
+            findNavController().navigate(R.id.action_mainFragment_to_settingsFragment)
+        }
+    }
+
     private fun initObservers() {
+        initTipsObserver()
+        initLauncherDefaultObserver()
+        initHomeDisplayObservers()
+        initAntiDoomObservers()
+    }
+
+    private fun initTipsObserver() {
         if (prefs.firstSettingsOpen) {
             binding.firstRunTips.visibility = View.VISIBLE
             binding.setDefaultLauncher.visibility = View.GONE
-        } else binding.firstRunTips.visibility = View.GONE
-
-        viewModel.refreshHome.observe(viewLifecycleOwner) {
-            populateHomeScreen(it)
+        } else {
+            binding.firstRunTips.visibility = View.GONE
         }
-        viewModel.isOlauncherDefault.observe(viewLifecycleOwner, Observer {
-            if (it != true) {
+    }
+
+    private fun initLauncherDefaultObserver() {
+        viewModel.isOlauncherDefault.observe(viewLifecycleOwner) { isDefault ->
+            if (isDefault != true) {
                 if (prefs.dailyWallpaper) {
                     prefs.dailyWallpaper = false
                     viewModel.cancelWallpaperWorker()
@@ -242,37 +249,34 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
                 prefs.homeBottomAlignment = false
                 setHomeAlignment()
             }
-            if (binding.firstRunTips.visibility == View.VISIBLE) return@Observer
-            binding.setDefaultLauncher.isVisible = it.not() && prefs.hideSetDefaultLauncher.not()
-//            if (it) binding.setDefaultLauncher.visibility = View.GONE
-//            else binding.setDefaultLauncher.visibility = View.VISIBLE
-        })
-        viewModel.homeAppAlignment.observe(viewLifecycleOwner) {
-            setHomeAlignment(it)
+            if (binding.firstRunTips.visibility != View.VISIBLE) {
+                binding.setDefaultLauncher.isVisible = !isDefault && !prefs.hideSetDefaultLauncher
+            }
         }
-        viewModel.toggleDateTime.observe(viewLifecycleOwner) {
-            populateDateTime()
-        }
+    }
+
+    private fun initHomeDisplayObservers() {
+        viewModel.refreshHome.observe(viewLifecycleOwner) { populateHomeScreen(it) }
+        viewModel.homeAppAlignment.observe(viewLifecycleOwner) { setHomeAlignment(it) }
+        viewModel.toggleDateTime.observe(viewLifecycleOwner) { populateDateTime() }
         viewModel.screenTimeValue.observe(viewLifecycleOwner) {
             it?.let {
                 binding.tvScreenTime.text = it
                 binding.tvScreenTime.visibility = View.VISIBLE
             }
         }
+    }
+
+    private fun initAntiDoomObservers() {
         viewModel.quarantineCount.observe(viewLifecycleOwner) { count ->
             if (count > 0) {
-                binding.quarantineLayout?.visibility = View.VISIBLE
-                binding.tvQuarantineCount?.text = count.toString()
+                binding.quarantineLayout.visibility = View.VISIBLE
+                binding.tvQuarantineCount.text = count.toString()
             } else {
-                binding.quarantineLayout?.visibility = View.GONE
+                binding.quarantineLayout.visibility = View.GONE
             }
         }
-        viewModel.showAntiDoomDialog.observe(viewLifecycleOwner) { info ->
-            info?.let { showAntiDoomBlockedDialog(it) }
-        }
-        viewModel.clearPermanentNoteFocus.observe(viewLifecycleOwner) {
-            // no-op
-        }
+        viewModel.showAntiDoomDialog.observe(viewLifecycleOwner) { showAntiDoomBlockedDialog(it) }
     }
 
     private fun initSwipeTouchListener() {
@@ -437,77 +441,84 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         val screenHeight = root.height
         if (screenWidth == 0 || screenHeight == 0) return
 
-        val lightningColor = Color.WHITE
-
         // Trigger 5 bolts with slight delays
         for (j in 0 until 5) {
             val startDelay = j * 100L
-            
-            // Flash animation for each bolt
-            val flashView = View(requireContext())
-            flashView.layoutParams = FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.MATCH_PARENT,
-                FrameLayout.LayoutParams.MATCH_PARENT
-            )
-            flashView.setBackgroundColor(lightningColor)
-            flashView.alpha = 0f
-            root.addView(flashView)
+            showLightningFlash(root, startDelay)
+            showLightningBolt(root, screenWidth, screenHeight, startDelay)
+        }
+    }
 
-            flashView.animate()
-                .alpha(0.2f)
-                .setDuration(40)
+    private fun showLightningFlash(root: FrameLayout, startDelay: Long) {
+        val flashView = View(requireContext())
+        flashView.layoutParams = FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT,
+            FrameLayout.LayoutParams.MATCH_PARENT
+        )
+        flashView.setBackgroundColor(Color.WHITE)
+        flashView.alpha = 0f
+        root.addView(flashView)
+
+        flashView.animate()
+            .alpha(0.2f)
+            .setDuration(40)
+            .setStartDelay(startDelay)
+            .withEndAction {
+                flashView.animate()
+                    .alpha(0f)
+                    .setDuration(40)
+                    .withEndAction { root.removeView(flashView) }
+                    .start()
+            }
+            .start()
+    }
+
+    private fun showLightningBolt(root: FrameLayout, screenWidth: Int, screenHeight: Int, startDelay: Long) {
+        val startX = (0..screenWidth).random().toFloat()
+        var currentX = startX
+        var currentY = 0f
+        val segments = 8
+        val segmentHeight = screenHeight / segments
+
+        for (i in 0 until segments) {
+            val nextX = currentX + ((-50..50).random() * resources.displayMetrics.density)
+            val nextY = currentY + segmentHeight
+
+            val segment = createLightningSegment(currentX, currentY, nextX, nextY)
+            root.addView(segment)
+
+            segment.animate()
+                .alpha(1f)
+                .setDuration(60)
                 .setStartDelay(startDelay)
                 .withEndAction {
-                    flashView.animate()
+                    segment.animate()
                         .alpha(0f)
-                        .setDuration(40)
-                        .withEndAction { root.removeView(flashView) }
+                        .setDuration(100)
+                        .withEndAction { root.removeView(segment) }
                         .start()
                 }
                 .start()
 
-            // Lightning bolt segments
-            val startX = (0..screenWidth).random().toFloat()
-            var currentX = startX
-            var currentY = 0f
-            val segments = 8
-            val segmentHeight = screenHeight / segments
-
-            for (i in 0 until segments) {
-                val nextX = currentX + ((-50..50).random() * resources.displayMetrics.density)
-                val nextY = currentY + segmentHeight
-
-                val segment = View(requireContext())
-                val angle = Math.atan2((nextY - currentY).toDouble(), (nextX - currentX).toDouble())
-                val distance = Math.sqrt(Math.pow((nextX - currentX).toDouble(), 2.0) + Math.pow((nextY - currentY).toDouble(), 2.0))
-                
-                segment.layoutParams = FrameLayout.LayoutParams(distance.toInt(), (3 * resources.displayMetrics.density).toInt())
-                segment.setBackgroundColor(lightningColor)
-                segment.pivotX = 0f
-                segment.pivotY = (1.5f * resources.displayMetrics.density)
-                segment.x = currentX
-                segment.y = currentY
-                segment.rotation = Math.toDegrees(angle).toFloat()
-                segment.alpha = 0f
-                root.addView(segment)
-
-                segment.animate()
-                    .alpha(1f)
-                    .setDuration(60)
-                    .setStartDelay(startDelay)
-                    .withEndAction {
-                        segment.animate()
-                            .alpha(0f)
-                            .setDuration(100)
-                            .withEndAction { root.removeView(segment) }
-                            .start()
-                    }
-                    .start()
-
-                currentX = nextX
-                currentY = nextY
-            }
+            currentX = nextX
+            currentY = nextY
         }
+    }
+
+    private fun createLightningSegment(currentX: Float, currentY: Float, nextX: Float, nextY: Float): View {
+        val segment = View(requireContext())
+        val angle = Math.atan2((nextY - currentY).toDouble(), (nextX - currentX).toDouble())
+        val distance = Math.sqrt(Math.pow((nextX - currentX).toDouble(), 2.0) + Math.pow((nextY - currentY).toDouble(), 2.0))
+
+        segment.layoutParams = FrameLayout.LayoutParams(distance.toInt(), (3 * resources.displayMetrics.density).toInt())
+        segment.setBackgroundColor(Color.WHITE)
+        segment.pivotX = 0f
+        segment.pivotY = (1.5f * resources.displayMetrics.density)
+        segment.x = currentX
+        segment.y = currentY
+        segment.rotation = Math.toDegrees(angle).toFloat()
+        segment.alpha = 0f
+        return segment
     }
 
     private fun setHomeAlignment(horizontalGravity: Int = prefs.homeAlignment) {

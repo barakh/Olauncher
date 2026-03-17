@@ -356,6 +356,18 @@ class Prefs(context: Context) {
         get() = prefs.getString(CALENDAR_APP_CLASS_NAME, "").toString()
         set(value) = prefs.edit().putString(CALENDAR_APP_CLASS_NAME, value).apply()
 
+    fun clearClockApp() {
+        clockAppPackage = ""
+        clockAppClassName = ""
+        clockAppUser = ""
+    }
+
+    fun clearCalendarApp() {
+        calendarAppPackage = ""
+        calendarAppClassName = ""
+        calendarAppUser = ""
+    }
+
     // --- Home Apps Indexed Access ---
 
     fun getAppName(location: Int): String = prefs.getString("APP_NAME_$location", "").toString()

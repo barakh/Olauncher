@@ -7,12 +7,6 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.View.OnTouchListener
 import app.olauncher.data.Constants
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlin.math.abs
 
 /*
@@ -26,7 +20,10 @@ internal open class OnSwipeTouchListener(c: Context?) : OnTouchListener {
     //    private var doubleTapOn = false
     private val gestureDetector: GestureDetector
 
+    private var view: View? = null
+
     override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
+        this.view = view
         if (motionEvent.action == MotionEvent.ACTION_UP)
             longPressOn = false
         return gestureDetector.onTouchEvent(motionEvent)
@@ -41,35 +38,20 @@ internal open class OnSwipeTouchListener(c: Context?) : OnTouchListener {
         }
 
         override fun onSingleTapUp(e: MotionEvent): Boolean {
-//            if (doubleTapOn) {
-//                doubleTapOn = false
-//                onTripleClick()
-//            }
             onClick()
             return super.onSingleTapUp(e)
         }
 
         override fun onDoubleTap(e: MotionEvent): Boolean {
-//            doubleTapOn = true
-//            Timer().schedule(Constants.TRIPLE_TAP_DELAY_MS) {
-//                if (doubleTapOn) {
-//                    doubleTapOn = false
-//                    onDoubleClick()
-//                }
-//            }
             onDoubleClick()
             return super.onDoubleTap(e)
         }
 
         override fun onLongPress(e: MotionEvent) {
             longPressOn = true
-            GlobalScope.launch {
-                delay(Constants.LONG_PRESS_DELAY_MS)
-                withContext(Dispatchers.Main) {
-                    if (isActive && longPressOn)
-                        onLongClick()
-                }
-            }
+            view?.postDelayed({
+                if (longPressOn) onLongClick()
+            }, Constants.LONG_PRESS_DELAY_MS)
             super.onLongPress(e)
         }
 
