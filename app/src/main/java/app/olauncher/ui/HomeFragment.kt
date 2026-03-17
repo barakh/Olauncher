@@ -103,7 +103,6 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         initSwipeTouchListener()
         initClickListeners()
         initPermanentNote()
-        initDailyReminder()
     }
 
     override fun onResume() {
@@ -333,7 +332,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
                     val list = prefs.quickReminders.toMutableList()
                     list.add(text)
                     prefs.quickReminders = list
-                    populatePermanentNote()
+                    populateReminders()
                 }
             }
             .setNegativeButton(R.string.not_now, null)
@@ -344,15 +343,36 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         editText.requestFocus()
     }
 
-    private fun populatePermanentNote() {
-        binding.permanentNoteContainer.isVisible = prefs.showPermanentNote
-        if (prefs.showPermanentNote) {
+    private fun populateReminders() {
+        val showQuick = prefs.showPermanentNote
+        val showDaily = prefs.showDailyReminder
+        binding.permanentNoteContainer.isVisible = showQuick || showDaily
+        if (showQuick || showDaily) {
             binding.quickRemindersContainer.removeAllViews()
-            prefs.quickReminders.forEach { reminderText ->
-                val chip = createQuickReminderChip(reminderText)
-                binding.quickRemindersContainer.addView(chip)
+            
+            // Add Daily Reminders
+            if (showDaily) {
+                val currentDay = Calendar.getInstance().get(Calendar.DAY_OF_YEAR)
+                val currentTime = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
+                prefs.dailyReminders.forEach { reminder ->
+                    if (reminder.text.isNotBlank() && reminder.lastCompletedDay != currentDay && currentTime >= reminder.time) {
+                        val ticker = createReminderTicker(reminder)
+                        binding.quickRemindersContainer.addView(ticker)
+                    }
+                }
             }
-            binding.quickRemindersContainer.addView(binding.btnAddQuickReminder)
+
+            // Add Quick Reminders
+            if (showQuick) {
+                prefs.quickReminders.forEach { reminderText ->
+                    val chip = createQuickReminderChip(reminderText)
+                    binding.quickRemindersContainer.addView(chip)
+                }
+                binding.quickRemindersContainer.addView(binding.btnAddQuickReminder)
+                binding.btnAddQuickReminder.isVisible = true
+            } else {
+                binding.btnAddQuickReminder.isVisible = false
+            }
         }
     }
 
@@ -382,25 +402,6 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         showLightningEffect()
     }
 
-    private fun initDailyReminder() {
-        // No-op for now, we'll populate dynamically
-    }
-
-    private fun populateDailyReminder() {
-        binding.dailyRemindersContainer.removeAllViews()
-        if (!prefs.showDailyReminder) return
-
-        val currentDay = Calendar.getInstance().get(Calendar.DAY_OF_YEAR)
-        val currentTime = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
-
-        prefs.dailyReminders.forEach { reminder ->
-            if (reminder.text.isNotBlank() && reminder.lastCompletedDay != currentDay && currentTime >= reminder.time) {
-                val ticker = createReminderTicker(reminder)
-                binding.dailyRemindersContainer.addView(ticker)
-            }
-        }
-    }
-
     private fun createReminderTicker(reminder: DailyReminder): TextView {
         val textView = TextView(requireContext())
         textView.text = reminder.text
@@ -411,13 +412,6 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         val paddingH = 16.dpToPx()
         val paddingV = 8.dpToPx()
         textView.setPadding(paddingH, paddingV, paddingH, paddingV)
-        
-        val params = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.WRAP_CONTENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        )
-        params.setMargins(0, 0, 0, 8.dpToPx())
-        textView.layoutParams = params
         
         textView.setOnClickListener {
             markReminderAsCompleted(textView, reminder)
@@ -433,7 +427,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
             list[index].lastCompletedDay = Calendar.getInstance().get(Calendar.DAY_OF_YEAR)
             prefs.dailyReminders = list
         }
-        binding.dailyRemindersContainer.removeView(view)
+        binding.quickRemindersContainer.removeView(view)
         showLightningEffect()
     }
 
@@ -570,8 +564,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     private fun populateHomeScreen(appCountUpdated: Boolean) {
         if (appCountUpdated) hideHomeApps()
         populateDateTime()
-        populatePermanentNote()
-        populateDailyReminder()
+        populateReminders()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
             populateScreenTime()

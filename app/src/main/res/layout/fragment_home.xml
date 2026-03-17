@@ -395,16 +395,6 @@
 
     </LinearLayout>
 
-    <com.google.android.material.chip.ChipGroup
-        android:id="@+id/dailyRemindersContainer"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:layout_marginBottom="120dp"
-        android:paddingHorizontal="16dp"
-        app:chipSpacingHorizontal="8dp"
-        app:chipSpacingVertical="4dp" />
-
     <FrameLayout
         android:id="@+id/confettiContainer"
         android:layout_width="match_parent"
