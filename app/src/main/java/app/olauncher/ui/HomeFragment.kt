@@ -271,8 +271,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
             info?.let { showAntiDoomBlockedDialog(it) }
         }
         viewModel.clearPermanentNoteFocus.observe(viewLifecycleOwner) {
-            binding.etPermanentNote.clearFocus()
-            binding.etPermanentNote.hideKeyboard()
+            // no-op
         }
     }
 
@@ -310,60 +309,98 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     }
 
     private fun initPermanentNote() {
-        binding.etPermanentNote.doAfterTextChanged {
-            if (prefs.permanentNoteText != it.toString()) {
-                prefs.permanentNoteText = it.toString()
-            }
+        binding.btnAddQuickReminder.setOnClickListener {
+            showAddQuickReminderDialog()
         }
+    }
 
-        binding.etPermanentNote.setOnFocusChangeListener { _, hasFocus ->
-            binding.btnClearNote.isVisible = hasFocus
-            if (hasFocus) {
-                binding.etPermanentNote.maxLines = Int.MAX_VALUE
-                val typedValue = TypedValue()
-                requireContext().theme.resolveAttribute(R.attr.dialogShadeColor, typedValue, true)
-                binding.etPermanentNote.setBackgroundColor(typedValue.data)
-                val paddingH = 16.dpToPx()
-                val paddingV = 8.dpToPx()
-                binding.etPermanentNote.setPadding(paddingH, paddingV, paddingH, paddingV)
-            } else {
-                binding.etPermanentNote.maxLines = 1
-                binding.etPermanentNote.setBackgroundResource(0)
-                binding.etPermanentNote.setPadding(0, 0, 0, 0)
-                if (binding.etPermanentNote.text?.isNotEmpty() == true) {
-                    binding.etPermanentNote.setSelection(0)
-                }
-                binding.etPermanentNote.hideKeyboard()
-            }
-        }
+    private fun showAddQuickReminderDialog() {
+        val editText = androidx.appcompat.widget.AppCompatEditText(requireContext())
+        editText.hint = getString(R.string.reminder_text_placeholder)
+        editText.isSingleLine = true
+        val padding = 16.dpToPx()
+        val container = FrameLayout(requireContext())
+        container.setPadding(padding, padding / 2, padding, 0)
+        container.addView(editText)
 
-        binding.btnClearNote.setOnClickListener {
-            binding.etPermanentNote.setText("")
-        }
-
-        ViewCompat.setOnApplyWindowInsetsListener(binding.permanentNoteContainer) { view, insets ->
-            val imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
-            val imeHeight = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
-
-            view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                val baseMargin = 80.dpToPx()
-                bottomMargin = if (imeVisible) {
-                    imeHeight + 16.dpToPx()
-                } else {
-                    baseMargin
+        val dialog = com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.add_reminder)
+            .setView(container)
+            .setPositiveButton(R.string.okay) { _, _ ->
+                val text = editText.text.toString()
+                if (text.isNotBlank()) {
+                    val list = prefs.quickReminders.toMutableList()
+                    list.add(text)
+                    prefs.quickReminders = list
+                    populatePermanentNote()
                 }
             }
-            insets
-        }
+            .setNegativeButton(R.string.not_now, null)
+            .create()
+        
+        dialog.window?.setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
+        dialog.show()
+        editText.requestFocus()
     }
 
     private fun populatePermanentNote() {
         binding.permanentNoteContainer.isVisible = prefs.showPermanentNote
         if (prefs.showPermanentNote) {
-            if (binding.etPermanentNote.text.toString() != prefs.permanentNoteText) {
-                binding.etPermanentNote.setText(prefs.permanentNoteText)
+            binding.quickRemindersContainer.removeAllViews()
+            prefs.quickReminders.forEach { reminderText ->
+                val chip = createQuickReminderChip(reminderText)
+                binding.quickRemindersContainer.addView(chip)
             }
+            binding.quickRemindersContainer.addView(binding.btnAddQuickReminder)
         }
+    }
+
+    private fun createQuickReminderChip(text: String): TextView {
+        val textView = TextView(requireContext())
+        textView.text = text
+        textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, resources.getDimension(R.dimen.text_small))
+        textView.setTextColor(requireContext().getColorFromAttr(R.attr.primaryColor))
+        textView.setBackgroundResource(R.drawable.rounded_rect_shade_color)
+
+        val paddingH = 16.dpToPx()
+        val paddingV = 8.dpToPx()
+        textView.setPadding(paddingH, paddingV, paddingH, paddingV)
+
+        textView.setOnClickListener {
+            markQuickReminderAsCompleted(textView, text)
+        }
+
+        return textView
+    }
+
+    private fun markQuickReminderAsCompleted(view: TextView, text: String) {
+        view.paintFlags = view.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
+
+        val list = prefs.quickReminders.toMutableList()
+        list.remove(text)
+        prefs.quickReminders = list
+
+        // Success effect
+        view.animate()
+            .scaleX(1.2f)
+            .scaleY(1.2f)
+            .setDuration(200)
+            .setInterpolator(AccelerateDecelerateInterpolator())
+            .withEndAction {
+                view.animate()
+                    .scaleX(1.0f)
+                    .scaleY(1.0f)
+                    .alpha(0f)
+                    .setDuration(500)
+                    .setStartDelay(1000)
+                    .withEndAction {
+                        binding.quickRemindersContainer.removeView(view)
+                    }
+                    .start()
+            }
+            .start()
+
+        showConfetti()
     }
 
     private fun initDailyReminder() {
@@ -822,8 +859,8 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
             override fun onClick() {
                 super.onClick()
                 viewModel.checkForMessages.call()
-                binding.etPermanentNote.clearFocus()
-                binding.etPermanentNote.hideKeyboard()
+                // binding.etPermanentNote.clearFocus()
+                // binding.etPermanentNote.hideKeyboard()
             }
         }
     }
