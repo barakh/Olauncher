@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.LauncherApps
 import android.content.res.Configuration
+import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.Paint
 import android.os.BatteryManager
@@ -400,7 +401,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
             }
             .start()
 
-        showConfetti()
+        showLightningEffect()
     }
 
     private fun initDailyReminder() {
@@ -477,47 +478,92 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
             }
             .start()
 
-        showConfetti()
+        showLightningEffect()
     }
 
-    private fun showConfetti() {
-        val colors = listOf(Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW, Color.CYAN, Color.MAGENTA)
-        val particleCount = 60
+    private fun showLightningEffect() {
         val root = binding.confettiContainer
         val screenWidth = root.width
         val screenHeight = root.height
-
         if (screenWidth == 0 || screenHeight == 0) return
 
-        val centerX = screenWidth / 2f
-        val startY = screenHeight.toFloat()
+        val lightningColor = Color.WHITE
+        val flashView = View(requireContext())
+        flashView.layoutParams = FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT,
+            FrameLayout.LayoutParams.MATCH_PARENT
+        )
+        flashView.setBackgroundColor(lightningColor)
+        flashView.alpha = 0f
+        root.addView(flashView)
 
-        for (i in 0 until particleCount) {
-            val particle = View(requireContext())
-            val size = (8..16).random().dpToPx()
-            val params = FrameLayout.LayoutParams(size, size)
-            particle.layoutParams = params
-            particle.setBackgroundColor(colors.random())
+        // Flash animation
+        flashView.animate()
+            .alpha(0.3f)
+            .setDuration(50)
+            .withEndAction {
+                flashView.animate()
+                    .alpha(0f)
+                    .setDuration(50)
+                    .withEndAction {
+                        flashView.animate()
+                            .alpha(0.15f)
+                            .setDuration(30)
+                            .withEndAction {
+                                flashView.animate()
+                                    .alpha(0f)
+                                    .setDuration(150)
+                                    .withEndAction { root.removeView(flashView) }
+                                    .start()
+                            }
+                            .start()
+                    }
+                    .start()
+            }
+            .start()
+
+        // Lightning bolt
+        val startX = (0..screenWidth).random().toFloat()
+        val boltContainer = View(requireContext()) // Use a view to draw or just add multiple lines
+        // For simplicity, let's create a few thin views as segments of a lightning bolt
+        var currentX = startX
+        var currentY = 0f
+        val segments = 8
+        val segmentHeight = screenHeight / segments
+
+        for (i in 0 until segments) {
+            val nextX = currentX + ((-50..50).random() * resources.displayMetrics.density)
+            val nextY = currentY + segmentHeight
+
+            val segment = View(requireContext())
+            val angle = Math.atan2((nextY - currentY).toDouble(), (nextX - currentX).toDouble())
+            val distance = Math.sqrt(Math.pow((nextX - currentX).toDouble(), 2.0) + Math.pow((nextY - currentY).toDouble(), 2.0))
             
-            particle.x = centerX
-            particle.y = startY
-            particle.rotation = (0..360).random().toFloat()
-            root.addView(particle)
+            segment.layoutParams = FrameLayout.LayoutParams(distance.toInt(), (3 * resources.displayMetrics.density).toInt())
+            segment.setBackgroundColor(lightningColor)
+            segment.pivotX = 0f
+            segment.pivotY = (1.5f * resources.displayMetrics.density)
+            segment.x = currentX
+            segment.y = currentY
+            segment.rotation = Math.toDegrees(angle).toFloat()
+            segment.alpha = 0f
+            root.addView(segment)
 
-            val targetX = (centerX - screenWidth * 0.4f) + (Math.random() * screenWidth * 0.8f).toFloat()
-            val targetY = (Math.random() * screenHeight * 0.3f).toFloat() // Shoot up to top 30%
-
-            particle.animate()
-                .translationX(targetX)
-                .translationY(targetY)
-                .rotationBy((360..1080).random().toFloat())
-                .alpha(0f)
-                .setDuration((1500..2500).random().toLong())
-                .setInterpolator(AccelerateDecelerateInterpolator())
+            segment.animate()
+                .alpha(1f)
+                .setDuration(100)
                 .withEndAction {
-                    root.removeView(particle)
+                    segment.animate()
+                        .alpha(0f)
+                        .setDuration(200)
+                        .setStartDelay(100)
+                        .withEndAction { root.removeView(segment) }
+                        .start()
                 }
                 .start()
+
+            currentX = nextX
+            currentY = nextY
         }
     }
 
