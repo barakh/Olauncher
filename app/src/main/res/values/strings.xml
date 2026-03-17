@@ -161,7 +161,7 @@
     <string name="show_app_icons_home">Show app icons on home</string>
     <string name="show_app_icons_app_drawer">Show app icons in drawer</string>
     <string name="plugins">Plugins</string>
-    <string name="permanent_note">Permanent note</string>
+    <string name="permanent_note">Reminders</string>
     <string name="permanent_note_placeholder">📝</string>
     <string name="pin_app">Pin app</string>
     <string name="unpin_app">Unpin app</string>

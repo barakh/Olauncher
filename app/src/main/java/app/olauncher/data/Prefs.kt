@@ -52,6 +52,7 @@ class Prefs(context: Context) {
     private val SHOW_APP_ICONS_APP_DRAWER = "SHOW_APP_ICONS_APP_DRAWER"
     private val SHOW_PERMANENT_NOTE = "SHOW_PERMANENT_NOTE"
     private val PERMANENT_NOTE_TEXT = "PERMANENT_NOTE_TEXT"
+    private val QUICK_REMINDERS = "QUICK_REMINDERS"
     private val SHOW_DAILY_REMINDER = "SHOW_DAILY_REMINDER"
     private val DAILY_REMINDERS = "DAILY_REMINDERS"
     private val LAST_CLICKED_TIME_PREFIX = "LAST_CLICKED_TIME_"
@@ -222,6 +223,26 @@ class Prefs(context: Context) {
     var permanentNoteText: String
         get() = prefs.getString(PERMANENT_NOTE_TEXT, "").toString()
         set(value) = prefs.edit().putString(PERMANENT_NOTE_TEXT, value).apply()
+
+    var quickReminders: List<String>
+        get() {
+            val jsonString = prefs.getString(QUICK_REMINDERS, "[]") ?: "[]"
+            val list = mutableListOf<String>()
+            try {
+                val jsonArray = org.json.JSONArray(jsonString)
+                for (i in 0 until jsonArray.length()) {
+                    list.add(jsonArray.getString(i))
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+            return list
+        }
+        set(value) {
+            val jsonArray = org.json.JSONArray()
+            value.forEach { jsonArray.put(it) }
+            prefs.edit().putString(QUICK_REMINDERS, jsonArray.toString()).apply()
+        }
 
     var showDailyReminder: Boolean
         get() = prefs.getBoolean(SHOW_DAILY_REMINDER, false)

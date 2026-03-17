@@ -361,41 +361,38 @@
 
     </LinearLayout>
 
-    <FrameLayout
+    <LinearLayout
         android:id="@+id/permanentNoteContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:layout_marginHorizontal="20dp"
         android:layout_marginBottom="80dp"
+        android:orientation="vertical"
+        android:gravity="center"
         android:visibility="gone"
         tools:visibility="visible">
 
-        <androidx.appcompat.widget.AppCompatEditText
-            android:id="@+id/etPermanentNote"
-            style="@style/TextSmall"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@null"
-            android:gravity="center"
-            android:hint="@string/permanent_note_placeholder"
-            android:inputType="textCapSentences|textMultiLine"
-            android:maxLines="1"
-            android:textColor="?attr/primaryColor"
-            android:textColorHint="?attr/primaryColor" />
-
-        <TextView
-            android:id="@+id/btnClearNote"
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/quickRemindersContainer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="end|center_vertical"
-            android:padding="8dp"
-            android:text="🧹"
-            android:textSize="18sp"
-            android:visibility="gone"
-            tools:visibility="visible" />
+            android:gravity="center"
+            app:chipSpacingHorizontal="8dp"
+            app:chipSpacingVertical="4dp">
 
-    </FrameLayout>
+            <TextView
+                android:id="@+id/btnAddQuickReminder"
+                style="@style/TextSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:text="@string/permanent_note_placeholder"
+                android:textColor="?attr/primaryColor" />
+
+        </com.google.android.material.chip.ChipGroup>
+
+    </LinearLayout>
 
     <com.google.android.material.chip.ChipGroup
         android:id="@+id/dailyRemindersContainer"
