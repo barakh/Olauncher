@@ -488,82 +488,75 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         if (screenWidth == 0 || screenHeight == 0) return
 
         val lightningColor = Color.WHITE
-        val flashView = View(requireContext())
-        flashView.layoutParams = FrameLayout.LayoutParams(
-            FrameLayout.LayoutParams.MATCH_PARENT,
-            FrameLayout.LayoutParams.MATCH_PARENT
-        )
-        flashView.setBackgroundColor(lightningColor)
-        flashView.alpha = 0f
-        root.addView(flashView)
 
-        // Flash animation
-        flashView.animate()
-            .alpha(0.3f)
-            .setDuration(50)
-            .withEndAction {
-                flashView.animate()
-                    .alpha(0f)
-                    .setDuration(50)
-                    .withEndAction {
-                        flashView.animate()
-                            .alpha(0.15f)
-                            .setDuration(30)
-                            .withEndAction {
-                                flashView.animate()
-                                    .alpha(0f)
-                                    .setDuration(150)
-                                    .withEndAction { root.removeView(flashView) }
-                                    .start()
-                            }
-                            .start()
-                    }
-                    .start()
-            }
-            .start()
-
-        // Lightning bolt
-        val startX = (0..screenWidth).random().toFloat()
-        val boltContainer = View(requireContext()) // Use a view to draw or just add multiple lines
-        // For simplicity, let's create a few thin views as segments of a lightning bolt
-        var currentX = startX
-        var currentY = 0f
-        val segments = 8
-        val segmentHeight = screenHeight / segments
-
-        for (i in 0 until segments) {
-            val nextX = currentX + ((-50..50).random() * resources.displayMetrics.density)
-            val nextY = currentY + segmentHeight
-
-            val segment = View(requireContext())
-            val angle = Math.atan2((nextY - currentY).toDouble(), (nextX - currentX).toDouble())
-            val distance = Math.sqrt(Math.pow((nextX - currentX).toDouble(), 2.0) + Math.pow((nextY - currentY).toDouble(), 2.0))
+        // Trigger 5 bolts with slight delays
+        for (j in 0 until 5) {
+            val startDelay = j * 100L
             
-            segment.layoutParams = FrameLayout.LayoutParams(distance.toInt(), (3 * resources.displayMetrics.density).toInt())
-            segment.setBackgroundColor(lightningColor)
-            segment.pivotX = 0f
-            segment.pivotY = (1.5f * resources.displayMetrics.density)
-            segment.x = currentX
-            segment.y = currentY
-            segment.rotation = Math.toDegrees(angle).toFloat()
-            segment.alpha = 0f
-            root.addView(segment)
+            // Flash animation for each bolt
+            val flashView = View(requireContext())
+            flashView.layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            )
+            flashView.setBackgroundColor(lightningColor)
+            flashView.alpha = 0f
+            root.addView(flashView)
 
-            segment.animate()
-                .alpha(1f)
-                .setDuration(100)
+            flashView.animate()
+                .alpha(0.2f)
+                .setDuration(40)
+                .setStartDelay(startDelay)
                 .withEndAction {
-                    segment.animate()
+                    flashView.animate()
                         .alpha(0f)
-                        .setDuration(200)
-                        .setStartDelay(100)
-                        .withEndAction { root.removeView(segment) }
+                        .setDuration(40)
+                        .withEndAction { root.removeView(flashView) }
                         .start()
                 }
                 .start()
 
-            currentX = nextX
-            currentY = nextY
+            // Lightning bolt segments
+            val startX = (0..screenWidth).random().toFloat()
+            var currentX = startX
+            var currentY = 0f
+            val segments = 8
+            val segmentHeight = screenHeight / segments
+
+            for (i in 0 until segments) {
+                val nextX = currentX + ((-50..50).random() * resources.displayMetrics.density)
+                val nextY = currentY + segmentHeight
+
+                val segment = View(requireContext())
+                val angle = Math.atan2((nextY - currentY).toDouble(), (nextX - currentX).toDouble())
+                val distance = Math.sqrt(Math.pow((nextX - currentX).toDouble(), 2.0) + Math.pow((nextY - currentY).toDouble(), 2.0))
+                
+                segment.layoutParams = FrameLayout.LayoutParams(distance.toInt(), (3 * resources.displayMetrics.density).toInt())
+                segment.setBackgroundColor(lightningColor)
+                segment.pivotX = 0f
+                segment.pivotY = (1.5f * resources.displayMetrics.density)
+                segment.x = currentX
+                segment.y = currentY
+                segment.rotation = Math.toDegrees(angle).toFloat()
+                segment.alpha = 0f
+                root.addView(segment)
+
+                segment.animate()
+                    .alpha(1f)
+                    .setDuration(60)
+                    .setStartDelay(startDelay)
+                    .withEndAction {
+                        segment.animate()
+                            .alpha(0f)
+                            .setDuration(100)
+                            .withEndAction { root.removeView(segment) }
+                            .start()
+                    }
+                    .start()
+
+                currentX = nextX
+                currentY = nextY
+            }
         }
     }
 
