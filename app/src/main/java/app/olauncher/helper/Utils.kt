@@ -8,6 +8,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
+import android.content.pm.LauncherActivityInfo
 import android.content.pm.LauncherApps
 import android.content.res.Configuration
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
@@ -73,70 +74,62 @@ suspend fun getAppsList(
 ): MutableList<AppModel> {
     return withContext(Dispatchers.IO) {
         val appList: MutableList<AppModel> = mutableListOf()
-
         try {
             if (!Prefs(context).hiddenAppsUpdated) upgradeHiddenApps(Prefs(context))
             val hiddenApps = Prefs(context).hiddenApps
-
-            val userManager = context.getSystemService(Context.USER_SERVICE) as UserManager
-            val launcherApps = context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
             val collator = Collator.getInstance()
-
-            for (profile in userManager.userProfiles) {
-                for (app in launcherApps.getActivityList(null, profile)) {
-
-                    val appLabelShown = prefs.getAppRenameLabel(app.applicationInfo.packageName).ifBlank { app.label.toString() }
-                    val appModel = AppModel(
-                        appLabelShown,
-                        collator.getCollationKey(app.label.toString()),
-                        app.applicationInfo.packageName,
-                        app.componentName.className,
-                        (System.currentTimeMillis() - app.firstInstallTime) < Constants.ONE_HOUR_IN_MILLIS,
-                        profile
-                    )
-
-                    // if the current app is not OLauncher
-                    if (app.applicationInfo.packageName != BuildConfig.APPLICATION_ID) {
-                        if (includeAntiDoomApps) {
-                            if (prefs.isAntiDoomApp(app.applicationInfo.packageName, profile.toString())) {
-                                appList.add(appModel)
-                            }
-                        } else if (includeQuarantinedApps) {
-                            if (prefs.isAntiDoomApp(app.applicationInfo.packageName, profile.toString()) &&
-                                prefs.isAppTemporarilyHidden(app.applicationInfo.packageName, profile.toString())
-                            ) {
-                                appList.add(appModel)
-                            }
-                        } else {
-                            // is this a hidden app?
-                            if (hiddenApps.contains(app.applicationInfo.packageName + "|" + profile.toString())) {
-                                if (includeHiddenApps) {
-                                    appList.add(appModel)
-                                }
-                            } else {
-                                val isTemporarilyHidden = prefs.hideDoomscrolledApps &&
-                                        prefs.isAntiDoomApp(app.applicationInfo.packageName, profile.toString()) &&
-                                        prefs.isAppTemporarilyHidden(app.applicationInfo.packageName, profile.toString())
-
-                                if (includeRegularApps && !isTemporarilyHidden) {
-                                    appList.add(appModel)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            if (prefs.showAntiDoomFirst) {
-                appList.sortWith(compareByDescending<AppModel> { prefs.isAntiDoomApp(it.appPackage, it.user.toString()) }
-                    .thenBy { it.appLabel.lowercase() })
-            } else {
-                appList.sortBy { it.appLabel.lowercase() }
-            }
-
+            
+            populateAppList(context, prefs, includeRegularApps, includeHiddenApps, includeAntiDoomApps, includeQuarantinedApps, hiddenApps, collator, appList)
+            sortAppList(prefs, appList)
         } catch (e: Exception) {
             e.printStackTrace()
         }
         appList
+    }
+}
+
+private fun populateAppList(
+    context: Context,
+    prefs: Prefs,
+    includeRegularApps: Boolean,
+    includeHiddenApps: Boolean,
+    includeAntiDoomApps: Boolean,
+    includeQuarantinedApps: Boolean,
+    hiddenApps: Set<String>,
+    collator: Collator,
+    appList: MutableList<AppModel>
+) {
+    val userManager = context.getSystemService(Context.USER_SERVICE) as UserManager
+    val launcherApps = context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
+
+    for (profile in userManager.userProfiles) {
+        for (app in launcherApps.getActivityList(null, profile)) {
+            val appModel = createAppModel(app, profile, prefs, collator)
+            if (app.applicationInfo.packageName != BuildConfig.APPLICATION_ID) {
+                if (includeAntiDoomApps) {
+                    if (prefs.isAntiDoomApp(app.applicationInfo.packageName, profile.toString())) {
+                        appList.add(appModel)
+                    }
+                } else if (includeQuarantinedApps) {
+                    if (prefs.isAntiDoomApp(app.applicationInfo.packageName, profile.toString()) &&
+                        prefs.isAppTemporarilyHidden(app.applicationInfo.packageName, profile.toString())
+                    ) {
+                        appList.add(appModel)
+                    }
+                } else {
+                    addRegularOrHiddenApp(appModel, profile, prefs, hiddenApps, includeHiddenApps, includeRegularApps, appList)
+                }
+            }
+        }
+    }
+}
+
+private fun sortAppList(prefs: Prefs, appList: MutableList<AppModel>) {
+    if (prefs.showAntiDoomFirst) {
+        appList.sortWith(compareByDescending<AppModel> { prefs.isAntiDoomApp(it.appPackage, it.user.toString()) }
+            .thenBy { it.appLabel.lowercase() })
+    } else {
+        appList.sortBy { it.appLabel.lowercase() }
     }
 }
 
@@ -163,11 +156,51 @@ fun isPackageInstalled(context: Context, packageName: String, userString: String
 fun getUserHandleFromString(context: Context, userHandleString: String): UserHandle {
     val userManager = context.getSystemService(Context.USER_SERVICE) as UserManager
     for (userHandle in userManager.userProfiles) {
-        if (userHandle.toString() == userHandleString) {
-            return userHandle
-        }
+        if (userHandle.toString() == userHandleString) return userHandle
     }
     return android.os.Process.myUserHandle()
+}
+
+private fun createAppModel(
+    app: LauncherActivityInfo,
+    profile: UserHandle,
+    prefs: Prefs,
+    collator: Collator
+): AppModel {
+    val appLabelShown =
+        prefs.getAppRenameLabel(app.applicationInfo.packageName).ifBlank { app.label.toString() }
+    return AppModel(
+        appLabelShown,
+        collator.getCollationKey(app.label.toString()),
+        app.applicationInfo.packageName,
+        app.componentName.className,
+        (System.currentTimeMillis() - app.firstInstallTime) < Constants.ONE_HOUR_IN_MILLIS,
+        profile
+    )
+}
+
+private fun addRegularOrHiddenApp(
+    appModel: AppModel,
+    profile: UserHandle,
+    prefs: Prefs,
+    hiddenApps: Set<String>,
+    includeHiddenApps: Boolean,
+    includeRegularApps: Boolean,
+    appList: MutableList<AppModel>
+) {
+    if (hiddenApps.contains(appModel.appPackage + "|" + profile.toString())) {
+        if (includeHiddenApps) {
+            appList.add(appModel)
+        }
+    } else {
+        val isTemporarilyHidden = prefs.hideDoomscrolledApps &&
+                prefs.isAntiDoomApp(appModel.appPackage, profile.toString()) &&
+                prefs.isAppTemporarilyHidden(appModel.appPackage, profile.toString())
+
+        if (includeRegularApps && !isTemporarilyHidden) {
+            appList.add(appModel)
+        }
+    }
 }
 
 fun isOlauncherDefault(context: Context): Boolean {
@@ -311,10 +344,17 @@ suspend fun setWallpaper(appContext: Context, url: String): Boolean {
 }
 
 fun getScreenDimensions(context: Context): Pair<Int, Int> {
-    val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-    val point = Point()
-    windowManager.defaultDisplay.getRealSize(point)
-    return Pair(point.x, point.y)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        val windowMetrics = (context.getSystemService(Context.WINDOW_SERVICE) as WindowManager).currentWindowMetrics
+        val bounds = windowMetrics.bounds
+        return Pair(bounds.width(), bounds.height())
+    } else {
+        val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        val point = Point()
+        @Suppress("DEPRECATION")
+        windowManager.defaultDisplay.getRealSize(point)
+        return Pair(point.x, point.y)
+    }
 }
 
 suspend fun getTodaysWallpaper(wallType: String, firstOpenTime: Long): String {
@@ -438,14 +478,12 @@ fun isAccessServiceEnabled(context: Context): Boolean {
 }
 
 fun isTablet(context: Context): Boolean {
-    val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-    val metrics = DisplayMetrics()
-    windowManager.defaultDisplay.getMetrics(metrics)
+    val resources = context.resources
+    val metrics = resources.displayMetrics
     val widthInches = metrics.widthPixels / metrics.xdpi
     val heightInches = metrics.heightPixels / metrics.ydpi
     val diagonalInches = sqrt(widthInches.toDouble().pow(2.0) + heightInches.toDouble().pow(2.0))
-    if (diagonalInches >= 7.0) return true
-    return false
+    return diagonalInches >= 7.0
 }
 
 fun Context.isDarkThemeOn(): Boolean {
@@ -485,6 +523,16 @@ fun Context.uninstall(packageName: String) {
     startActivity(intent)
 }
 
+fun getAppName(context: Context, packageName: String): String {
+    return try {
+        val pm = context.packageManager
+        val ai = pm.getApplicationInfo(packageName, 0)
+        pm.getApplicationLabel(ai).toString()
+    } catch (e: Exception) {
+        ""
+    }
+}
+
 @ColorInt
 fun Context.getColorFromAttr(
     @AttrRes attrColor: Int,
@@ -503,4 +551,3 @@ fun View.animateAlpha(alpha: Float = 1.0f) {
         start()
     }
 }
-

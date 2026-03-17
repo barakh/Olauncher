@@ -66,23 +66,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun selectedApp(appModel: AppModel, flag: Int): Boolean {
         when (flag) {
             Constants.FLAG_LAUNCH_APP, Constants.FLAG_ANTIDOOM_APPS, Constants.FLAG_QUARANTINED_APPS -> {
-                prefs.setLastClickedTime(appModel.appPackage, appModel.user.toString(), System.currentTimeMillis())
-                if (prefs.autoOrderApps) {
-                    getAutoOrderedApps()
-                }
-                if (prefs.isAntiDoomApp(appModel.appPackage, appModel.user.toString())) {
-                    val hiddenUntil = prefs.getAntiDoomHiddenUntil(appModel.appPackage, appModel.user.toString())
-                    if (hiddenUntil > System.currentTimeMillis()) {
-                        val remainingMinutes = ((hiddenUntil - System.currentTimeMillis()) / 60000).toInt()
-                        showAntiDoomDialog.postValue(AntiDoomBlockedInfo(appModel, remainingMinutes.coerceAtLeast(1)))
-                        return false
-                    }
-                    prefs.setAntiDoomHiddenUntil(appModel.appPackage, appModel.user.toString(), System.currentTimeMillis() + Constants.ONE_HOUR_IN_MILLIS)
-                    getAppList()
-                    getHiddenApps()
-                    refreshHome(false)
-                }
-                launchApp(appModel.appPackage, appModel.activityClassName, appModel.user)
+                return launchSelectedApp(appModel)
             }
 
             Constants.FLAG_HIDDEN_APPS -> {
@@ -90,29 +74,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
 
             in Constants.HOME_APP_FLAGS -> {
-                val location = flag - Constants.FLAG_SET_HOME_APP_1 + 1
-                prefs.setAppName(location, appModel.appLabel)
-                prefs.setAppPackage(location, appModel.appPackage)
-                prefs.setAppUser(location, appModel.user.toString())
-                prefs.setAppActivityClassName(location, appModel.activityClassName)
-                prefs.pinLocation(location)
-                refreshHome(false)
+                setHomeApp(appModel, flag)
             }
 
             Constants.FLAG_SET_SWIPE_LEFT_APP -> {
-                prefs.appNameSwipeLeft = appModel.appLabel
-                prefs.appPackageSwipeLeft = appModel.appPackage
-                prefs.appUserSwipeLeft = appModel.user.toString()
-                prefs.appActivityClassNameSwipeLeft = appModel.activityClassName
-                updateSwipeApps()
+                setSwipeLeftApp(appModel)
             }
 
             Constants.FLAG_SET_SWIPE_RIGHT_APP -> {
-                prefs.appNameSwipeRight = appModel.appLabel
-                prefs.appPackageSwipeRight = appModel.appPackage
-                prefs.appUserSwipeRight = appModel.user.toString()
-                prefs.appActivityClassNameRight = appModel.activityClassName
-                updateSwipeApps()
+                setSwipeRightApp(appModel)
             }
 
             Constants.FLAG_SET_CLOCK_APP -> {
@@ -128,6 +98,53 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
         return true
+    }
+
+    private fun launchSelectedApp(appModel: AppModel): Boolean {
+        prefs.setLastClickedTime(appModel.appPackage, appModel.user.toString(), System.currentTimeMillis())
+        if (prefs.autoOrderApps) {
+            getAutoOrderedApps()
+        }
+        if (prefs.isAntiDoomApp(appModel.appPackage, appModel.user.toString())) {
+            val hiddenUntil = prefs.getAntiDoomHiddenUntil(appModel.appPackage, appModel.user.toString())
+            if (hiddenUntil > System.currentTimeMillis()) {
+                val remainingMinutes = ((hiddenUntil - System.currentTimeMillis()) / 60000).toInt()
+                showAntiDoomDialog.postValue(AntiDoomBlockedInfo(appModel, remainingMinutes.coerceAtLeast(1)))
+                return false
+            }
+            prefs.setAntiDoomHiddenUntil(appModel.appPackage, appModel.user.toString(), System.currentTimeMillis() + Constants.ONE_HOUR_IN_MILLIS)
+            getAppList()
+            getHiddenApps()
+            refreshHome(false)
+        }
+        launchApp(appModel.appPackage, appModel.activityClassName, appModel.user)
+        return true
+    }
+
+    private fun setHomeApp(appModel: AppModel, flag: Int) {
+        val location = flag - Constants.FLAG_SET_HOME_APP_1 + 1
+        prefs.setAppName(location, appModel.appLabel)
+        prefs.setAppPackage(location, appModel.appPackage)
+        prefs.setAppUser(location, appModel.user.toString())
+        prefs.setAppActivityClassName(location, appModel.activityClassName)
+        prefs.pinLocation(location)
+        refreshHome(false)
+    }
+
+    private fun setSwipeLeftApp(appModel: AppModel) {
+        prefs.appNameSwipeLeft = appModel.appLabel
+        prefs.appPackageSwipeLeft = appModel.appPackage
+        prefs.appUserSwipeLeft = appModel.user.toString()
+        prefs.appActivityClassNameSwipeLeft = appModel.activityClassName
+        updateSwipeApps()
+    }
+
+    private fun setSwipeRightApp(appModel: AppModel) {
+        prefs.appNameSwipeRight = appModel.appLabel
+        prefs.appPackageSwipeRight = appModel.appPackage
+        prefs.appUserSwipeRight = appModel.user.toString()
+        prefs.appActivityClassNameRight = appModel.activityClassName
+        updateSwipeApps()
     }
 
     fun forceLaunchApp(appModel: AppModel) {
@@ -216,48 +233,55 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 !(prefs.isAntiDoomApp(app.appPackage, app.user.toString()) && prefs.isAppTemporarilyHidden(app.appPackage, app.user.toString()))
             }
 
-            // Apps that are currently in pinned slots
-            val appsInPinnedSlots = mutableSetOf<String>()
-            for (i in 1..16) {
-                if (prefs.isLocationPinned(i)) {
-                    val pkg = prefs.getAppPackage(i)
-                    val user = prefs.getAppUser(i)
-                    if (pkg.isNotEmpty()) appsInPinnedSlots.add("$pkg|$user")
-                }
-            }
-
-            // Apps available for auto-ordering (not in any pinned slot)
+            val appsInPinnedSlots = getPinnedApps()
             val availableRecentApps = filteredApps
                 .filter { !appsInPinnedSlots.contains("${it.appPackage}|${it.user}") }
                 .sortedByDescending { prefs.getLastClickedTime(it.appPackage, it.user.toString()) }
 
-            var poolIndex = 0
-            val homeAppsNum = prefs.homeAppsNum
+            autoOrderAppsToSlots(availableRecentApps)
+            refreshHome.postValue(false)
+        }
+    }
 
-            for (i in 1..16) {
-                if (i <= homeAppsNum) {
-                    if (prefs.isLocationPinned(i)) {
-                        val pkg = prefs.getAppPackage(i)
-                        val user = prefs.getAppUser(i)
-                        // If empty pinned slot or app uninstalled, treat as auto-order slot and unpin
-                        if (pkg.isEmpty() || !app.olauncher.helper.isPackageInstalled(appContext, pkg, user)) {
-                            prefs.unpinLocation(i)
-                            fillSlot(i, availableRecentApps, poolIndex++)
-                        }
-                        // else: Keep what's there
-                    } else {
+    private fun getPinnedApps(): Set<String> {
+        val appsInPinnedSlots = mutableSetOf<String>()
+        for (i in 1..16) {
+            if (prefs.isLocationPinned(i)) {
+                val pkg = prefs.getAppPackage(i)
+                val user = prefs.getAppUser(i)
+                if (pkg.isNotEmpty()) appsInPinnedSlots.add("$pkg|$user")
+            }
+        }
+        return appsInPinnedSlots
+    }
+
+    private fun autoOrderAppsToSlots(availableRecentApps: List<AppModel>) {
+        var poolIndex = 0
+        val homeAppsNum = prefs.homeAppsNum
+
+        for (i in 1..16) {
+            if (i <= homeAppsNum) {
+                if (prefs.isLocationPinned(i)) {
+                    val pkg = prefs.getAppPackage(i)
+                    val user = prefs.getAppUser(i)
+                    if (pkg.isEmpty() || !app.olauncher.helper.isPackageInstalled(appContext, pkg, user)) {
+                        prefs.unpinLocation(i)
                         fillSlot(i, availableRecentApps, poolIndex++)
                     }
                 } else {
-                    // Beyond homeAppsNum, clear it
-                    prefs.setAppName(i, "")
-                    prefs.setAppPackage(i, "")
-                    prefs.setAppUser(i, "")
-                    prefs.setAppActivityClassName(i, "")
+                    fillSlot(i, availableRecentApps, poolIndex++)
                 }
+            } else {
+                clearSlot(i)
             }
-            refreshHome.postValue(false)
         }
+    }
+
+    private fun clearSlot(location: Int) {
+        prefs.setAppName(location, "")
+        prefs.setAppPackage(location, "")
+        prefs.setAppUser(location, "")
+        prefs.setAppActivityClassName(location, "")
     }
 
     private fun fillSlot(location: Int, pool: List<AppModel>, index: Int) {
@@ -332,96 +356,109 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         if (screenTimeValue.value != null && prefs.screenTimeLastUpdated.hasBeenMinutes(1).not()) return
 
         val usageStatsManager = appContext.getSystemService(USAGE_STATS_SERVICE) as UsageStatsManager
-        val appUsageStatsHashMap: MutableMap<String, AppUsageStats> = HashMap()
         val beginTime = System.currentTimeMillis().convertEpochToMidnight()
         val endTime = System.currentTimeMillis()
         val events = usageStatsManager.queryEvents(beginTime, endTime)
+        
+        val eventsMap = parseUsageEvents(events)
+        val appUsageStatsHashMap = calculateAppUsageStats(eventsMap, beginTime, endTime)
+
+        val totalTimeSpent = appUsageStatsHashMap.values.sumOf { it.totalTimeInForegroundMillis }
+        val viewTimeSpent = appContext.formattedTimeSpent((totalTimeSpent * 1.1).toLong())
+        screenTimeValue.postValue(viewTimeSpent)
+        prefs.screenTimeLastUpdated = System.currentTimeMillis()
+    }
+
+    private fun parseUsageEvents(events: UsageEvents): Map<String, MutableList<UsageEvents.Event>> {
         val eventsMap: MutableMap<String, MutableList<UsageEvents.Event>> = HashMap()
         var currentEvent: UsageEvents.Event
-
         while (events.hasNextEvent()) {
             currentEvent = UsageEvents.Event()
             if (events.getNextEvent(currentEvent)) {
                 when (currentEvent.eventType) {
                     UsageEvents.Event.ACTIVITY_RESUMED, UsageEvents.Event.ACTIVITY_PAUSED, UsageEvents.Event.ACTIVITY_STOPPED, UsageEvents.Event.FOREGROUND_SERVICE_START, UsageEvents.Event.FOREGROUND_SERVICE_STOP -> {
-                        var packageEvents = eventsMap[currentEvent.packageName]
-                        if (packageEvents == null)
-                            packageEvents = ArrayList(listOf(currentEvent))
-                        else
-                            packageEvents.add(currentEvent)
-                        eventsMap[currentEvent.packageName] = packageEvents
+                        eventsMap.getOrPut(currentEvent.packageName) { ArrayList() }.add(currentEvent)
                     }
                 }
             }
         }
+        return eventsMap
+    }
 
+    private fun calculateAppUsageStats(
+        eventsMap: Map<String, List<UsageEvents.Event>>,
+        beginTime: Long,
+        endTime: Long
+    ): Map<String, AppUsageStats> {
+        val appUsageStatsHashMap: MutableMap<String, AppUsageStats> = HashMap()
         for ((key, value) in eventsMap) {
             val foregroundBucket = AppUsageStatsBucket()
-            val backgroundBucketMap: MutableMap<String, AppUsageStatsBucket?> = HashMap()
-            var pos = 0
-            while (pos < value.size) {
-                val event = value[pos]
+            val backgroundBucketMap: MutableMap<String, AppUsageStatsBucket> = HashMap()
+            
+            for (event in value) {
                 if (event.className != null) {
-                    var backgroundBucket: AppUsageStatsBucket? = backgroundBucketMap[event.className]
-                    if (backgroundBucket == null) {
-                        backgroundBucket = AppUsageStatsBucket()
-                        backgroundBucketMap[event.className] = backgroundBucket
-                    }
-                    when (event.eventType) {
-                        UsageEvents.Event.ACTIVITY_RESUMED -> foregroundBucket.startMillis = event.timeStamp
-
-                        UsageEvents.Event.ACTIVITY_PAUSED, UsageEvents.Event.ACTIVITY_STOPPED -> if (foregroundBucket.startMillis >= foregroundBucket.endMillis) {
-                            if (foregroundBucket.startMillis == 0L) {
-                                foregroundBucket.startMillis = beginTime
-                            }
-                            foregroundBucket.endMillis = event.timeStamp
-                            foregroundBucket.addTotalTime()
-                        }
-
-                        UsageEvents.Event.FOREGROUND_SERVICE_START -> backgroundBucket.startMillis = event.timeStamp
-                        UsageEvents.Event.FOREGROUND_SERVICE_STOP -> if (backgroundBucket.startMillis >= backgroundBucket.endMillis) {
-                            if (backgroundBucket.startMillis == 0L) {
-                                backgroundBucket.startMillis = beginTime
-                            }
-                            backgroundBucket.endMillis = event.timeStamp
-                            backgroundBucket.addTotalTime()
-                        }
-                    }
-                    if (pos == value.size - 1) {
-                        if (foregroundBucket.startMillis > foregroundBucket.endMillis) {
-                            foregroundBucket.endMillis = endTime
-                            foregroundBucket.addTotalTime()
-                        }
-                        if (backgroundBucket.startMillis > backgroundBucket.endMillis) {
-                            backgroundBucket.endMillis = endTime
-                            backgroundBucket.addTotalTime()
-                        }
-                    }
+                    val backgroundBucket = backgroundBucketMap.getOrPut(event.className) { AppUsageStatsBucket() }
+                    updateBucketsWithEvent(event, foregroundBucket, backgroundBucket, beginTime)
                 }
-                pos++
             }
+            
+            finalizeBuckets(foregroundBucket, backgroundBucketMap.values, endTime)
 
             val foregroundEnd: Long = foregroundBucket.endMillis
             val totalTimeForeground: Long = foregroundBucket.totalTime
-            val backgroundEnd: Long = backgroundBucketMap.values
-                .mapNotNull { it?.endMillis }
-                .maxOrNull() ?: 0L
-
-            val totalTimeBackground: Long = backgroundBucketMap.values
-                .mapNotNull { it?.totalTime }
-                .sum()
+            val backgroundEnd: Long = backgroundBucketMap.values.maxOfOrNull { it.endMillis } ?: 0L
+            val totalTimeBackground: Long = backgroundBucketMap.values.sumOf { it.totalTime }
 
             appUsageStatsHashMap[key] = AppUsageStats(
-                max(foregroundEnd, backgroundEnd),
+                kotlin.math.max(foregroundEnd, backgroundEnd),
                 totalTimeForeground,
                 backgroundEnd,
                 totalTimeBackground
             )
         }
+        return appUsageStatsHashMap
+    }
 
-        val totalTimeInMillis = appUsageStatsHashMap.values.sumOf { it.totalTimeInForegroundMillis }
-        val viewTimeSpent = appContext.formattedTimeSpent((totalTimeInMillis * 1.1).toLong())
-        screenTimeValue.postValue(viewTimeSpent)
-        prefs.screenTimeLastUpdated = endTime
+    private fun updateBucketsWithEvent(
+        event: UsageEvents.Event,
+        foregroundBucket: AppUsageStatsBucket,
+        backgroundBucket: AppUsageStatsBucket,
+        beginTime: Long
+    ) {
+        when (event.eventType) {
+            UsageEvents.Event.ACTIVITY_RESUMED -> foregroundBucket.startMillis = event.timeStamp
+            UsageEvents.Event.ACTIVITY_PAUSED, UsageEvents.Event.ACTIVITY_STOPPED -> {
+                if (foregroundBucket.startMillis >= foregroundBucket.endMillis) {
+                    if (foregroundBucket.startMillis == 0L) foregroundBucket.startMillis = beginTime
+                    foregroundBucket.endMillis = event.timeStamp
+                    foregroundBucket.addTotalTime()
+                }
+            }
+            UsageEvents.Event.FOREGROUND_SERVICE_START -> backgroundBucket.startMillis = event.timeStamp
+            UsageEvents.Event.FOREGROUND_SERVICE_STOP -> {
+                if (backgroundBucket.startMillis >= backgroundBucket.endMillis) {
+                    if (backgroundBucket.startMillis == 0L) backgroundBucket.startMillis = beginTime
+                    backgroundBucket.endMillis = event.timeStamp
+                    backgroundBucket.addTotalTime()
+                }
+            }
+        }
+    }
+
+    private fun finalizeBuckets(
+        foregroundBucket: AppUsageStatsBucket,
+        backgroundBuckets: Collection<AppUsageStatsBucket>,
+        endTime: Long
+    ) {
+        if (foregroundBucket.startMillis > foregroundBucket.endMillis) {
+            foregroundBucket.endMillis = endTime
+            foregroundBucket.addTotalTime()
+        }
+        for (bucket in backgroundBuckets) {
+            if (bucket.startMillis > bucket.endMillis) {
+                bucket.endMillis = endTime
+                bucket.addTotalTime()
+            }
+        }
     }
 }

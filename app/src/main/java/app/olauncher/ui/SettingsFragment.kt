@@ -1,5 +1,6 @@
 package app.olauncher.ui
 
+import android.app.Activity
 import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
 import android.content.Context
@@ -14,6 +15,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
@@ -47,6 +49,13 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
 
     private var _binding: FragmentSettingsBinding? = null
     private val binding get() = _binding!!
+
+    private val adminEnableLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            prefs.lockModeOn = true
+            populateLockSettings()
+        }
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentSettingsBinding.inflate(inflater, container, false)
@@ -87,14 +96,14 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
     }
 
     override fun onClick(view: View) {
-        binding.appsNumSelectLayout.visibility = View.GONE
-        binding.dateTimeSelectLayout.visibility = View.GONE
-        binding.appThemeSelectLayout.visibility = View.GONE
-        binding.swipeDownSelectLayout.visibility = View.GONE
-        binding.textSizesLayout.visibility = View.GONE
-        if (view.id != R.id.alignmentBottom)
-            binding.alignmentSelectLayout.visibility = View.GONE
+        hideSelectionLayouts(view)
+        if (handleAppAndGeneralClicks(view)) return
+        if (handleAlignmentAndDateTimeClicks(view)) return
+        if (handleThemeAndTextClicks(view)) return
+        handleSwipeAndOtherClicks(view)
+    }
 
+    private fun handleAppAndGeneralClicks(view: View): Boolean {
         when (view.id) {
             R.id.olauncherHiddenApps -> showHiddenApps()
             R.id.showAppIconsHome -> toggleShowAppIconsHome()
@@ -111,38 +120,35 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
             R.id.autoShowKeyboard -> toggleKeyboardText()
             R.id.autoLaunchApps -> toggleAutoLaunchText()
             R.id.homeAppsNum -> binding.appsNumSelectLayout.visibility = View.VISIBLE
-            R.id.dailyWallpaperUrl -> requireContext().openUrl(prefs.dailyWallpaperUrl)
-            R.id.dailyWallpaper -> toggleDailyWallpaperUpdate()
+            else -> return false
+        }
+        return true
+    }
+
+    private fun handleAlignmentAndDateTimeClicks(view: View): Boolean {
+        when (view.id) {
             R.id.alignment -> binding.alignmentSelectLayout.visibility = View.VISIBLE
             R.id.alignmentLeft -> viewModel.updateHomeAlignment(Gravity.START)
             R.id.alignmentCenter -> viewModel.updateHomeAlignment(Gravity.CENTER)
             R.id.alignmentRight -> viewModel.updateHomeAlignment(Gravity.END)
             R.id.alignmentBottom -> updateHomeBottomAlignment()
-            R.id.statusBar -> toggleStatusBar()
             R.id.dateTime -> binding.dateTimeSelectLayout.visibility = View.VISIBLE
             R.id.dateTimeOn -> toggleDateTime(Constants.DateTime.ON)
             R.id.dateTimeOff -> toggleDateTime(Constants.DateTime.OFF)
             R.id.dateOnly -> toggleDateTime(Constants.DateTime.DATE_ONLY)
+            R.id.statusBar -> toggleStatusBar()
+            else -> return false
+        }
+        return true
+    }
+
+    private fun handleThemeAndTextClicks(view: View): Boolean {
+        when (view.id) {
             R.id.appThemeText -> binding.appThemeSelectLayout.visibility = View.VISIBLE
             R.id.themeLight -> updateTheme(AppCompatDelegate.MODE_NIGHT_NO)
             R.id.themeDark -> updateTheme(AppCompatDelegate.MODE_NIGHT_YES)
             R.id.themeSystem -> updateTheme(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
             R.id.textSizeValue -> binding.textSizesLayout.visibility = View.VISIBLE
-            R.id.actionAccessibility -> openAccessibilityService()
-            R.id.closeAccessibility -> toggleAccessibilityVisibility(false)
-
-            R.id.tvGestures -> binding.flSwipeDown.visibility = View.VISIBLE
-
-            R.id.appsNumDecrement -> {
-                val newNum = (prefs.homeAppsNum - 1).coerceAtLeast(0)
-                updateHomeAppsNum(newNum)
-            }
-            R.id.appsNumIncrement -> {
-                val newNum = (prefs.homeAppsNum + 1).coerceAtMost(16)
-                updateHomeAppsNum(newNum)
-            }
-
-
             R.id.textSize1 -> updateTextSizeScale(Constants.TextSize.ONE)
             R.id.textSize2 -> updateTextSizeScale(Constants.TextSize.TWO)
             R.id.textSize3 -> updateTextSizeScale(Constants.TextSize.THREE)
@@ -150,13 +156,36 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
             R.id.textSize5 -> updateTextSizeScale(Constants.TextSize.FIVE)
             R.id.textSize6 -> updateTextSizeScale(Constants.TextSize.SIX)
             R.id.textSize7 -> updateTextSizeScale(Constants.TextSize.SEVEN)
+            else -> return false
+        }
+        return true
+    }
 
+    private fun handleSwipeAndOtherClicks(view: View) {
+        when (view.id) {
+            R.id.dailyWallpaperUrl -> requireContext().openUrl(prefs.dailyWallpaperUrl)
+            R.id.dailyWallpaper -> toggleDailyWallpaperUpdate()
+            R.id.actionAccessibility -> openAccessibilityService()
+            R.id.closeAccessibility -> toggleAccessibilityVisibility(false)
+            R.id.tvGestures -> binding.flSwipeDown.visibility = View.VISIBLE
+            R.id.appsNumDecrement -> updateHomeAppsNum((prefs.homeAppsNum - 1).coerceAtLeast(0))
+            R.id.appsNumIncrement -> updateHomeAppsNum((prefs.homeAppsNum + 1).coerceAtMost(16))
             R.id.swipeLeftApp -> showAppListIfEnabled(Constants.FLAG_SET_SWIPE_LEFT_APP)
             R.id.swipeRightApp -> showAppListIfEnabled(Constants.FLAG_SET_SWIPE_RIGHT_APP)
             R.id.swipeDownAction -> binding.swipeDownSelectLayout.visibility = View.VISIBLE
             R.id.notifications -> updateSwipeDownAction(Constants.SwipeDownAction.NOTIFICATIONS)
             R.id.search -> updateSwipeDownAction(Constants.SwipeDownAction.SEARCH)
         }
+    }
+
+    private fun hideSelectionLayouts(view: View) {
+        binding.appsNumSelectLayout.visibility = View.GONE
+        binding.dateTimeSelectLayout.visibility = View.GONE
+        binding.appThemeSelectLayout.visibility = View.GONE
+        binding.swipeDownSelectLayout.visibility = View.GONE
+        binding.textSizesLayout.visibility = View.GONE
+        if (view.id != R.id.alignmentBottom)
+            binding.alignmentSelectLayout.visibility = View.GONE
     }
 
     override fun onLongClick(view: View): Boolean {
@@ -181,6 +210,16 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
     }
 
     private fun initClickListeners() {
+        initAppClickListeners()
+        initAlignmentClickListeners()
+        initDateTimeClickListeners()
+        initSwipeClickListeners()
+        initThemeAndTextClickListeners()
+        initOtherClickListeners()
+        initLongClickListeners()
+    }
+
+    private fun initAppClickListeners() {
         binding.olauncherHiddenApps.setOnClickListener(this)
         binding.showAppIconsHome.setOnClickListener(this)
         binding.showAppIconsAppDrawer.setOnClickListener(this)
@@ -189,42 +228,42 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
         binding.hideDoomscrolledApps?.setOnClickListener(this)
         binding.paintAntidoomedAppsRed?.setOnClickListener(this)
         binding.showAntiDoomFirst?.setOnClickListener(this)
-        binding.scrollLayout.setOnClickListener(this)
-        binding.appInfo.setOnClickListener(this)
-        binding.setLauncher.setOnClickListener(this)
         binding.autoShowKeyboard.setOnClickListener(this)
-        binding.autoLaunchApps?.setOnClickListener(this)
-        binding.toggleLock.setOnClickListener(this)
+        binding.autoLaunchApps.setOnClickListener(this)
         binding.homeAppsNum.setOnClickListener(this)
-        binding.screenTimeOnOff.setOnClickListener(this)
-        binding.dailyWallpaperUrl.setOnClickListener(this)
-        binding.dailyWallpaper.setOnClickListener(this)
+        binding.appsNumDecrement?.setOnClickListener(this)
+        binding.appsNumIncrement?.setOnClickListener(this)
+    }
+
+    private fun initAlignmentClickListeners() {
         binding.alignment.setOnClickListener(this)
         binding.alignmentLeft.setOnClickListener(this)
         binding.alignmentCenter.setOnClickListener(this)
         binding.alignmentRight.setOnClickListener(this)
         binding.alignmentBottom.setOnClickListener(this)
-        binding.statusBar.setOnClickListener(this)
+    }
+
+    private fun initDateTimeClickListeners() {
         binding.dateTime.setOnClickListener(this)
         binding.dateTimeOn.setOnClickListener(this)
         binding.dateTimeOff.setOnClickListener(this)
         binding.dateOnly.setOnClickListener(this)
+    }
+
+    private fun initSwipeClickListeners() {
         binding.swipeLeftApp.setOnClickListener(this)
         binding.swipeRightApp.setOnClickListener(this)
         binding.swipeDownAction.setOnClickListener(this)
         binding.search.setOnClickListener(this)
         binding.notifications.setOnClickListener(this)
+    }
+
+    private fun initThemeAndTextClickListeners() {
         binding.appThemeText.setOnClickListener(this)
         binding.themeLight.setOnClickListener(this)
         binding.themeDark.setOnClickListener(this)
         binding.themeSystem.setOnClickListener(this)
         binding.textSizeValue.setOnClickListener(this)
-        binding.actionAccessibility.setOnClickListener(this)
-        binding.closeAccessibility.setOnClickListener(this)
-
-        binding.appsNumDecrement?.setOnClickListener(this)
-        binding.appsNumIncrement?.setOnClickListener(this)
-
         binding.textSize1.setOnClickListener(this)
         binding.textSize2.setOnClickListener(this)
         binding.textSize3.setOnClickListener(this)
@@ -232,7 +271,22 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
         binding.textSize5.setOnClickListener(this)
         binding.textSize6.setOnClickListener(this)
         binding.textSize7.setOnClickListener(this)
+    }
 
+    private fun initOtherClickListeners() {
+        binding.scrollLayout.setOnClickListener(this)
+        binding.appInfo.setOnClickListener(this)
+        binding.setLauncher.setOnClickListener(this)
+        binding.toggleLock.setOnClickListener(this)
+        binding.screenTimeOnOff.setOnClickListener(this)
+        binding.dailyWallpaperUrl.setOnClickListener(this)
+        binding.dailyWallpaper.setOnClickListener(this)
+        binding.statusBar.setOnClickListener(this)
+        binding.actionAccessibility.setOnClickListener(this)
+        binding.closeAccessibility.setOnClickListener(this)
+    }
+
+    private fun initLongClickListeners() {
         binding.dailyWallpaper.setOnLongClickListener(this)
         binding.alignment.setOnLongClickListener(this)
         binding.appThemeText.setOnLongClickListener(this)
@@ -443,7 +497,7 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
                     DevicePolicyManager.EXTRA_ADD_EXPLANATION,
                     getString(R.string.admin_permission_message)
                 )
-                requireActivity().startActivityForResult(intent, Constants.REQUEST_CODE_ENABLE_ADMIN)
+                adminEnableLauncher.launch(intent)
             }
         }
         populateLockSettings()
@@ -576,8 +630,8 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
     }
 
     private fun populateAutoLaunchText() {
-        if (prefs.autoLaunchApps) binding.autoLaunchApps?.text = getString(R.string.on)
-        else binding.autoLaunchApps?.text = getString(R.string.off)
+        if (prefs.autoLaunchApps) binding.autoLaunchApps.text = getString(R.string.on)
+        else binding.autoLaunchApps.text = getString(R.string.off)
     }
 
     private fun populateWallpaperText() {

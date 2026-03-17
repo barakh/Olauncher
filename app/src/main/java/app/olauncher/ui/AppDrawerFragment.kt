@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView.Recycler
 import app.olauncher.MainViewModel
 import app.olauncher.R
 import app.olauncher.data.AntiDoomBlockedInfo
+import app.olauncher.data.AppModel
 import app.olauncher.data.Constants
 import app.olauncher.data.Prefs
 import app.olauncher.databinding.FragmentAppDrawerBinding
@@ -116,88 +117,93 @@ class AppDrawerFragment : Fragment() {
         adapter = AppDrawerAdapter(
             flag,
             prefs,
-            appClickListener = {
-                if (it.appPackage.isEmpty())
-                    return@AppDrawerAdapter
-                viewModel.selectedApp(it, flag)
-                if (flag == Constants.FLAG_LAUNCH_APP || flag == Constants.FLAG_HIDDEN_APPS || flag == Constants.FLAG_ANTIDOOM_APPS)
-                    findNavController().popBackStack(R.id.mainFragment, false)
-                else
-                    findNavController().popBackStack()
-            },
-            appInfoListener = {
-                openAppInfo(
-                    requireContext(),
-                    it.user,
-                    it.appPackage
-                )
-                findNavController().popBackStack(R.id.mainFragment, false)
-            },
-            appDeleteListener = {
-                requireContext().apply {
-                    if (isSystemApp(it.appPackage))
-                        showToast(getString(R.string.system_app_cannot_delete))
-                    else
-                        uninstall(it.appPackage)
-                }
-            },
-            appHideListener = { appModel, position ->
-                adapter.appFilteredList.removeAt(position)
-                adapter.notifyItemRemoved(position)
-                adapter.appsList.remove(appModel)
-
-                val newSet = mutableSetOf<String>()
-                newSet.addAll(prefs.hiddenApps)
-                if (flag == Constants.FLAG_HIDDEN_APPS) {
-                    newSet.remove(appModel.appPackage) // for backward compatibility
-                    newSet.remove(appModel.appPackage + "|" + appModel.user.toString())
-                } else
-                    newSet.add(appModel.appPackage + "|" + appModel.user.toString())
-
-                prefs.hiddenApps = newSet
-                if (newSet.isEmpty())
-                    findNavController().popBackStack()
-                if (prefs.firstHide) {
-                    binding.search.hideKeyboard()
-                    prefs.firstHide = false
-                    viewModel.showDialog.postValue(Constants.Dialog.HIDDEN)
-                    findNavController().navigate(R.id.action_appListFragment_to_settingsFragment2)
-                }
-                viewModel.getAppList()
-                viewModel.getHiddenApps()
-            },
-            appRenameListener = { appModel, renameLabel ->
-                prefs.setAppRenameLabel(appModel.appPackage, renameLabel)
-                viewModel.getAppList()
-            },
-            appAntiDoomListener = { appModel ->
-                val userString = appModel.user.toString()
-                val isAntiDoom = prefs.isAntiDoomApp(appModel.appPackage, userString)
-
-                if (isAntiDoom) {
-                    prefs.removeAntiDoomApp(appModel.appPackage, userString)
-                    prefs.clearAntiDoomHiddenUntil(appModel.appPackage, userString)
-                    requireContext().showToast(getString(R.string.antidoom_disabled))
-                } else {
-                    prefs.addAntiDoomApp(appModel.appPackage, userString)
-                    prefs.clearAntiDoomHiddenUntil(appModel.appPackage, userString)
-                    requireContext().showToast(getString(R.string.antidoom_enabled))
-                }
-                viewModel.getAppList()
-                if (flag == Constants.FLAG_ANTIDOOM_APPS) viewModel.getAntiDoomApps()
-                adapter.notifyDataSetChanged()
-            },
-            isAppHidden = { appModel ->
-                prefs.isAppTemporarilyHidden(appModel.appPackage, appModel.user.toString())
-            }
+            appClickListener = { onAppClicked(it) },
+            appInfoListener = { onAppInfoClicked(it) },
+            appDeleteListener = { onAppDeleteClicked(it) },
+            appHideListener = { appModel, position -> onAppHideClicked(appModel, position) },
+            appRenameListener = { appModel, renameLabel -> onAppRenameClicked(appModel, renameLabel) },
+            appAntiDoomListener = { onAppAntiDoomClicked(it) },
+            isAppHidden = { prefs.isAppTemporarilyHidden(it.appPackage, it.user.toString()) }
         )
 
+        initRecyclerViewLayoutManager()
+        binding.recyclerView.layoutManager = linearLayoutManager
+        binding.recyclerView.adapter = adapter
+        binding.recyclerView.addOnScrollListener(getRecyclerViewOnScrollListener())
+        binding.recyclerView.itemAnimator = null
+        setupRecyclerViewAnimation()
+    }
+
+    private fun onAppClicked(it: AppModel) {
+        if (it.appPackage.isEmpty()) return
+        viewModel.selectedApp(it, flag)
+        if (flag == Constants.FLAG_LAUNCH_APP || flag == Constants.FLAG_HIDDEN_APPS || flag == Constants.FLAG_ANTIDOOM_APPS)
+            findNavController().popBackStack(R.id.mainFragment, false)
+        else
+            findNavController().popBackStack()
+    }
+
+    private fun onAppInfoClicked(it: AppModel) {
+        openAppInfo(requireContext(), it.user, it.appPackage)
+        findNavController().popBackStack(R.id.mainFragment, false)
+    }
+
+    private fun onAppDeleteClicked(it: AppModel) {
+        requireContext().apply {
+            if (isSystemApp(it.appPackage)) showToast(getString(R.string.system_app_cannot_delete))
+            else uninstall(it.appPackage)
+        }
+    }
+
+    private fun onAppHideClicked(appModel: AppModel, position: Int) {
+        adapter.appFilteredList.removeAt(position)
+        adapter.notifyItemRemoved(position)
+        adapter.appsList.remove(appModel)
+
+        val newSet = prefs.hiddenApps.toMutableSet()
+        if (flag == Constants.FLAG_HIDDEN_APPS) {
+            newSet.remove(appModel.appPackage)
+            newSet.remove(appModel.appPackage + "|" + appModel.user.toString())
+        } else {
+            newSet.add(appModel.appPackage + "|" + appModel.user.toString())
+        }
+        prefs.hiddenApps = newSet
+
+        if (newSet.isEmpty()) findNavController().popBackStack()
+        if (prefs.firstHide) {
+            binding.search.hideKeyboard()
+            prefs.firstHide = false
+            viewModel.showDialog.postValue(Constants.Dialog.HIDDEN)
+            findNavController().navigate(R.id.action_appListFragment_to_settingsFragment2)
+        }
+        viewModel.getAppList()
+        viewModel.getHiddenApps()
+    }
+
+    private fun onAppRenameClicked(appModel: AppModel, renameLabel: String) {
+        prefs.setAppRenameLabel(appModel.appPackage, renameLabel)
+        viewModel.getAppList()
+    }
+
+    private fun onAppAntiDoomClicked(appModel: AppModel) {
+        val userString = appModel.user.toString()
+        if (prefs.isAntiDoomApp(appModel.appPackage, userString)) {
+            prefs.removeAntiDoomApp(appModel.appPackage, userString)
+            prefs.clearAntiDoomHiddenUntil(appModel.appPackage, userString)
+            requireContext().showToast(getString(R.string.antidoom_disabled))
+        } else {
+            prefs.addAntiDoomApp(appModel.appPackage, userString)
+            prefs.clearAntiDoomHiddenUntil(appModel.appPackage, userString)
+            requireContext().showToast(getString(R.string.antidoom_enabled))
+        }
+        viewModel.getAppList()
+        if (flag == Constants.FLAG_ANTIDOOM_APPS) viewModel.getAntiDoomApps()
+        adapter.notifyDataSetChanged()
+    }
+
+    private fun initRecyclerViewLayoutManager() {
         linearLayoutManager = object : LinearLayoutManager(requireContext()) {
-            override fun scrollVerticallyBy(
-                dx: Int,
-                recycler: Recycler,
-                state: RecyclerView.State,
-            ): Int {
+            override fun scrollVerticallyBy(dx: Int, recycler: Recycler, state: RecyclerView.State): Int {
                 val scrollRange = super.scrollVerticallyBy(dx, recycler, state)
                 val overScroll = dx - scrollRange
                 if (overScroll < -10 && binding.recyclerView.scrollState == RecyclerView.SCROLL_STATE_DRAGGING)
@@ -205,17 +211,21 @@ class AppDrawerFragment : Fragment() {
                 return scrollRange
             }
         }
+    }
 
-        binding.recyclerView.layoutManager = linearLayoutManager
-        binding.recyclerView.adapter = adapter
-        binding.recyclerView.addOnScrollListener(getRecyclerViewOnScrollListener())
-        binding.recyclerView.itemAnimator = null
+    private fun setupRecyclerViewAnimation() {
         if (requireContext().isEinkDisplay().not())
             binding.recyclerView.layoutAnimation =
                 AnimationUtils.loadLayoutAnimation(requireContext(), R.anim.layout_anim_from_bottom)
     }
 
     private fun initObservers() {
+        initAppDrawerTipObserver()
+        initAppListObservers()
+        initQuarantineCountObserver()
+    }
+
+    private fun initAppDrawerTipObserver() {
         viewModel.firstOpen.observe(viewLifecycleOwner) {
             if (it && flag == Constants.FLAG_LAUNCH_APP) {
                 binding.appDrawerTip.text = if (prefs.autoLaunchApps)
@@ -226,32 +236,31 @@ class AppDrawerFragment : Fragment() {
                 binding.appDrawerTip.isSelected = true
             }
         }
-        if (flag == Constants.FLAG_HIDDEN_APPS) {
-            viewModel.hiddenApps.observe(viewLifecycleOwner) {
-                it?.let {
-                    adapter.setAppList(it.toMutableList())
-                }
+    }
+
+    private fun initAppListObservers() {
+        when (flag) {
+            Constants.FLAG_HIDDEN_APPS -> {
+                viewModel.hiddenApps.observe(viewLifecycleOwner) { it?.let { adapter.setAppList(it.toMutableList()) } }
             }
-        } else if (flag == Constants.FLAG_ANTIDOOM_APPS) {
-            viewModel.antiDoomApps.observe(viewLifecycleOwner) {
-                it?.let {
-                    adapter.setAppList(it.toMutableList())
-                }
+            Constants.FLAG_ANTIDOOM_APPS -> {
+                viewModel.antiDoomApps.observe(viewLifecycleOwner) { it?.let { adapter.setAppList(it.toMutableList()) } }
             }
-        } else if (flag == Constants.FLAG_QUARANTINED_APPS) {
-            viewModel.quarantinedApps.observe(viewLifecycleOwner) {
-                it?.let {
-                    adapter.setAppList(it.toMutableList())
-                }
+            Constants.FLAG_QUARANTINED_APPS -> {
+                viewModel.quarantinedApps.observe(viewLifecycleOwner) { it?.let { adapter.setAppList(it.toMutableList()) } }
             }
-        } else {
-            viewModel.appList.observe(viewLifecycleOwner) {
-                it?.let { appModels ->
-                    adapter.setAppList(appModels.toMutableList())
-                    adapter.filter.filter(binding.search.query)
+            else -> {
+                viewModel.appList.observe(viewLifecycleOwner) {
+                    it?.let { appModels ->
+                        adapter.setAppList(appModels.toMutableList())
+                        adapter.filter.filter(binding.search.query)
+                    }
                 }
             }
         }
+    }
+
+    private fun initQuarantineCountObserver() {
         viewModel.quarantineCount.observe(viewLifecycleOwner) { count ->
             if (count > 0 && flag != Constants.FLAG_QUARANTINED_APPS) {
                 binding.quarantineLayout.visibility = View.VISIBLE
@@ -323,9 +332,18 @@ class AppDrawerFragment : Fragment() {
             viewModel.checkForMessages.call()
     }
 
+    override fun onResume() {
+        super.onResume()
+        if (prefs.autoShowKeyboard) {
+            binding.search.isIconified = false
+            binding.search.postDelayed({
+                binding.search.showKeyboard(true)
+            }, 100)
+        }
+    }
+
     override fun onStart() {
         super.onStart()
-        binding.search.showKeyboard(prefs.autoShowKeyboard)
     }
 
     override fun onStop() {

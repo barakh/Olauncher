@@ -1,5 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
+apply plugin: 'io.gitlab.arturbosch.detekt'
 
 android {
     compileSdk 34
@@ -11,6 +12,7 @@ android {
 
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_17.toString()
+        allWarningsAsErrors = true
     }
 
     defaultConfig {
@@ -63,4 +65,12 @@ dependencies {
     //Material dependency
     implementation libs.material
 
+}
+
+detekt {
+    toolVersion = libs.versions.detekt.get()
+    config.setFrom(files("${rootProject.projectDir}/config/detekt/detekt.yml"))
+    buildUponDefaultConfig = false
+    allRules = false
+    autoCorrect = false
 }
