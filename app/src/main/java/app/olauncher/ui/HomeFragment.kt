@@ -375,32 +375,10 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     }
 
     private fun markQuickReminderAsCompleted(view: TextView, text: String) {
-        view.paintFlags = view.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
-
         val list = prefs.quickReminders.toMutableList()
         list.remove(text)
         prefs.quickReminders = list
-
-        // Success effect
-        view.animate()
-            .scaleX(1.2f)
-            .scaleY(1.2f)
-            .setDuration(200)
-            .setInterpolator(AccelerateDecelerateInterpolator())
-            .withEndAction {
-                view.animate()
-                    .scaleX(1.0f)
-                    .scaleY(1.0f)
-                    .alpha(0f)
-                    .setDuration(500)
-                    .setStartDelay(1000)
-                    .withEndAction {
-                        binding.quickRemindersContainer.removeView(view)
-                    }
-                    .start()
-            }
-            .start()
-
+        binding.quickRemindersContainer.removeView(view)
         showLightningEffect()
     }
 
@@ -449,35 +427,13 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     }
 
     private fun markReminderAsCompleted(view: TextView, reminder: DailyReminder) {
-        view.paintFlags = view.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
-        
         val list = prefs.dailyReminders.toMutableList()
         val index = list.indexOfFirst { it.id == reminder.id }
         if (index != -1) {
             list[index].lastCompletedDay = Calendar.getInstance().get(Calendar.DAY_OF_YEAR)
             prefs.dailyReminders = list
         }
-
-        // Success effect
-        view.animate()
-            .scaleX(1.2f)
-            .scaleY(1.2f)
-            .setDuration(200)
-            .setInterpolator(AccelerateDecelerateInterpolator())
-            .withEndAction {
-                view.animate()
-                    .scaleX(1.0f)
-                    .scaleY(1.0f)
-                    .alpha(0f)
-                    .setDuration(500)
-                    .setStartDelay(1000)
-                    .withEndAction {
-                        binding.dailyRemindersContainer.removeView(view)
-                    }
-                    .start()
-            }
-            .start()
-
+        binding.dailyRemindersContainer.removeView(view)
         showLightningEffect()
     }
 
