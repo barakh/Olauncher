@@ -152,7 +152,8 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
                 "Clock",
                 prefs.clockAppPackage,
                 prefs.clockAppClassName,
-                prefs.clockAppUser
+                prefs.clockAppUser,
+                false
             )
         }
     }
@@ -165,7 +166,8 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
                 "Calendar",
                 prefs.calendarAppPackage,
                 prefs.calendarAppClassName,
-                prefs.calendarAppUser
+                prefs.calendarAppUser,
+                false
             )
         }
     }
@@ -614,7 +616,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         for (i in 1..homeAppsNum) {
             val view = homeAppViews[i - 1]
             view.visibility = View.VISIBLE
-            if (!setHomeAppText(view, prefs.getAppName(i), prefs.getAppPackage(i), prefs.getAppUser(i))) {
+            if (!setHomeAppText(view, prefs.getAppName(i), prefs.getAppPackage(i), prefs.getAppUser(i), i)) {
                 prefs.setAppName(i, "")
                 prefs.setAppPackage(i, "")
             }
@@ -646,9 +648,14 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         requestCalendarPermissionLauncher.launch(Manifest.permission.READ_CALENDAR)
     }
 
-    private fun setHomeAppText(textView: TextView, appName: String, packageName: String, userString: String): Boolean {
+    private fun setHomeAppText(textView: TextView, appName: String, packageName: String, userString: String, location: Int): Boolean {
         if (isPackageInstalled(requireContext(), packageName, userString)) {
             val isTemporarilyHidden = prefs.isAppTemporarilyHidden(packageName, userString)
+            val isPinned = prefs.isLocationPinned(location)
+
+            if (isPinned) {
+                textView.typeface = android.graphics.Typeface.DEFAULT
+            }
 
             if (prefs.showAppIconsHome) {
                 val userHandle = getUserHandleFromString(requireContext(), userString)
@@ -703,7 +710,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         }
     }
 
-    private fun launchApp(appName: String, packageName: String, activityClassName: String?, userString: String) {
+    private fun launchApp(appName: String, packageName: String, activityClassName: String?, userString: String, trackLaunch: Boolean = true) {
         viewModel.selectedApp(
             AppModel(
                 appName,
@@ -713,7 +720,8 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
                 false,
                 getUserHandleFromString(requireContext(), userString)
             ),
-            Constants.FLAG_LAUNCH_APP
+            Constants.FLAG_LAUNCH_APP,
+            trackLaunch
         )
     }
 
@@ -753,7 +761,8 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
                 prefs.appNameSwipeRight,
                 prefs.appPackageSwipeRight,
                 prefs.appActivityClassNameRight,
-                prefs.appUserSwipeRight
+                prefs.appUserSwipeRight,
+                false
             )
         } else openDialerApp(requireContext())
     }
@@ -765,7 +774,8 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
                 prefs.appNameSwipeLeft,
                 prefs.appPackageSwipeLeft,
                 prefs.appActivityClassNameSwipeLeft,
-                prefs.appUserSwipeLeft
+                prefs.appUserSwipeLeft,
+                false
             )
         } else openCameraApp(requireContext())
     }
