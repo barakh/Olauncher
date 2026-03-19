@@ -346,7 +346,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 val cursor = appContext.contentResolver.query(
                     builder.build(),
                     projection,
-                    null,
+                    "${CalendarContract.Instances.ALL_DAY} = 0",
                     null,
                     "${CalendarContract.Instances.BEGIN} ASC"
                 )
@@ -356,17 +356,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     while (it.moveToNext() && events.size < 3) {
                         val title = it.getString(0)
                         val start = it.getLong(1)
-                        val allDay = it.getInt(2) != 0
 
-                        val timeStr = if (allDay) {
-                            "All day"
-                        } else {
-                            DateUtils.formatDateTime(
-                                appContext,
-                                start,
-                                DateUtils.FORMAT_SHOW_TIME
-                            )
-                        }
+                        val timeStr = DateUtils.formatDateTime(
+                            appContext,
+                            start,
+                            DateUtils.FORMAT_SHOW_TIME
+                        )
                         events.add("$title • $timeStr")
                     }
                     if (events.isNotEmpty()) {
