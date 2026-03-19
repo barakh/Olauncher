@@ -405,7 +405,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val beginTime = System.currentTimeMillis()
-                val endTime = beginTime + DateUtils.DAY_IN_MILLIS * 2
+                val endTime = beginTime + DateUtils.DAY_IN_MILLIS * 3 // Look up to 3 days ahead
                 val builder = CalendarContract.Instances.CONTENT_URI.buildUpon()
                 ContentUris.appendId(builder, beginTime)
                 ContentUris.appendId(builder, endTime)
@@ -438,12 +438,20 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         val title = it.getString(0)
                         val start = it.getLong(1)
 
-                        val timeStr = DateUtils.formatDateTime(
+                        val isToday = android.text.format.DateUtils.isToday(start)
+                        val flags = if (isToday) {
+                            android.text.format.DateUtils.FORMAT_SHOW_TIME
+                        } else {
+                            android.text.format.DateUtils.FORMAT_SHOW_TIME or android.text.format.DateUtils.FORMAT_SHOW_WEEKDAY or android.text.format.DateUtils.FORMAT_ABBREV_ALL
+                        }
+
+                        val timeStr = android.text.format.DateUtils.formatDateTime(
                             appContext,
                             start,
-                            DateUtils.FORMAT_SHOW_TIME
+                            flags
                         )
-                        events.add("$timeStr $title")
+                        val displayStr = if (isToday) "Today, $timeStr $title" else "$timeStr $title"
+                        events.add(displayStr)
                     }
                     if (events.isNotEmpty()) {
                         calendarEvent.postValue(events)
