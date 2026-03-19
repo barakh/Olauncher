@@ -16,6 +16,11 @@ import app.olauncher.R
 import app.olauncher.data.DailyReminder
 import app.olauncher.data.Prefs
 import app.olauncher.databinding.FragmentPluginsBinding
+import android.provider.CalendarContract
+import androidx.activity.result.contract.ActivityResultContracts
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.core.content.ContextCompat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class PluginsFragment : Fragment(), View.OnClickListener {
@@ -25,6 +30,12 @@ class PluginsFragment : Fragment(), View.OnClickListener {
 
     private var _binding: FragmentPluginsBinding? = null
     private val binding get() = _binding!!
+
+    private val requestCalendarPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+        if (isGranted) {
+            showCalendarSelectionDialog()
+        }
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentPluginsBinding.inflate(inflater, container, false)
@@ -42,6 +53,22 @@ class PluginsFragment : Fragment(), View.OnClickListener {
         populateDailyReminderUI()
         populateCalendarToggle()
         initClickListeners()
+        initObservers()
+    }
+
+    private fun initObservers() {
+        viewModel.testCalendarEvents.observe(viewLifecycleOwner) { events ->
+            val message = if (events.isEmpty()) {
+                "No upcoming events found in the next 7 days."
+            } else {
+                events.joinToString("\n\n")
+            }
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle(R.string.test_calendar)
+                .setMessage(message)
+                .setPositiveButton(R.string.okay, null)
+                .show()
+        }
     }
 
     override fun onClick(view: View) {
@@ -50,6 +77,8 @@ class PluginsFragment : Fragment(), View.OnClickListener {
             R.id.showDailyReminder -> toggleDailyReminder()
             R.id.btnAddReminder -> addNewReminder()
             R.id.showCalendarEvents -> toggleCalendar()
+            R.id.btnSelectCalendars -> checkCalendarPermissionAndShowDialog()
+            R.id.btnTestCalendar -> viewModel.testCalendarAgenda()
         }
     }
 
@@ -58,6 +87,8 @@ class PluginsFragment : Fragment(), View.OnClickListener {
         binding.showDailyReminder.setOnClickListener(this)
         binding.btnAddReminder.setOnClickListener(this)
         binding.showCalendarEvents.setOnClickListener(this)
+        binding.btnSelectCalendars.setOnClickListener(this)
+        binding.btnTestCalendar.setOnClickListener(this)
     }
 
     private fun togglePermanentNote() {
@@ -78,6 +109,71 @@ class PluginsFragment : Fragment(), View.OnClickListener {
 
     private fun populateCalendarToggle() {
         binding.showCalendarEvents.text = getString(if (prefs.showCalendarEvents) R.string.on else R.string.off)
+        binding.btnSelectCalendars.isVisible = prefs.showCalendarEvents
+        binding.btnTestCalendar.isVisible = prefs.showCalendarEvents
+    }
+
+    private fun checkCalendarPermissionAndShowDialog() {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED) {
+            showCalendarSelectionDialog()
+        } else {
+            requestCalendarPermissionLauncher.launch(Manifest.permission.READ_CALENDAR)
+        }
+    }
+
+    private fun showCalendarSelectionDialog() {
+        val projection = arrayOf(
+            CalendarContract.Calendars._ID,
+            CalendarContract.Calendars.CALENDAR_DISPLAY_NAME,
+            CalendarContract.Calendars.ACCOUNT_NAME
+        )
+
+        val cursor = requireContext().contentResolver.query(
+            CalendarContract.Calendars.CONTENT_URI,
+            projection,
+            null,
+            null,
+            CalendarContract.Calendars.CALENDAR_DISPLAY_NAME + " ASC"
+        )
+
+        val calendarIds = mutableListOf<String>()
+        val calendarNames = mutableListOf<String>()
+        val checkedItems = mutableListOf<Boolean>()
+
+        cursor?.use {
+            while (it.moveToNext()) {
+                val id = it.getString(0)
+                val name = it.getString(1)
+                val account = it.getString(2)
+                calendarIds.add(id)
+                calendarNames.add("$name ($account)")
+                checkedItems.add(prefs.selectedCalendars.contains(id))
+            }
+        }
+
+        if (calendarIds.isEmpty()) {
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle(R.string.select_calendars)
+                .setMessage("No calendars found")
+                .setPositiveButton(R.string.okay, null)
+                .show()
+            return
+        }
+
+        val selectedIds = prefs.selectedCalendars.toMutableSet()
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.select_calendars)
+            .setMultiChoiceItems(calendarNames.toTypedArray(), checkedItems.toBooleanArray()) { _, which, isChecked ->
+                val id = calendarIds[which]
+                if (isChecked) selectedIds.add(id) else selectedIds.remove(id)
+            }
+            .setPositiveButton(R.string.okay) { _, _ ->
+                prefs.selectedCalendars = selectedIds
+                viewModel.refreshHome(true)
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
     }
 
     private fun toggleCalendar() {

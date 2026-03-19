@@ -116,8 +116,8 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
 
     override fun onResume() {
         super.onResume()
+        populateHomeScreen(false)
         if (prefs.autoOrderApps) viewModel.getAutoOrderedApps()
-        else populateHomeScreen(false)
         viewModel.isOlauncherDefault()
         viewModel.updateQuarantineCount()
         if (prefs.showStatusBar) showStatusBar()
@@ -268,12 +268,17 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         viewModel.refreshHome.observe(viewLifecycleOwner) { populateHomeScreen(it) }
         viewModel.homeAppAlignment.observe(viewLifecycleOwner) { setHomeAlignment(it) }
         viewModel.toggleDateTime.observe(viewLifecycleOwner) { populateDateTime() }
-        viewModel.calendarEvent.observe(viewLifecycleOwner) { event ->
-            if (event != null) {
-                binding.tvCalendarEvent.text = event
-                binding.tvCalendarEvent.isVisible = true
+        viewModel.calendarEvent.observe(viewLifecycleOwner) { events ->
+            if (events != null) {
+                binding.calendarEventsContainer.isVisible = true
+                binding.tvCalendarEvent1.text = events.getOrNull(0)
+                binding.tvCalendarEvent2.text = events.getOrNull(1)
+                binding.tvCalendarEvent3.text = events.getOrNull(2)
+                binding.tvCalendarEvent1.isVisible = events.size >= 1
+                binding.tvCalendarEvent2.isVisible = events.size >= 2
+                binding.tvCalendarEvent3.isVisible = events.size >= 3
             } else {
-                binding.tvCalendarEvent.isVisible = false
+                binding.calendarEventsContainer.isVisible = false
             }
         }
         viewModel.screenTimeValue.observe(viewLifecycleOwner) {
@@ -541,7 +546,9 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     private fun setHomeAlignment(horizontalGravity: Int = prefs.homeAlignment) {
 //        binding.homeAppsLayout.gravity = horizontalGravity or verticalGravity
         binding.dateTimeLayout.gravity = horizontalGravity
-        binding.tvCalendarEvent.gravity = horizontalGravity
+        binding.tvCalendarEvent1.gravity = horizontalGravity
+        binding.tvCalendarEvent2.gravity = horizontalGravity
+        binding.tvCalendarEvent3.gravity = horizontalGravity
         homeAppViews.forEach { it.gravity = horizontalGravity }
     }
 
@@ -616,7 +623,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
 
     private fun populateCalendarEvents() {
         if (!prefs.showCalendarEvents) {
-            binding.tvCalendarEvent.isVisible = false
+            binding.calendarEventsContainer.isVisible = false
             return
         }
 
@@ -630,7 +637,9 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         }
 
         viewModel.getNextCalendarEvent()
-        binding.tvCalendarEvent.gravity = prefs.homeAlignment
+        binding.tvCalendarEvent1.gravity = prefs.homeAlignment
+        binding.tvCalendarEvent2.gravity = prefs.homeAlignment
+        binding.tvCalendarEvent3.gravity = prefs.homeAlignment
     }
 
     private fun requestCalendarPermission() {

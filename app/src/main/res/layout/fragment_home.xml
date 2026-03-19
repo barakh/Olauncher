@@ -56,9 +56,9 @@
         android:layout_height="match_parent"
         android:gravity="center_vertical"
         android:paddingHorizontal="20dp"
-        android:paddingTop="212dp"
+        android:paddingTop="180dp"
         android:columnCount="2"
-        android:paddingBottom="48dp">
+        android:paddingBottom="24dp">
 
         <TextView
             android:id="@+id/homeApp1"
@@ -395,20 +395,55 @@
 
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/tvCalendarEvent"
-        style="@style/TextSmall"
+    <LinearLayout
+        android:id="@+id/calendarEventsContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:layout_marginHorizontal="20dp"
-        android:layout_marginBottom="116dp"
-        android:ellipsize="end"
-        android:gravity="center"
-        android:maxLines="3"
+        android:layout_marginBottom="148dp"
+        android:orientation="vertical"
         android:visibility="gone"
-        tools:text="Calendar event • 10:00 AM"
-        tools:visibility="visible" />
+        tools:visibility="visible">
+
+        <TextView
+            android:id="@+id/tvCalendarEvent1"
+            style="@style/TextSmall"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:maxLines="1"
+            android:textSize="14sp"
+            tools:text="10:00 AM Meeting" />
+
+        <TextView
+            android:id="@+id/tvCalendarEvent2"
+            style="@style/TextSmall"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:maxLines="1"
+            android:textSize="14sp"
+            android:visibility="gone"
+            tools:text="12:00 PM Lunch"
+            tools:visibility="visible" />
+
+        <TextView
+            android:id="@+id/tvCalendarEvent3"
+            style="@style/TextSmall"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:maxLines="1"
+            android:textSize="14sp"
+            android:visibility="gone"
+            tools:text="02:00 PM Coffee"
+            tools:visibility="visible" />
+
+    </LinearLayout>
 
     <FrameLayout
         android:id="@+id/confettiContainer"

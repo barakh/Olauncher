@@ -41,9 +41,35 @@ import java.util.concurrent.TimeUnit
 import kotlin.math.max
 
 
+import android.database.ContentObserver
+import android.os.Handler
+import android.os.Looper
+
 class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val appContext by lazy { application.applicationContext }
     private val prefs = Prefs(appContext)
+
+    private val calendarObserver = object : ContentObserver(Handler(Looper.getMainLooper())) {
+        override fun onChange(selfChange: Boolean) {
+            // Some providers take a moment to update instances after events change
+            Handler(Looper.getMainLooper()).postDelayed({
+                getNextCalendarEvent()
+            }, 1000)
+        }
+    }
+
+    init {
+        appContext.contentResolver.registerContentObserver(
+            CalendarContract.CONTENT_URI,
+            true,
+            calendarObserver
+        )
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        appContext.contentResolver.unregisterContentObserver(calendarObserver)
+    }
 
     val firstOpen = MutableLiveData<Boolean>()
     val refreshHome = MutableLiveData<Boolean>()
@@ -59,7 +85,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val screenTimeValue = MutableLiveData<String>()
     val autoOrderedApps = MutableLiveData<List<AppModel>>()
     val quarantineCount = MutableLiveData<Int>()
-    val calendarEvent = MutableLiveData<String?>()
+    val calendarEvent = MutableLiveData<List<String>?>()
+    val testCalendarEvents = SingleLiveEvent<List<String>>()
 
     val showDialog = SingleLiveEvent<String>()
     val checkForMessages = SingleLiveEvent<Unit?>()
@@ -323,6 +350,52 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun testCalendarAgenda() {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val beginTime = System.currentTimeMillis()
+                val endTime = beginTime + DateUtils.DAY_IN_MILLIS * 7 // Look a week ahead for testing
+                val builder = CalendarContract.Instances.CONTENT_URI.buildUpon()
+                ContentUris.appendId(builder, beginTime)
+                ContentUris.appendId(builder, endTime)
+
+                val projection = arrayOf(
+                    CalendarContract.Instances.TITLE,
+                    CalendarContract.Instances.BEGIN,
+                    CalendarContract.Instances.CALENDAR_ID
+                )
+
+                // Query all events regardless of selection, but within the next 7 days
+                val cursor = appContext.contentResolver.query(
+                    builder.build(),
+                    projection,
+                    "${CalendarContract.Instances.ALL_DAY} = 0",
+                    null,
+                    "${CalendarContract.Instances.BEGIN} ASC"
+                )
+
+                cursor?.use {
+                    val events = mutableListOf<String>()
+                    while (it.moveToNext() && events.size < 5) {
+                        val title = it.getString(0)
+                        val start = it.getLong(1)
+
+                        val timeStr = DateUtils.formatDateTime(
+                            appContext,
+                            start,
+                            DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_SHOW_DATE
+                        )
+                        events.add("$timeStr - $title")
+                    }
+                    testCalendarEvents.postValue(events)
+                } ?: testCalendarEvents.postValue(emptyList())
+            } catch (e: Exception) {
+                e.printStackTrace()
+                testCalendarEvents.postValue(emptyList())
+            }
+        }
+    }
+
     fun getNextCalendarEvent() {
         if (!prefs.showCalendarEvents) {
             calendarEvent.postValue(null)
@@ -340,13 +413,21 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 val projection = arrayOf(
                     CalendarContract.Instances.TITLE,
                     CalendarContract.Instances.BEGIN,
-                    CalendarContract.Instances.ALL_DAY
+                    CalendarContract.Instances.ALL_DAY,
+                    CalendarContract.Instances.CALENDAR_ID
                 )
+
+                val selection = if (prefs.selectedCalendars.isNotEmpty()) {
+                    val calendarIds = prefs.selectedCalendars.joinToString(",")
+                    "${CalendarContract.Instances.ALL_DAY} = 0 AND ${CalendarContract.Instances.CALENDAR_ID} IN ($calendarIds)"
+                } else {
+                    "${CalendarContract.Instances.ALL_DAY} = 0"
+                }
 
                 val cursor = appContext.contentResolver.query(
                     builder.build(),
                     projection,
-                    "${CalendarContract.Instances.ALL_DAY} = 0",
+                    selection,
                     null,
                     "${CalendarContract.Instances.BEGIN} ASC"
                 )
@@ -362,10 +443,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                             start,
                             DateUtils.FORMAT_SHOW_TIME
                         )
-                        events.add("$title • $timeStr")
+                        events.add("$timeStr $title")
                     }
                     if (events.isNotEmpty()) {
-                        calendarEvent.postValue(events.joinToString("\n"))
+                        calendarEvent.postValue(events)
                     } else {
                         calendarEvent.postValue(null)
                     }
