@@ -4,6 +4,7 @@ import android.app.admin.DevicePolicyManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.LauncherApps
+import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.graphics.Color
@@ -23,7 +24,9 @@ import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
+import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.core.view.setPadding
@@ -65,6 +68,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import android.Manifest
 
 
 class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener {
@@ -72,6 +76,11 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     private lateinit var prefs: Prefs
     private lateinit var viewModel: MainViewModel
     private lateinit var deviceManager: DevicePolicyManager
+    private val requestCalendarPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+        if (isGranted) {
+            viewModel.getNextCalendarEvent()
+        }
+    }
 
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
@@ -259,6 +268,14 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         viewModel.refreshHome.observe(viewLifecycleOwner) { populateHomeScreen(it) }
         viewModel.homeAppAlignment.observe(viewLifecycleOwner) { setHomeAlignment(it) }
         viewModel.toggleDateTime.observe(viewLifecycleOwner) { populateDateTime() }
+        viewModel.calendarEvent.observe(viewLifecycleOwner) { event ->
+            if (event != null) {
+                binding.tvCalendarEvent.text = event
+                binding.tvCalendarEvent.isVisible = true
+            } else {
+                binding.tvCalendarEvent.isVisible = false
+            }
+        }
         viewModel.screenTimeValue.observe(viewLifecycleOwner) {
             it?.let {
                 binding.tvScreenTime.text = it
@@ -524,6 +541,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     private fun setHomeAlignment(horizontalGravity: Int = prefs.homeAlignment) {
 //        binding.homeAppsLayout.gravity = horizontalGravity or verticalGravity
         binding.dateTimeLayout.gravity = horizontalGravity
+        binding.tvCalendarEvent.gravity = horizontalGravity
         homeAppViews.forEach { it.gravity = horizontalGravity }
     }
 
@@ -576,6 +594,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         if (appCountUpdated) hideHomeApps()
         populateDateTime()
         populateReminders()
+        populateCalendarEvents()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
             populateScreenTime()
@@ -593,6 +612,29 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
                 prefs.setAppPackage(i, "")
             }
         }
+    }
+
+    private fun populateCalendarEvents() {
+        if (!prefs.showCalendarEvents) {
+            binding.tvCalendarEvent.isVisible = false
+            return
+        }
+
+        if (androidx.core.content.ContextCompat.checkSelfPermission(
+                requireContext(),
+                android.Manifest.permission.READ_CALENDAR
+            ) != android.content.pm.PackageManager.PERMISSION_GRANTED
+        ) {
+            requestCalendarPermission()
+            return
+        }
+
+        viewModel.getNextCalendarEvent()
+        binding.tvCalendarEvent.gravity = prefs.homeAlignment
+    }
+
+    private fun requestCalendarPermission() {
+        requestCalendarPermissionLauncher.launch(Manifest.permission.READ_CALENDAR)
     }
 
     private fun setHomeAppText(textView: TextView, appName: String, packageName: String, userString: String): Boolean {

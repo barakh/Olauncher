@@ -395,6 +395,21 @@
 
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/tvCalendarEvent"
+        style="@style/TextSmall"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginBottom="116dp"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:maxLines="1"
+        android:visibility="gone"
+        tools:text="Calendar event • 10:00 AM"
+        tools:visibility="visible" />
+
     <FrameLayout
         android:id="@+id/confettiContainer"
         android:layout_width="match_parent"

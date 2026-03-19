@@ -5,9 +5,12 @@ import android.app.Service.USAGE_STATS_SERVICE
 import android.app.usage.UsageEvents
 import android.app.usage.UsageStatsManager
 import android.content.ComponentName
+import android.content.ContentUris
 import android.content.Context
 import android.content.pm.LauncherApps
 import android.os.UserHandle
+import android.provider.CalendarContract
+import android.text.format.DateUtils
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
@@ -56,6 +59,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val screenTimeValue = MutableLiveData<String>()
     val autoOrderedApps = MutableLiveData<List<AppModel>>()
     val quarantineCount = MutableLiveData<Int>()
+    val calendarEvent = MutableLiveData<String?>()
 
     val showDialog = SingleLiveEvent<String>()
     val checkForMessages = SingleLiveEvent<Unit?>()
@@ -316,6 +320,63 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 }
             }
             quarantineCount.postValue(count)
+        }
+    }
+
+    fun getNextCalendarEvent() {
+        if (!prefs.showCalendarEvents) {
+            calendarEvent.postValue(null)
+            return
+        }
+
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val beginTime = System.currentTimeMillis()
+                val endTime = beginTime + DateUtils.DAY_IN_MILLIS * 2
+                val builder = CalendarContract.Instances.CONTENT_URI.buildUpon()
+                ContentUris.appendId(builder, beginTime)
+                ContentUris.appendId(builder, endTime)
+
+                val projection = arrayOf(
+                    CalendarContract.Instances.TITLE,
+                    CalendarContract.Instances.BEGIN,
+                    CalendarContract.Instances.ALL_DAY
+                )
+
+                val cursor = appContext.contentResolver.query(
+                    builder.build(),
+                    projection,
+                    null,
+                    null,
+                    "${CalendarContract.Instances.BEGIN} ASC"
+                )
+
+                cursor?.use {
+                    if (it.moveToFirst()) {
+                        val title = it.getString(0)
+                        val start = it.getLong(1)
+                        val allDay = it.getInt(2) != 0
+
+                        val timeStr = if (allDay) {
+                            "All day"
+                        } else {
+                            DateUtils.formatDateTime(
+                                appContext,
+                                start,
+                                DateUtils.FORMAT_SHOW_TIME
+                            )
+                        }
+                        calendarEvent.postValue("$title • $timeStr")
+                    } else {
+                        calendarEvent.postValue(null)
+                    }
+                } ?: calendarEvent.postValue(null)
+            } catch (e: SecurityException) {
+                calendarEvent.postValue(null)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                calendarEvent.postValue(null)
+            }
         }
     }
 

@@ -40,6 +40,7 @@ class PluginsFragment : Fragment(), View.OnClickListener {
 
         populatePermanentNoteToggle()
         populateDailyReminderUI()
+        populateCalendarToggle()
         initClickListeners()
     }
 
@@ -48,6 +49,7 @@ class PluginsFragment : Fragment(), View.OnClickListener {
             R.id.showPermanentNote -> togglePermanentNote()
             R.id.showDailyReminder -> toggleDailyReminder()
             R.id.btnAddReminder -> addNewReminder()
+            R.id.showCalendarEvents -> toggleCalendar()
         }
     }
 
@@ -55,6 +57,7 @@ class PluginsFragment : Fragment(), View.OnClickListener {
         binding.showPermanentNote.setOnClickListener(this)
         binding.showDailyReminder.setOnClickListener(this)
         binding.btnAddReminder.setOnClickListener(this)
+        binding.showCalendarEvents.setOnClickListener(this)
     }
 
     private fun togglePermanentNote() {
@@ -70,6 +73,16 @@ class PluginsFragment : Fragment(), View.OnClickListener {
     private fun toggleDailyReminder() {
         prefs.showDailyReminder = !prefs.showDailyReminder
         populateDailyReminderUI()
+        viewModel.refreshHome(true)
+    }
+
+    private fun populateCalendarToggle() {
+        binding.showCalendarEvents.text = getString(if (prefs.showCalendarEvents) R.string.on else R.string.off)
+    }
+
+    private fun toggleCalendar() {
+        prefs.showCalendarEvents = !prefs.showCalendarEvents
+        populateCalendarToggle()
         viewModel.refreshHome(true)
     }
 

@@ -55,6 +55,7 @@ class Prefs(context: Context) {
     private val QUICK_REMINDERS = "QUICK_REMINDERS"
     private val SHOW_DAILY_REMINDER = "SHOW_DAILY_REMINDER"
     private val DAILY_REMINDERS = "DAILY_REMINDERS"
+    private val SHOW_CALENDAR_EVENTS = "SHOW_CALENDAR_EVENTS"
     private val LAST_CLICKED_TIME_PREFIX = "LAST_CLICKED_TIME_"
 
     private val APP_NAME_SWIPE_LEFT = "APP_NAME_SWIPE_LEFT"
@@ -247,6 +248,10 @@ class Prefs(context: Context) {
     var showDailyReminder: Boolean
         get() = prefs.getBoolean(SHOW_DAILY_REMINDER, false)
         set(value) = prefs.edit().putBoolean(SHOW_DAILY_REMINDER, value).apply()
+
+    var showCalendarEvents: Boolean
+        get() = prefs.getBoolean(SHOW_CALENDAR_EVENTS, false)
+        set(value) = prefs.edit().putBoolean(SHOW_CALENDAR_EVENTS, value).apply()
 
     var dailyReminders: List<DailyReminder>
         get() {
