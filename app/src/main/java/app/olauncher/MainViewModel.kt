@@ -94,10 +94,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val showAntiDoomDialog = SingleLiveEvent<AntiDoomBlockedInfo>()
     val clearPermanentNoteFocus = SingleLiveEvent<Unit?>()
 
-    fun selectedApp(appModel: AppModel, flag: Int): Boolean {
+    fun selectedApp(appModel: AppModel, flag: Int, trackLaunch: Boolean = true): Boolean {
         when (flag) {
             Constants.FLAG_LAUNCH_APP, Constants.FLAG_ANTIDOOM_APPS, Constants.FLAG_QUARANTINED_APPS -> {
-                return launchSelectedApp(appModel)
+                return launchSelectedApp(appModel, trackLaunch)
             }
 
             Constants.FLAG_HIDDEN_APPS -> {
@@ -131,10 +131,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         return true
     }
 
-    private fun launchSelectedApp(appModel: AppModel): Boolean {
-        prefs.setLastClickedTime(appModel.appPackage, appModel.user.toString(), System.currentTimeMillis())
-        if (prefs.autoOrderApps) {
-            getAutoOrderedApps()
+    private fun launchSelectedApp(appModel: AppModel, trackLaunch: Boolean = true): Boolean {
+        if (trackLaunch) {
+            prefs.setLastClickedTime(appModel.appPackage, appModel.user.toString(), System.currentTimeMillis())
+            if (prefs.autoOrderApps) {
+                getAutoOrderedApps()
+            }
         }
         if (prefs.isAntiDoomApp(appModel.appPackage, appModel.user.toString())) {
             val hiddenUntil = prefs.getAntiDoomHiddenUntil(appModel.appPackage, appModel.user.toString())
