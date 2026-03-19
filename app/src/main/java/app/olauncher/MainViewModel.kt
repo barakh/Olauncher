@@ -352,7 +352,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 )
 
                 cursor?.use {
-                    if (it.moveToFirst()) {
+                    val events = mutableListOf<String>()
+                    while (it.moveToNext() && events.size < 3) {
                         val title = it.getString(0)
                         val start = it.getLong(1)
                         val allDay = it.getInt(2) != 0
@@ -366,7 +367,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                                 DateUtils.FORMAT_SHOW_TIME
                             )
                         }
-                        calendarEvent.postValue("$title • $timeStr")
+                        events.add("$title • $timeStr")
+                    }
+                    if (events.isNotEmpty()) {
+                        calendarEvent.postValue(events.joinToString("\n"))
                     } else {
                         calendarEvent.postValue(null)
                     }

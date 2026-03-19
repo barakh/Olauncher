@@ -404,7 +404,7 @@
         android:layout_marginBottom="116dp"
         android:ellipsize="end"
         android:gravity="center"
-        android:maxLines="1"
+        android:maxLines="3"
         android:visibility="gone"
         tools:text="Calendar event • 10:00 AM"
         tools:visibility="visible" />
