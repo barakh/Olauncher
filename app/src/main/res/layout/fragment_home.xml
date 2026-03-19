@@ -401,7 +401,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:layout_marginHorizontal="20dp"
-        android:layout_marginBottom="148dp"
+        android:layout_marginBottom="198dp"
         android:orientation="vertical"
         android:visibility="gone"
         tools:visibility="visible">
