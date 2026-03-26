@@ -132,6 +132,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
             R.id.setDefaultLauncher -> viewModel.resetLauncherLiveData.call()
             R.id.tvScreenTime -> openScreenTimeDigitalWellbeing()
             R.id.quarantineLayout -> showQuarantinedApps()
+            R.id.btnAddQuickReminder -> showAddQuickReminderDialog()
 
             in homeAppViews.map { it.id } -> {
                 try { // Launch app
@@ -350,9 +351,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     }
 
     private fun initPermanentNote() {
-        binding.btnAddQuickReminder.setOnClickListener {
-            showAddQuickReminderDialog()
-        }
+        binding.btnAddQuickReminder.setOnClickListener(this)
     }
 
     private fun showAddQuickReminderDialog() {
