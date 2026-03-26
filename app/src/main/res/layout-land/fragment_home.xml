@@ -13,435 +13,447 @@
     <FrameLayout
         android:id="@+id/lock"
         android:layout_width="match_parent"
-        android:layout_height="1dp"
+        android:layout_height="match_parent"
         android:contentDescription="@string/lock_layout_description" />
 
-    <!-- Clock and calendar-->
     <LinearLayout
-        android:id="@+id/dateTimeLayout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="48dp"
-        android:gravity="center_horizontal"
-        android:orientation="vertical"
-        android:visibility="gone"
-        tools:visibility="visible">
-
-        <TextClock
-            android:id="@+id/clock"
-            style="@style/TextDefault"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-light"
-            android:format12Hour="h:mm"
-            android:textSize="@dimen/time_size"
-            tools:text="02:34" />
-
-        <TextView
-            android:id="@+id/date"
-            style="@style/TextDefault"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:format12Hour="EEE, dd MMM"
-            android:format24Hour="EEE, dd MMM"
-            android:paddingHorizontal="3dp"
-            android:textSize="@dimen/date_size"
-            tools:text="Thu, 30 Dec" />
-    </LinearLayout>
- 
-    <!-- Home apps-->
-    <GridLayout
-        android:id="@+id/homeAppsLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginHorizontal="74dp"
-        android:gravity="center_vertical"
-        android:columnCount="2"
-        android:paddingVertical="@dimen/home_app_padding_vertical">
-
-        <TextView
-            android:id="@+id/homeApp1"
-            style="@style/TextLarge"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_columnWeight="1"
-            android:ellipsize="end"
-            android:hint="@string/app"
-            android:maxLines="1"
-            android:paddingVertical="@dimen/home_app_padding_vertical"
-            android:tag="1"
-            android:visibility="gone"
-            tools:visibility="visible" />
-
-        <TextView
-            android:id="@+id/homeApp2"
-            style="@style/TextLarge"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_columnWeight="1"
-            android:ellipsize="end"
-            android:hint="@string/app"
-            android:maxLines="1"
-            android:paddingVertical="@dimen/home_app_padding_vertical"
-            android:tag="2"
-            android:visibility="gone"
-            tools:visibility="visible" />
-
-        <TextView
-            android:id="@+id/homeApp3"
-            style="@style/TextLarge"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_columnWeight="1"
-            android:ellipsize="end"
-            android:hint="@string/app"
-            android:maxLines="1"
-            android:paddingVertical="@dimen/home_app_padding_vertical"
-            android:tag="3"
-            android:visibility="gone"
-            tools:visibility="visible" />
-
-        <TextView
-            android:id="@+id/homeApp4"
-            style="@style/TextLarge"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_columnWeight="1"
-            android:ellipsize="end"
-            android:hint="@string/app"
-            android:maxLines="1"
-            android:paddingVertical="@dimen/home_app_padding_vertical"
-            android:tag="4"
-            android:visibility="gone"
-            tools:visibility="visible" />
-
-        <TextView
-            android:id="@+id/homeApp5"
-            style="@style/TextLarge"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_columnWeight="1"
-            android:ellipsize="end"
-            android:hint="@string/app"
-            android:maxLines="1"
-            android:paddingVertical="@dimen/home_app_padding_vertical"
-            android:tag="5"
-            android:visibility="gone"
-            tools:visibility="visible" />
-
-        <TextView
-            android:id="@+id/homeApp6"
-            style="@style/TextLarge"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_columnWeight="1"
-            android:ellipsize="end"
-            android:hint="@string/app"
-            android:maxLines="1"
-            android:paddingVertical="@dimen/home_app_padding_vertical"
-            android:tag="6"
-            android:visibility="gone"
-            tools:visibility="visible" />
-
-        <TextView
-            android:id="@+id/homeApp7"
-            style="@style/TextLarge"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_columnWeight="1"
-            android:ellipsize="end"
-            android:hint="@string/app"
-            android:maxLines="1"
-            android:paddingVertical="@dimen/home_app_padding_vertical"
-            android:tag="7"
-            android:visibility="gone"
-            tools:visibility="visible" />
-
-        <TextView
-            android:id="@+id/homeApp8"
-            style="@style/TextLarge"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_columnWeight="1"
-            android:ellipsize="end"
-            android:hint="@string/app"
-            android:maxLines="1"
-            android:paddingVertical="@dimen/home_app_padding_vertical"
-            android:tag="8"
-            android:visibility="gone"
-            tools:visibility="visible" />
-
-        <TextView
-            android:id="@+id/homeApp9"
-            style="@style/TextLarge"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_columnWeight="1"
-            android:ellipsize="end"
-            android:hint="@string/app"
-            android:maxLines="1"
-            android:paddingVertical="@dimen/home_app_padding_vertical"
-            android:tag="9"
-            android:visibility="gone"
-            tools:visibility="visible" />
-
-        <TextView
-            android:id="@+id/homeApp10"
-            style="@style/TextLarge"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_columnWeight="1"
-            android:ellipsize="end"
-            android:hint="@string/app"
-            android:maxLines="1"
-            android:paddingVertical="@dimen/home_app_padding_vertical"
-            android:tag="10"
-            android:visibility="gone"
-            tools:visibility="visible" />
-
-        <TextView
-            android:id="@+id/homeApp11"
-            style="@style/TextLarge"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_columnWeight="1"
-            android:ellipsize="end"
-            android:hint="@string/app"
-            android:maxLines="1"
-            android:paddingVertical="@dimen/home_app_padding_vertical"
-            android:tag="11"
-            android:visibility="gone"
-            tools:visibility="visible" />
-
-        <TextView
-            android:id="@+id/homeApp12"
-            style="@style/TextLarge"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_columnWeight="1"
-            android:ellipsize="end"
-            android:hint="@string/app"
-            android:maxLines="1"
-            android:paddingVertical="@dimen/home_app_padding_vertical"
-            android:tag="12"
-            android:visibility="gone"
-            tools:visibility="visible" />
-
-        <TextView
-            android:id="@+id/homeApp13"
-            style="@style/TextLarge"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_columnWeight="1"
-            android:ellipsize="end"
-            android:hint="@string/app"
-            android:maxLines="1"
-            android:paddingVertical="@dimen/home_app_padding_vertical"
-            android:tag="13"
-            android:visibility="gone"
-            tools:visibility="visible" />
-
-        <TextView
-            android:id="@+id/homeApp14"
-            style="@style/TextLarge"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_columnWeight="1"
-            android:ellipsize="end"
-            android:hint="@string/app"
-            android:maxLines="1"
-            android:paddingVertical="@dimen/home_app_padding_vertical"
-            android:tag="14"
-            android:visibility="gone"
-            tools:visibility="visible" />
-
-        <TextView
-            android:id="@+id/homeApp15"
-            style="@style/TextLarge"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_columnWeight="1"
-            android:ellipsize="end"
-            android:hint="@string/app"
-            android:maxLines="1"
-            android:paddingVertical="@dimen/home_app_padding_vertical"
-            android:tag="15"
-            android:visibility="gone"
-            tools:visibility="visible" />
-
-        <TextView
-            android:id="@+id/homeApp16"
-            style="@style/TextLarge"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_columnWeight="1"
-            android:ellipsize="end"
-            android:hint="@string/app"
-            android:maxLines="1"
-            android:paddingVertical="@dimen/home_app_padding_vertical"
-            android:tag="16"
-            android:visibility="gone"
-            tools:visibility="visible" />
-
-    </GridLayout>
-
-    <TextView
-        android:id="@+id/firstRunTips"
-        style="@style/TextSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|center_horizontal"
-        android:layout_marginHorizontal="8dp"
-        android:layout_marginBottom="56dp"
-        android:gravity="center"
-        android:text="@string/swipe_up_for_apps" />
-
-    <!-- Set default launcher -->
-    <TextView
-        android:id="@+id/setDefaultLauncher"
-        style="@style/TextMedium"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|center_horizontal"
-        android:layout_marginStart="24dp"
-        android:layout_marginEnd="24dp"
-        android:layout_marginBottom="56dp"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:text="@string/set_as_default_launcher_u"
-        android:visibility="gone" />
-
-    <!-- Screen time-->
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/tvScreenTime"
-        style="@style/TextSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end"
-        android:layout_marginHorizontal="10dp"
-        android:layout_marginTop="72dp"
-        android:gravity="center"
-        android:padding="10dp"
-        android:textSize="@dimen/date_size"
-        android:visibility="gone"
-        tools:text="2h 11m"
-        tools:visibility="visible" />
-
-    <!-- Quarantined apps count -->
-    <LinearLayout
-        android:id="@+id/quarantineLayout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end"
-        android:layout_marginTop="110dp"
-        android:layout_marginHorizontal="10dp"
-        android:padding="10dp"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:visibility="gone"
-        tools:visibility="visible">
-
-        <TextView
-            android:id="@+id/tvQuarantineIcon"
-            style="@style/TextSmall"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="💀"
-            android:textSize="@dimen/date_size" />
-
-        <TextView
-            android:id="@+id/tvQuarantineCount"
-            style="@style/TextSmall"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
-            android:textSize="@dimen/date_size"
-            tools:text="3" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/permanentNoteContainer"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:layout_marginHorizontal="20dp"
-        android:layout_marginBottom="80dp"
         android:orientation="vertical"
-        android:gravity="center"
-        android:visibility="gone"
-        tools:visibility="visible">
+        android:paddingHorizontal="20dp">
 
-        <com.google.android.material.chip.ChipGroup
-            android:id="@+id/quickRemindersContainer"
-            android:layout_width="wrap_content"
+        <!-- Top section: Clock and Info -->
+        <FrameLayout
+            android:id="@+id/topSection"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            app:chipSpacingHorizontal="8dp"
-            app:chipSpacingVertical="4dp">
+            android:layout_marginTop="48dp">
 
-            <TextView
-                android:id="@+id/btnAddQuickReminder"
+            <LinearLayout
+                android:id="@+id/dateTimeLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <TextClock
+                    android:id="@+id/clock"
+                    style="@style/TextDefault"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif-light"
+                    android:format12Hour="h:mm"
+                    android:textSize="@dimen/time_size"
+                    tools:text="02:34" />
+
+                <TextView
+                    android:id="@+id/date"
+                    style="@style/TextDefault"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="3dp"
+                    android:textSize="@dimen/date_size"
+                    tools:text="Thu, 30 Dec" />
+            </LinearLayout>
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvScreenTime"
                 style="@style/TextSmall"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="8dp"
-                android:text="@string/permanent_note_placeholder"
-                android:textColor="?attr/primaryColor" />
+                android:layout_gravity="end"
+                android:gravity="center"
+                android:padding="10dp"
+                android:textSize="@dimen/date_size"
+                android:visibility="gone"
+                tools:text="2h 11m"
+                tools:visibility="visible" />
 
-        </com.google.android.material.chip.ChipGroup>
+            <LinearLayout
+                android:id="@+id/quarantineLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginTop="40dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="10dp"
+                android:visibility="gone"
+                tools:visibility="visible">
 
-    </LinearLayout>
+                <TextView
+                    android:id="@+id/tvQuarantineIcon"
+                    style="@style/TextSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="💀"
+                    android:textSize="@dimen/date_size" />
 
-    <LinearLayout
-        android:id="@+id/calendarEventsContainer"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:layout_marginHorizontal="20dp"
-        android:layout_marginBottom="148dp"
-        android:orientation="vertical"
-        android:visibility="gone"
-        tools:visibility="visible">
+                <TextView
+                    android:id="@+id/tvQuarantineCount"
+                    style="@style/TextSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:textSize="@dimen/date_size"
+                    tools:text="3" />
+            </LinearLayout>
+        </FrameLayout>
 
-        <TextView
-            android:id="@+id/tvCalendarEvent1"
-            style="@style/TextSmall"
+        <!-- Middle section: Home apps -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginHorizontal="74dp">
+
+            <GridLayout
+                android:id="@+id/homeAppsLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:columnCount="2"
+                android:paddingVertical="@dimen/home_app_padding_vertical">
+
+                <TextView
+                    android:id="@+id/homeApp1"
+                    style="@style/TextLarge"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:ellipsize="end"
+                    android:hint="@string/app"
+                    android:maxLines="1"
+                    android:paddingVertical="@dimen/home_app_padding_vertical"
+                    android:tag="1"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+
+                <TextView
+                    android:id="@+id/homeApp2"
+                    style="@style/TextLarge"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:ellipsize="end"
+                    android:hint="@string/app"
+                    android:maxLines="1"
+                    android:paddingVertical="@dimen/home_app_padding_vertical"
+                    android:tag="2"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+
+                <TextView
+                    android:id="@+id/homeApp3"
+                    style="@style/TextLarge"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:ellipsize="end"
+                    android:hint="@string/app"
+                    android:maxLines="1"
+                    android:paddingVertical="@dimen/home_app_padding_vertical"
+                    android:tag="3"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+
+                <TextView
+                    android:id="@+id/homeApp4"
+                    style="@style/TextLarge"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:ellipsize="end"
+                    android:hint="@string/app"
+                    android:maxLines="1"
+                    android:paddingVertical="@dimen/home_app_padding_vertical"
+                    android:tag="4"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+
+                <TextView
+                    android:id="@+id/homeApp5"
+                    style="@style/TextLarge"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:ellipsize="end"
+                    android:hint="@string/app"
+                    android:maxLines="1"
+                    android:paddingVertical="@dimen/home_app_padding_vertical"
+                    android:tag="5"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+
+                <TextView
+                    android:id="@+id/homeApp6"
+                    style="@style/TextLarge"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:ellipsize="end"
+                    android:hint="@string/app"
+                    android:maxLines="1"
+                    android:paddingVertical="@dimen/home_app_padding_vertical"
+                    android:tag="6"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+
+                <TextView
+                    android:id="@+id/homeApp7"
+                    style="@style/TextLarge"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:ellipsize="end"
+                    android:hint="@string/app"
+                    android:maxLines="1"
+                    android:paddingVertical="@dimen/home_app_padding_vertical"
+                    android:tag="7"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+
+                <TextView
+                    android:id="@+id/homeApp8"
+                    style="@style/TextLarge"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:ellipsize="end"
+                    android:hint="@string/app"
+                    android:maxLines="1"
+                    android:paddingVertical="@dimen/home_app_padding_vertical"
+                    android:tag="8"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+
+                <TextView
+                    android:id="@+id/homeApp9"
+                    style="@style/TextLarge"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:ellipsize="end"
+                    android:hint="@string/app"
+                    android:maxLines="1"
+                    android:paddingVertical="@dimen/home_app_padding_vertical"
+                    android:tag="9"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+
+                <TextView
+                    android:id="@+id/homeApp10"
+                    style="@style/TextLarge"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:ellipsize="end"
+                    android:hint="@string/app"
+                    android:maxLines="1"
+                    android:paddingVertical="@dimen/home_app_padding_vertical"
+                    android:tag="10"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+
+                <TextView
+                    android:id="@+id/homeApp11"
+                    style="@style/TextLarge"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:ellipsize="end"
+                    android:hint="@string/app"
+                    android:maxLines="1"
+                    android:paddingVertical="@dimen/home_app_padding_vertical"
+                    android:tag="11"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+
+                <TextView
+                    android:id="@+id/homeApp12"
+                    style="@style/TextLarge"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:ellipsize="end"
+                    android:hint="@string/app"
+                    android:maxLines="1"
+                    android:paddingVertical="@dimen/home_app_padding_vertical"
+                    android:tag="12"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+
+                <TextView
+                    android:id="@+id/homeApp13"
+                    style="@style/TextLarge"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:ellipsize="end"
+                    android:hint="@string/app"
+                    android:maxLines="1"
+                    android:paddingVertical="@dimen/home_app_padding_vertical"
+                    android:tag="13"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+
+                <TextView
+                    android:id="@+id/homeApp14"
+                    style="@style/TextLarge"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:ellipsize="end"
+                    android:hint="@string/app"
+                    android:maxLines="1"
+                    android:paddingVertical="@dimen/home_app_padding_vertical"
+                    android:tag="14"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+
+                <TextView
+                    android:id="@+id/homeApp15"
+                    style="@style/TextLarge"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:ellipsize="end"
+                    android:hint="@string/app"
+                    android:maxLines="1"
+                    android:paddingVertical="@dimen/home_app_padding_vertical"
+                    android:tag="15"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+
+                <TextView
+                    android:id="@+id/homeApp16"
+                    style="@style/TextLarge"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:ellipsize="end"
+                    android:hint="@string/app"
+                    android:maxLines="1"
+                    android:paddingVertical="@dimen/home_app_padding_vertical"
+                    android:tag="16"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+
+            </GridLayout>
+        </FrameLayout>
+
+        <!-- Bottom section -->
+        <LinearLayout
+            android:id="@+id/bottomSection"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:gravity="center"
-            android:maxLines="1"
-            android:textSize="14sp"
-            tools:text="10:00 AM Meeting" />
+            android:layout_marginBottom="56dp"
+            android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/tvCalendarEvent2"
-            style="@style/TextSmall"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:gravity="center"
-            android:maxLines="1"
-            android:textSize="14sp"
-            android:visibility="gone"
-            tools:text="12:00 PM Lunch"
-            tools:visibility="visible" />
+            <LinearLayout
+                android:id="@+id/calendarEventsContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone"
+                tools:visibility="visible">
 
-        <TextView
-            android:id="@+id/tvCalendarEvent3"
-            style="@style/TextSmall"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:gravity="center"
-            android:maxLines="1"
-            android:textSize="14sp"
-            android:visibility="gone"
-            tools:text="02:00 PM Coffee"
-            tools:visibility="visible" />
+                <TextView
+                    android:id="@+id/tvCalendarEvent1"
+                    style="@style/TextSmall"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:maxLines="1"
+                    android:textSize="14sp"
+                    tools:text="10:00 AM Meeting" />
 
+                <TextView
+                    android:id="@+id/tvCalendarEvent2"
+                    style="@style/TextSmall"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:maxLines="1"
+                    android:textSize="14sp"
+                    android:visibility="gone"
+                    tools:text="12:00 PM Lunch"
+                    tools:visibility="visible" />
+
+                <TextView
+                    android:id="@+id/tvCalendarEvent3"
+                    style="@style/TextSmall"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:maxLines="1"
+                    android:textSize="14sp"
+                    android:visibility="gone"
+                    tools:text="02:00 PM Coffee"
+                    tools:visibility="visible" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/permanentNoteContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/quickRemindersContainer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    app:chipSpacingHorizontal="8dp"
+                    app:chipSpacingVertical="4dp">
+
+                    <TextView
+                        android:id="@+id/btnAddQuickReminder"
+                        style="@style/TextSmall"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:padding="8dp"
+                        android:text="@string/permanent_note_placeholder"
+                        android:textColor="?attr/primaryColor" />
+
+                </com.google.android.material.chip.ChipGroup>
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/firstRunTips"
+                style="@style/TextSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="16dp"
+                android:gravity="center"
+                android:text="@string/swipe_up_for_apps" />
+
+            <!-- Set default launcher -->
+            <TextView
+                android:id="@+id/setDefaultLauncher"
+                style="@style/TextMedium"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="16dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="@string/set_as_default_launcher_u"
+                android:visibility="gone" />
+
+        </LinearLayout>
     </LinearLayout>
 
     <FrameLayout
