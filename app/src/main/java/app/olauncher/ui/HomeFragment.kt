@@ -305,14 +305,27 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
 
     private fun initSwipeTouchListener() {
         val context = requireContext()
-        binding.mainLayout.setOnTouchListener(getSwipeGestureListener(context))
+        val rootListener = getSwipeGestureListener(context)
+        binding.mainLayout.setOnTouchListener(rootListener)
+        binding.lock.setOnTouchListener(rootListener)
+
+        // Apply swipe listener recursively to all children in the layout
+        setSwipeListenerRecursively(binding.homeMainLayout)
 
         val defaultPaddingH = 5.dpToPx()
         val defaultPaddingV = 5.dpToPx()
         homeAppViews.forEach {
             it.setPadding(defaultPaddingH, defaultPaddingV, defaultPaddingH, defaultPaddingV)
-            it.setOnTouchListener(getViewSwipeTouchListener(context, it))
         }
+    }
+
+    private fun setSwipeListenerRecursively(view: View) {
+        if (view is ViewGroup) {
+            for (i in 0 until view.childCount) {
+                setSwipeListenerRecursively(view.getChildAt(i))
+            }
+        }
+        view.setOnTouchListener(getViewSwipeTouchListener(requireContext(), view))
     }
 
 
