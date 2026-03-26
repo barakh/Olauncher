@@ -377,7 +377,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
                 cursor?.use {
                     val events = mutableListOf<String>()
-                    while (it.moveToNext() && events.size < 5) {
+                    val maxEvents = prefs.calendarEventsNum
+                    while (it.moveToNext() && events.size < maxEvents) {
                         val title = it.getString(0)
                         val start = it.getLong(1)
 
@@ -435,7 +436,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
                 cursor?.use {
                     val events = mutableListOf<String>()
-                    while (it.moveToNext() && events.size < 3) {
+                    val maxEvents = prefs.calendarEventsNum
+                    while (it.moveToNext() && events.size < maxEvents) {
                         val title = it.getString(0)
                         val start = it.getLong(1)
 
