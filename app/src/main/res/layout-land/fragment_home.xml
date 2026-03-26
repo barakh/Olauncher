@@ -98,7 +98,6 @@
                     style="@style/TextSmall"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="4dp"
                     android:textSize="@dimen/date_size"
                     tools:text="3" />
             </LinearLayout>
@@ -110,18 +109,13 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
+            android:gravity="center_vertical"
             android:orientation="vertical">
-
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="2" />
 
             <GridLayout
                 android:id="@+id/homeAppsLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="74dp"
                 android:columnCount="2"
                 android:paddingVertical="@dimen/home_app_padding_vertical">
 
