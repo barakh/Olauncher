@@ -427,9 +427,9 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         val paddingV = 8.dpToPx()
         textView.setPadding(paddingH, paddingV, paddingH, paddingV)
 
-        textView.setOnClickListener {
+        textView.setOnTouchListener(getViewSwipeTouchListener(requireContext(), textView) {
             markQuickReminderAsCompleted(textView, text)
-        }
+        })
 
         return textView
     }
@@ -453,9 +453,9 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         val paddingV = 8.dpToPx()
         textView.setPadding(paddingH, paddingV, paddingH, paddingV)
         
-        textView.setOnClickListener {
+        textView.setOnTouchListener(getViewSwipeTouchListener(requireContext(), textView) {
             markReminderAsCompleted(textView, reminder)
-        }
+        })
         
         return textView
     }
@@ -937,7 +937,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         }
     }
 
-    private fun getViewSwipeTouchListener(context: Context, view: View): View.OnTouchListener {
+    private fun getViewSwipeTouchListener(context: Context, view: View, customOnClick: ((View) -> Unit)? = null): View.OnTouchListener {
         return object : ViewSwipeTouchListener(context, view) {
             override fun onSwipeLeft() {
                 super.onSwipeLeft()
@@ -966,7 +966,8 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
 
             override fun onClick(view: View) {
                 super.onClick(view)
-                textOnClick(view)
+                if (customOnClick != null) customOnClick(view)
+                else textOnClick(view)
             }
         }
     }
