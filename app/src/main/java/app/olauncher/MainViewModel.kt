@@ -236,7 +236,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun getAppList(includeHiddenApps: Boolean = false) {
         viewModelScope.launch {
-            appList.value = getAppsList(appContext, prefs, includeRegularApps = true, includeHiddenApps)
+            val allApps = getAppsList(appContext, prefs, includeRegularApps = true, includeHiddenApps)
+            val allAppsSorted = allApps.sortedByDescending { prefs.getLastClickedTime(it.appPackage, it.user.toString()) }
+            appList.value = allAppsSorted
         }
     }
 
