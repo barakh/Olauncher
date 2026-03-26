@@ -191,6 +191,15 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
             R.id.setDefaultLauncher -> {
                 onSetDefaultLauncherLongClick()
             }
+
+            else -> {
+                try {
+                    findNavController().navigate(R.id.action_mainFragment_to_settingsFragment)
+                    viewModel.firstOpen(false)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
         }
         return true
     }

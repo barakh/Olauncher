@@ -104,18 +104,24 @@
             </LinearLayout>
         </FrameLayout>
 
-        <!-- Middle section: Home apps -->
-        <FrameLayout
+        <!-- Middle section: Home apps (fills remaining space) -->
+        <LinearLayout
+            android:id="@+id/homeAppsContainer"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:layout_marginHorizontal="74dp">
+            android:orientation="vertical">
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="2" />
 
             <GridLayout
                 android:id="@+id/homeAppsLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
+                android:layout_marginHorizontal="74dp"
                 android:columnCount="2"
                 android:paddingVertical="@dimen/home_app_padding_vertical">
 
@@ -344,7 +350,25 @@
                     tools:visibility="visible" />
 
             </GridLayout>
-        </FrameLayout>
+
+            <!-- Bottom gap that contains the calendar -->
+            <FrameLayout
+                android:id="@+id/calendarEventsWrapper"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="2">
+
+                <LinearLayout
+                    android:id="@+id/calendarEventsContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginHorizontal="74dp"
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+            </FrameLayout>
+        </LinearLayout>
 
         <!-- Bottom section -->
         <LinearLayout
@@ -353,14 +377,6 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="56dp"
             android:orientation="vertical">
-
-            <LinearLayout
-                android:id="@+id/calendarEventsContainer"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:visibility="gone"
-                tools:visibility="visible" />
 
             <LinearLayout
                 android:id="@+id/permanentNoteContainer"
