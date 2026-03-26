@@ -10,7 +10,6 @@ import app.olauncher.data.Constants
 import kotlin.math.abs
 
 internal open class ViewSwipeTouchListener(c: Context?, v: View) : OnTouchListener {
-    private var longPressOn = false
     private val gestureDetector: GestureDetector
 
     override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
@@ -40,10 +39,7 @@ internal open class ViewSwipeTouchListener(c: Context?, v: View) : OnTouchListen
         }
 
         override fun onLongPress(e: MotionEvent) {
-            longPressOn = true
-            view.postDelayed({
-                if (longPressOn) onLongClick(view)
-            }, Constants.LONG_PRESS_DELAY_MS)
+            onLongClick(view)
             super.onLongPress(e)
         }
 

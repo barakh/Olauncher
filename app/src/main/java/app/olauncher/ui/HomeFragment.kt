@@ -274,12 +274,11 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         viewModel.calendarEvent.observe(viewLifecycleOwner) { events ->
             if (events != null) {
                 binding.calendarEventsContainer.isVisible = true
-                binding.tvCalendarEvent1.text = events.getOrNull(0)
-                binding.tvCalendarEvent2.text = events.getOrNull(1)
-                binding.tvCalendarEvent3.text = events.getOrNull(2)
-                binding.tvCalendarEvent1.isVisible = events.size >= 1
-                binding.tvCalendarEvent2.isVisible = events.size >= 2
-                binding.tvCalendarEvent3.isVisible = events.size >= 3
+                binding.calendarEventsContainer.removeAllViews()
+                events.forEach { event ->
+                    val textView = createCalendarEventTextView(event)
+                    binding.calendarEventsContainer.addView(textView)
+                }
             } else {
                 binding.calendarEventsContainer.isVisible = false
             }
@@ -471,6 +470,21 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         showLightningEffect()
     }
 
+    private fun createCalendarEventTextView(text: String): TextView {
+        val textView = TextView(requireContext(), null, 0, R.style.TextSmall)
+        textView.text = text
+        textView.setTextColor(requireContext().getColorFromAttr(R.attr.primaryColor))
+        val params = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        )
+        textView.layoutParams = params
+        textView.gravity = prefs.homeAlignment
+        textView.maxLines = 1
+        textView.ellipsize = android.text.TextUtils.TruncateAt.END
+        return textView
+    }
+
     private fun showLightningEffect() {
         val root = binding.confettiContainer
         val screenWidth = root.width
@@ -560,9 +574,10 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     private fun setHomeAlignment(horizontalGravity: Int = prefs.homeAlignment) {
 //        binding.homeAppsLayout.gravity = horizontalGravity or verticalGravity
         binding.dateTimeLayout.gravity = horizontalGravity
-        binding.tvCalendarEvent1.gravity = horizontalGravity
-        binding.tvCalendarEvent2.gravity = horizontalGravity
-        binding.tvCalendarEvent3.gravity = horizontalGravity
+        for (i in 0 until binding.calendarEventsContainer.childCount) {
+            val child = binding.calendarEventsContainer.getChildAt(i)
+            if (child is TextView) child.gravity = horizontalGravity
+        }
         homeAppViews.forEach { it.gravity = horizontalGravity }
     }
 
@@ -651,9 +666,6 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         }
 
         viewModel.getNextCalendarEvent()
-        binding.tvCalendarEvent1.gravity = prefs.homeAlignment
-        binding.tvCalendarEvent2.gravity = prefs.homeAlignment
-        binding.tvCalendarEvent3.gravity = prefs.homeAlignment
     }
 
     private fun requestCalendarPermission() {

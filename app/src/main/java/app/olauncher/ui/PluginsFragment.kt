@@ -78,6 +78,7 @@ class PluginsFragment : Fragment(), View.OnClickListener {
             R.id.btnAddReminder -> addNewReminder()
             R.id.showCalendarEvents -> toggleCalendar()
             R.id.btnSelectCalendars -> checkCalendarPermissionAndShowDialog()
+            R.id.btnCalendarEventsNum -> showCalendarEventsNumDialog()
             R.id.btnTestCalendar -> viewModel.testCalendarAgenda()
         }
     }
@@ -88,6 +89,7 @@ class PluginsFragment : Fragment(), View.OnClickListener {
         binding.btnAddReminder.setOnClickListener(this)
         binding.showCalendarEvents.setOnClickListener(this)
         binding.btnSelectCalendars.setOnClickListener(this)
+        binding.btnCalendarEventsNum.setOnClickListener(this)
         binding.btnTestCalendar.setOnClickListener(this)
     }
 
@@ -110,7 +112,9 @@ class PluginsFragment : Fragment(), View.OnClickListener {
     private fun populateCalendarToggle() {
         binding.showCalendarEvents.text = getString(if (prefs.showCalendarEvents) R.string.on else R.string.off)
         binding.btnSelectCalendars.isVisible = prefs.showCalendarEvents
+        binding.btnCalendarEventsNum.isVisible = prefs.showCalendarEvents
         binding.btnTestCalendar.isVisible = prefs.showCalendarEvents
+        binding.btnCalendarEventsNum.text = getString(R.string.calendar_events_num, prefs.calendarEventsNum)
     }
 
     private fun checkCalendarPermissionAndShowDialog() {
@@ -180,6 +184,22 @@ class PluginsFragment : Fragment(), View.OnClickListener {
         prefs.showCalendarEvents = !prefs.showCalendarEvents
         populateCalendarToggle()
         viewModel.refreshHome(true)
+    }
+
+    private fun showCalendarEventsNumDialog() {
+        val options = arrayOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "10")
+        var selected = prefs.calendarEventsNum - 1
+        
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.events_to_show)
+            .setSingleChoiceItems(options, selected) { dialog, which ->
+                prefs.calendarEventsNum = which + 1
+                populateCalendarToggle()
+                viewModel.refreshHome(true)
+                dialog.dismiss()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
     }
 
     private fun populateDailyReminderUI() {
