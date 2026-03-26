@@ -471,7 +471,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     }
 
     private fun createCalendarEventTextView(text: String): TextView {
-        val textView = TextView(requireContext(), null, 0, R.style.TextSmall)
+        val textView = TextView(requireContext(), null, 0, R.style.TextXSmall)
         textView.text = text
         textView.setTextColor(requireContext().getColorFromAttr(R.attr.primaryColor))
         val params = LinearLayout.LayoutParams(

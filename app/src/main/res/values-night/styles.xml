@@ -83,6 +83,10 @@
         <item name="android:textSize">@dimen/text_small</item>
     </style>
 
+    <style name="TextXSmall" parent="TextDefault">
+        <item name="android:textSize">@dimen/text_xsmall</item>
+    </style>
+
     <style name="TextSmallBold" parent="TextSmall">
         <item name="android:textStyle">bold</item>
     </style>
