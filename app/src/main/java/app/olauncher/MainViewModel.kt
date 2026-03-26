@@ -8,6 +8,7 @@ import android.content.ComponentName
 import android.content.ContentUris
 import android.content.Context
 import android.content.pm.LauncherApps
+import android.os.Build
 import android.os.UserHandle
 import android.provider.CalendarContract
 import android.text.format.DateUtils
@@ -25,8 +26,6 @@ import app.olauncher.data.AppModel
 import app.olauncher.data.AntiDoomBlockedInfo
 import app.olauncher.data.Constants
 import app.olauncher.data.Prefs
-import app.olauncher.helper.AppUsageStats
-import app.olauncher.helper.AppUsageStatsBucket
 import app.olauncher.helper.SingleLiveEvent
 import app.olauncher.helper.WallpaperWorker
 import app.olauncher.helper.convertEpochToMidnight
@@ -510,106 +509,51 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val beginTime = System.currentTimeMillis().convertEpochToMidnight()
         val endTime = System.currentTimeMillis()
         val events = usageStatsManager.queryEvents(beginTime, endTime)
-        
-        val eventsMap = parseUsageEvents(events)
-        val appUsageStatsHashMap = calculateAppUsageStats(eventsMap, beginTime, endTime)
 
-        val totalTimeSpent = appUsageStatsHashMap.values.sumOf { it.totalTimeInForegroundMillis }
-        val viewTimeSpent = appContext.formattedTimeSpent((totalTimeSpent * 1.1).toLong())
+        val totalScreenOnTime = calculateScreenOnTime(events, beginTime, endTime)
+        val viewTimeSpent = appContext.formattedTimeSpent(totalScreenOnTime)
         screenTimeValue.postValue(viewTimeSpent)
         prefs.screenTimeLastUpdated = System.currentTimeMillis()
     }
 
-    private fun parseUsageEvents(events: UsageEvents): Map<String, MutableList<UsageEvents.Event>> {
-        val eventsMap: MutableMap<String, MutableList<UsageEvents.Event>> = HashMap()
-        var currentEvent: UsageEvents.Event
+    private fun calculateScreenOnTime(events: UsageEvents, beginTime: Long, endTime: Long): Long {
+        var totalTime = 0L
+        var screenOnTimestamp = 0L
+        val event = UsageEvents.Event()
         while (events.hasNextEvent()) {
-            currentEvent = UsageEvents.Event()
-            if (events.getNextEvent(currentEvent)) {
-                when (currentEvent.eventType) {
-                    UsageEvents.Event.ACTIVITY_RESUMED, UsageEvents.Event.ACTIVITY_PAUSED, UsageEvents.Event.ACTIVITY_STOPPED, UsageEvents.Event.FOREGROUND_SERVICE_START, UsageEvents.Event.FOREGROUND_SERVICE_STOP -> {
-                        eventsMap.getOrPut(currentEvent.packageName) { ArrayList() }.add(currentEvent)
+            events.getNextEvent(event)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                when (event.eventType) {
+                    UsageEvents.Event.SCREEN_INTERACTIVE -> {
+                        screenOnTimestamp = event.timeStamp
+                    }
+                    UsageEvents.Event.SCREEN_NON_INTERACTIVE -> {
+                        if (screenOnTimestamp != 0L) {
+                            totalTime += event.timeStamp - screenOnTimestamp
+                            screenOnTimestamp = 0L
+                        } else if (totalTime == 0L) {
+                            // First event is off, so it must have been on since beginTime
+                            totalTime += event.timeStamp - beginTime
+                        }
+                    }
+                }
+            } else {
+                when (event.eventType) {
+                    UsageEvents.Event.ACTIVITY_RESUMED -> {
+                        if (screenOnTimestamp == 0L) screenOnTimestamp = event.timeStamp
+                    }
+                    UsageEvents.Event.ACTIVITY_PAUSED, UsageEvents.Event.ACTIVITY_STOPPED -> {
+                        if (screenOnTimestamp != 0L) {
+                            totalTime += event.timeStamp - screenOnTimestamp
+                            screenOnTimestamp = 0L
+                        }
                     }
                 }
             }
         }
-        return eventsMap
-    }
-
-    private fun calculateAppUsageStats(
-        eventsMap: Map<String, List<UsageEvents.Event>>,
-        beginTime: Long,
-        endTime: Long
-    ): Map<String, AppUsageStats> {
-        val appUsageStatsHashMap: MutableMap<String, AppUsageStats> = HashMap()
-        for ((key, value) in eventsMap) {
-            val foregroundBucket = AppUsageStatsBucket()
-            val backgroundBucketMap: MutableMap<String, AppUsageStatsBucket> = HashMap()
-            
-            for (event in value) {
-                if (event.className != null) {
-                    val backgroundBucket = backgroundBucketMap.getOrPut(event.className) { AppUsageStatsBucket() }
-                    updateBucketsWithEvent(event, foregroundBucket, backgroundBucket, beginTime)
-                }
-            }
-            
-            finalizeBuckets(foregroundBucket, backgroundBucketMap.values, endTime)
-
-            val foregroundEnd: Long = foregroundBucket.endMillis
-            val totalTimeForeground: Long = foregroundBucket.totalTime
-            val backgroundEnd: Long = backgroundBucketMap.values.maxOfOrNull { it.endMillis } ?: 0L
-            val totalTimeBackground: Long = backgroundBucketMap.values.sumOf { it.totalTime }
-
-            appUsageStatsHashMap[key] = AppUsageStats(
-                kotlin.math.max(foregroundEnd, backgroundEnd),
-                totalTimeForeground,
-                backgroundEnd,
-                totalTimeBackground
-            )
+        if (screenOnTimestamp != 0L) {
+            totalTime += endTime - screenOnTimestamp
         }
-        return appUsageStatsHashMap
-    }
-
-    private fun updateBucketsWithEvent(
-        event: UsageEvents.Event,
-        foregroundBucket: AppUsageStatsBucket,
-        backgroundBucket: AppUsageStatsBucket,
-        beginTime: Long
-    ) {
-        when (event.eventType) {
-            UsageEvents.Event.ACTIVITY_RESUMED -> foregroundBucket.startMillis = event.timeStamp
-            UsageEvents.Event.ACTIVITY_PAUSED, UsageEvents.Event.ACTIVITY_STOPPED -> {
-                if (foregroundBucket.startMillis >= foregroundBucket.endMillis) {
-                    if (foregroundBucket.startMillis == 0L) foregroundBucket.startMillis = beginTime
-                    foregroundBucket.endMillis = event.timeStamp
-                    foregroundBucket.addTotalTime()
-                }
-            }
-            UsageEvents.Event.FOREGROUND_SERVICE_START -> backgroundBucket.startMillis = event.timeStamp
-            UsageEvents.Event.FOREGROUND_SERVICE_STOP -> {
-                if (backgroundBucket.startMillis >= backgroundBucket.endMillis) {
-                    if (backgroundBucket.startMillis == 0L) backgroundBucket.startMillis = beginTime
-                    backgroundBucket.endMillis = event.timeStamp
-                    backgroundBucket.addTotalTime()
-                }
-            }
-        }
-    }
-
-    private fun finalizeBuckets(
-        foregroundBucket: AppUsageStatsBucket,
-        backgroundBuckets: Collection<AppUsageStatsBucket>,
-        endTime: Long
-    ) {
-        if (foregroundBucket.startMillis > foregroundBucket.endMillis) {
-            foregroundBucket.endMillis = endTime
-            foregroundBucket.addTotalTime()
-        }
-        for (bucket in backgroundBuckets) {
-            if (bucket.startMillis > bucket.endMillis) {
-                bucket.endMillis = endTime
-                bucket.addTotalTime()
-            }
-        }
+        return totalTime
     }
 }
