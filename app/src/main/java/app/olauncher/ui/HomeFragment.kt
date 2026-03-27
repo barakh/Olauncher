@@ -456,6 +456,15 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, resources.getDimension(R.dimen.text_small))
         textView.setTextColor(requireContext().getColorFromAttr(R.attr.primaryColor))
         textView.setBackgroundResource(R.drawable.rounded_rect_shade_color)
+
+        val currentDay = Calendar.getInstance().get(Calendar.DAY_OF_YEAR)
+        var dayDiff = currentDay - reminder.lastCompletedDay
+        if (dayDiff < 0) dayDiff += 365
+        
+        if (reminder.lastCompletedDay != -1 && dayDiff > 1) {
+            textView.background.mutate().setTint(requireContext().getColor(R.color.pink_tint))
+            textView.background.mutate().setTintMode(android.graphics.PorterDuff.Mode.SRC_OVER)
+        }
         
         val paddingH = 16.dpToPx()
         val paddingV = 8.dpToPx()

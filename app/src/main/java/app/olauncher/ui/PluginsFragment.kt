@@ -227,7 +227,8 @@ class PluginsFragment : Fragment(), View.OnClickListener {
     }
 
     private fun addNewReminder() {
-        val reminder = DailyReminder(text = "", time = "08:00")
+        val currentDay = java.util.Calendar.getInstance().get(java.util.Calendar.DAY_OF_YEAR)
+        val reminder = DailyReminder(text = "", time = "08:00", lastCompletedDay = currentDay - 1)
         showEditReminderDialog(reminder, isNew = true)
     }
 

@@ -30,4 +30,5 @@
 
     <color name="red">#FF0000</color>
     <color name="light_red">#FF7F7F</color>
+    <color name="pink_tint">#33FFB6C1</color>
 </resources>
