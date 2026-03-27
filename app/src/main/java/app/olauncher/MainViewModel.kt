@@ -43,10 +43,14 @@ import kotlin.math.max
 import android.database.ContentObserver
 import android.os.Handler
 import android.os.Looper
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.core.content.ContextCompat
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val appContext by lazy { application.applicationContext }
     private val prefs = Prefs(appContext)
+    private var isCalendarObserverRegistered = false
 
     private val calendarObserver = object : ContentObserver(Handler(Looper.getMainLooper())) {
         override fun onChange(selfChange: Boolean) {
@@ -58,16 +62,35 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     init {
-        appContext.contentResolver.registerContentObserver(
-            CalendarContract.CONTENT_URI,
-            true,
-            calendarObserver
-        )
+        registerCalendarObserver()
+    }
+
+    private fun registerCalendarObserver() {
+        if (isCalendarObserverRegistered) return
+
+        if (ContextCompat.checkSelfPermission(
+                appContext,
+                Manifest.permission.READ_CALENDAR
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            try {
+                appContext.contentResolver.registerContentObserver(
+                    CalendarContract.CONTENT_URI,
+                    true,
+                    calendarObserver
+                )
+                isCalendarObserverRegistered = true
+            } catch (e: SecurityException) {
+                // Should not happen if permission is granted
+            }
+        }
     }
 
     override fun onCleared() {
         super.onCleared()
-        appContext.contentResolver.unregisterContentObserver(calendarObserver)
+        if (isCalendarObserverRegistered) {
+            appContext.contentResolver.unregisterContentObserver(calendarObserver)
+        }
     }
 
     val firstOpen = MutableLiveData<Boolean>()
@@ -405,6 +428,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             calendarEvent.postValue(null)
             return
         }
+
+        registerCalendarObserver()
 
         viewModelScope.launch(Dispatchers.IO) {
             try {
