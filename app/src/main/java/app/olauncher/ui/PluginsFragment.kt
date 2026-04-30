@@ -61,7 +61,7 @@ class PluginsFragment : Fragment(), View.OnClickListener {
             val message = if (events.isEmpty()) {
                 "No upcoming events found in the next 7 days."
             } else {
-                events.joinToString("\n\n")
+                events.joinToString("\n\n") { it.displayString }
             }
             MaterialAlertDialogBuilder(requireContext())
                 .setTitle(R.string.test_calendar)

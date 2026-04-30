@@ -24,6 +24,7 @@ import androidx.work.WorkManager
 import app.olauncher.R
 import app.olauncher.data.AppModel
 import app.olauncher.data.AntiDoomBlockedInfo
+import app.olauncher.data.CalendarEventModel
 import app.olauncher.data.Constants
 import app.olauncher.data.Prefs
 import app.olauncher.helper.SingleLiveEvent
@@ -107,8 +108,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val screenTimeValue = MutableLiveData<String>()
     val autoOrderedApps = MutableLiveData<List<AppModel>>()
     val quarantineCount = MutableLiveData<Int>()
-    val calendarEvent = MutableLiveData<List<String>?>()
-    val testCalendarEvents = SingleLiveEvent<List<String>>()
+    val calendarEvent = MutableLiveData<List<CalendarEventModel>?>()
+    val testCalendarEvents = SingleLiveEvent<List<CalendarEventModel>>()
 
     val showDialog = SingleLiveEvent<String>()
     val checkForMessages = SingleLiveEvent<Unit?>()
@@ -386,6 +387,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 ContentUris.appendId(builder, endTime)
 
                 val projection = arrayOf(
+                    CalendarContract.Instances.EVENT_ID,
                     CalendarContract.Instances.TITLE,
                     CalendarContract.Instances.BEGIN,
                     CalendarContract.Instances.CALENDAR_ID
@@ -401,18 +403,19 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 )
 
                 cursor?.use {
-                    val events = mutableListOf<String>()
+                    val events = mutableListOf<CalendarEventModel>()
                     val maxEvents = prefs.calendarEventsNum
                     while (it.moveToNext() && events.size < maxEvents) {
-                        val title = it.getString(0)
-                        val start = it.getLong(1)
+                        val eventId = it.getLong(0)
+                        val title = it.getString(1)
+                        val start = it.getLong(2)
 
                         val timeStr = DateUtils.formatDateTime(
                             appContext,
                             start,
                             DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_SHOW_DATE
                         )
-                        events.add("$timeStr - $title")
+                        events.add(CalendarEventModel(eventId, "$timeStr - $title"))
                     }
                     testCalendarEvents.postValue(events)
                 } ?: testCalendarEvents.postValue(emptyList())
@@ -440,6 +443,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 ContentUris.appendId(builder, endTime)
 
                 val projection = arrayOf(
+                    CalendarContract.Instances.EVENT_ID,
                     CalendarContract.Instances.TITLE,
                     CalendarContract.Instances.BEGIN,
                     CalendarContract.Instances.ALL_DAY,
@@ -462,11 +466,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 )
 
                 cursor?.use {
-                    val events = mutableListOf<String>()
+                    val events = mutableListOf<CalendarEventModel>()
                     val maxEvents = prefs.calendarEventsNum
                     while (it.moveToNext() && events.size < maxEvents) {
-                        val title = it.getString(0)
-                        val start = it.getLong(1)
+                        val eventId = it.getLong(0)
+                        val title = it.getString(1)
+                        val start = it.getLong(2)
 
                         val isToday = android.text.format.DateUtils.isToday(start)
                         val flags = if (isToday) {
@@ -481,7 +486,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                             flags
                         )
                         val displayStr = if (isToday) "Today, $timeStr $title" else "$timeStr $title"
-                        events.add(displayStr)
+                        events.add(CalendarEventModel(eventId, displayStr))
                     }
                     if (events.isNotEmpty()) {
                         calendarEvent.postValue(events)

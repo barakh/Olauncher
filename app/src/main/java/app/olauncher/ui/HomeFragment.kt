@@ -65,6 +65,7 @@ import app.olauncher.listener.OnSwipeTouchListener
 import app.olauncher.listener.ViewSwipeTouchListener
 import app.olauncher.helper.hideKeyboard
 import java.text.SimpleDateFormat
+import app.olauncher.data.CalendarEventModel
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
@@ -170,6 +171,25 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
                 prefs.calendarAppUser,
                 false
             )
+        }
+    }
+
+    private fun openCalendarEvent(eventId: Long) {
+        val uri = android.content.ContentUris.withAppendedId(android.provider.CalendarContract.Events.CONTENT_URI, eventId)
+        val intent = Intent(Intent.ACTION_VIEW)
+            .setData(uri)
+            .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+        if (prefs.calendarAppPackage.isNotBlank()) {
+            intent.setPackage(prefs.calendarAppPackage)
+        }
+        
+        try {
+            startActivity(intent)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            // Fallback to general calendar app or toast
+            openCalendarApp()
         }
     }
 
@@ -286,6 +306,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
                 binding.calendarEventsContainer.removeAllViews()
                 events.forEach { event ->
                     val textView = createCalendarEventTextView(event)
+                    textView.setOnClickListener { openCalendarEvent(event.id) }
                     binding.calendarEventsContainer.addView(textView)
                 }
             } else {
@@ -520,9 +541,9 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         showLightningEffect()
     }
 
-    private fun createCalendarEventTextView(text: String): TextView {
+    private fun createCalendarEventTextView(event: CalendarEventModel): TextView {
         val textView = TextView(requireContext(), null, 0, R.style.TextXSmall)
-        textView.text = text
+        textView.text = event.displayString
         textView.setTextColor(requireContext().getColorFromAttr(R.attr.primaryColor))
         val params = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
