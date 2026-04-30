@@ -421,10 +421,9 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
             
             // Add Daily Reminders
             if (showDaily) {
-                val currentDay = Calendar.getInstance().get(Calendar.DAY_OF_YEAR)
                 val currentTime = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
                 prefs.dailyReminders.forEach { reminder ->
-                    if (reminder.text.isNotBlank() && reminder.lastCompletedDay != currentDay && currentTime >= reminder.time) {
+                    if (reminder.text.isNotBlank() && currentTime >= reminder.time) {
                         val ticker = createReminderTicker(reminder)
                         binding.quickRemindersContainer.addView(ticker)
                     }
@@ -486,10 +485,19 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
 
     private fun createReminderTicker(reminder: DailyReminder): TextView {
         val textView = TextView(requireContext())
+        updateReminderTickerAppearance(textView, reminder)
+        return textView
+    }
+
+    private fun updateReminderTickerAppearance(textView: TextView, reminder: DailyReminder) {
         var displayText = reminder.text
+        
+        val cal = Calendar.getInstance()
+        val currentDay = cal.get(Calendar.DAY_OF_YEAR)
+        val currentEpochDay = (cal.timeInMillis + cal.timeZone.getOffset(cal.timeInMillis)) / (1000 * 60 * 60 * 24L)
+        val isCompletedToday = reminder.lastCompletedDay == currentDay
+
         if (reminder.countStreak) {
-            val cal = Calendar.getInstance()
-            val currentEpochDay = (cal.timeInMillis + cal.timeZone.getOffset(cal.timeInMillis)) / (1000 * 60 * 60 * 24L)
             val missed = (currentEpochDay > reminder.lastCompletedEpochDay + 1) && reminder.lastCompletedEpochDay > 0
             val displayStreak = if (missed) 0 else reminder.streakCount
             
@@ -499,18 +507,34 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         }
         textView.text = displayText
         textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, resources.getDimension(R.dimen.text_small))
-        textView.setTextColor(requireContext().getColorFromAttr(R.attr.primaryColor))
-        textView.setBackgroundResource(R.drawable.rounded_rect_shade_color)
-        
+
         val paddingH = 16.dpToPx()
         val paddingV = 8.dpToPx()
         textView.setPadding(paddingH, paddingV, paddingH, paddingV)
-        
-        textView.setOnTouchListener(getViewSwipeTouchListener(requireContext(), textView) {
-            markReminderAsCompleted(textView, reminder)
-        })
-        
-        return textView
+
+        if (isCompletedToday) {
+            textView.setTextColor(requireContext().getColorFromAttr(R.attr.primaryColor).let { Color.argb(64, Color.red(it), Color.green(it), Color.blue(it)) })
+            textView.paintFlags = textView.paintFlags and android.graphics.Paint.STRIKE_THRU_TEXT_FLAG.inv()
+            textView.setBackgroundResource(R.drawable.rounded_rect_shade_color)
+            
+            textView.setOnTouchListener(getViewSwipeTouchListener(
+                requireContext(), 
+                textView,
+                customOnClick = { showReminderHistoryDialog(reminder) },
+                customOnLongClick = { showReminderHistoryDialog(reminder) }
+            ))
+        } else {
+            textView.setTextColor(requireContext().getColorFromAttr(R.attr.primaryColor))
+            textView.paintFlags = textView.paintFlags and android.graphics.Paint.STRIKE_THRU_TEXT_FLAG.inv()
+            textView.setBackgroundResource(R.drawable.rounded_rect_shade_color)
+            
+            textView.setOnTouchListener(getViewSwipeTouchListener(
+                requireContext(), 
+                textView,
+                customOnClick = { markReminderAsCompleted(textView, reminder) },
+                customOnLongClick = { showReminderHistoryDialog(reminder) }
+            ))
+        }
     }
 
     private fun markReminderAsCompleted(view: TextView, reminder: DailyReminder) {
@@ -535,10 +559,82 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
             }
             updatedReminder.lastCompletedEpochDay = currentEpochDay
             
+            val newCompletedEpochDays = updatedReminder.completedEpochDays.toMutableList()
+            if (!newCompletedEpochDays.contains(currentEpochDay)) {
+                newCompletedEpochDays.add(currentEpochDay)
+            }
+            
+            // Prune records older than 40 days to prevent DB bloat
+            val fortyDaysAgo = currentEpochDay - 40
+            updatedReminder.completedEpochDays = newCompletedEpochDays.filter { it >= fortyDaysAgo }
+            
             prefs.dailyReminders = list
+            updateReminderTickerAppearance(view, updatedReminder)
         }
-        binding.quickRemindersContainer.removeView(view)
         showLightningEffect()
+    }
+
+    private fun showReminderHistoryDialog(reminder: DailyReminder) {
+        val view = layoutInflater.inflate(R.layout.dialog_reminder_history, null)
+        val tvTitle = view.findViewById<TextView>(R.id.tvHistoryTitle)
+        val gridHistory = view.findViewById<android.widget.GridLayout>(R.id.gridHistory)
+        val tvStats = view.findViewById<TextView>(R.id.tvHistoryStats)
+
+        tvTitle.text = reminder.text
+
+        val cal = Calendar.getInstance()
+        val currentEpochDay = (cal.timeInMillis + cal.timeZone.getOffset(cal.timeInMillis)) / (1000 * 60 * 60 * 24L)
+
+        // Header row
+        val daysOfWeek = listOf("S", "M", "T", "W", "T", "F", "S")
+        for (day in daysOfWeek) {
+            val tv = TextView(requireContext())
+            tv.text = day
+            tv.textSize = 14f
+            tv.setTextColor(requireContext().getColorFromAttr(R.attr.primaryColor).let { Color.argb(128, Color.red(it), Color.green(it), Color.blue(it)) })
+            tv.gravity = Gravity.CENTER
+            tv.setPadding(8, 8, 8, 8)
+            gridHistory.addView(tv)
+        }
+
+        // Generate last 30 days grid
+        // Find what day of the week 30 days ago was
+        cal.add(Calendar.DAY_OF_YEAR, -29)
+        val firstDayOfWeek = cal.get(Calendar.DAY_OF_WEEK) // 1=Sun, 2=Mon...
+        val emptyCells = firstDayOfWeek - Calendar.SUNDAY
+        
+        for (i in 0 until emptyCells) {
+            val tv = TextView(requireContext())
+            tv.text = ""
+            tv.setPadding(8, 8, 8, 8)
+            gridHistory.addView(tv)
+        }
+
+        var thirtyDayTotal = 0
+        for (i in 0 until 30) {
+            val epochDay = currentEpochDay - 29 + i
+            val tv = TextView(requireContext())
+            tv.text = "●"
+            tv.textSize = 24f
+            tv.gravity = Gravity.CENTER
+            tv.setPadding(8, 8, 8, 8)
+            
+            if (reminder.completedEpochDays.contains(epochDay)) {
+                tv.setTextColor(requireContext().getColorFromAttr(R.attr.primaryColor))
+                thirtyDayTotal++
+            } else {
+                tv.text = "○"
+                tv.setTextColor(requireContext().getColorFromAttr(R.attr.primaryColor).let { Color.argb(64, Color.red(it), Color.green(it), Color.blue(it)) })
+            }
+            gridHistory.addView(tv)
+        }
+
+        val displayStreak = if ((currentEpochDay > reminder.lastCompletedEpochDay + 1) && reminder.lastCompletedEpochDay > 0) 0 else reminder.streakCount
+        tvStats.text = "Streak: $displayStreak 🔥  •  30-Day Total: $thirtyDayTotal"
+
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+            .setView(view)
+            .show()
     }
 
     private fun createCalendarEventTextView(event: CalendarEventModel): TextView {
@@ -1001,7 +1097,12 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         }
     }
 
-    private fun getViewSwipeTouchListener(context: Context, view: View, customOnClick: ((View) -> Unit)? = null): View.OnTouchListener {
+    private fun getViewSwipeTouchListener(
+        context: Context, 
+        view: View, 
+        customOnClick: ((View) -> Unit)? = null,
+        customOnLongClick: ((View) -> Unit)? = null
+    ): View.OnTouchListener {
         return object : ViewSwipeTouchListener(context, view) {
             override fun onSwipeLeft() {
                 super.onSwipeLeft()
@@ -1025,7 +1126,8 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
 
             override fun onLongClick(view: View) {
                 super.onLongClick(view)
-                textOnLongClick(view)
+                if (customOnLongClick != null) customOnLongClick(view)
+                else textOnLongClick(view)
             }
 
             override fun onClick(view: View) {
