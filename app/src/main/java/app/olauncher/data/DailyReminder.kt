@@ -7,7 +7,10 @@ data class DailyReminder(
     val id: String = UUID.randomUUID().toString(),
     var text: String,
     var time: String, // HH:mm
-    var lastCompletedDay: Int = -1
+    var lastCompletedDay: Int = -1,
+    var countStreak: Boolean = false,
+    var streakCount: Int = 0,
+    var lastCompletedEpochDay: Long = 0L
 ) {
     fun toJson(): String {
         val json = JSONObject()
@@ -15,6 +18,9 @@ data class DailyReminder(
         json.put("text", text)
         json.put("time", time)
         json.put("lastCompletedDay", lastCompletedDay)
+        json.put("countStreak", countStreak)
+        json.put("streakCount", streakCount)
+        json.put("lastCompletedEpochDay", lastCompletedEpochDay)
         return json.toString()
     }
 
@@ -25,7 +31,10 @@ data class DailyReminder(
                 json.getString("id"),
                 json.getString("text"),
                 json.getString("time"),
-                json.getInt("lastCompletedDay")
+                json.optInt("lastCompletedDay", -1),
+                json.optBoolean("countStreak", false),
+                json.optInt("streakCount", 0),
+                json.optLong("lastCompletedEpochDay", 0L)
             )
         }
     }

@@ -235,9 +235,11 @@ class PluginsFragment : Fragment(), View.OnClickListener {
         val view = layoutInflater.inflate(R.layout.dialog_edit_reminder, null)
         val etText = view.findViewById<EditText>(R.id.etReminderText)
         val tvTime = view.findViewById<TextView>(R.id.tvReminderTime)
+        val switchCountStreak = view.findViewById<android.widget.Switch>(R.id.switchCountStreak)
         
         etText.setText(reminder.text)
         tvTime.text = reminder.time
+        switchCountStreak.isChecked = reminder.countStreak
         
         tvTime.setOnClickListener {
             val timeParts = tvTime.text.split(":")
@@ -252,6 +254,7 @@ class PluginsFragment : Fragment(), View.OnClickListener {
             .setPositiveButton(R.string.okay) { _, _ ->
                 reminder.text = etText.text.toString()
                 reminder.time = tvTime.text.toString()
+                reminder.countStreak = switchCountStreak.isChecked
                 
                 val list = prefs.dailyReminders.toMutableList()
                 if (isNew) {

@@ -450,9 +450,33 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         showLightningEffect()
     }
 
+    private fun formatStreak(days: Int): String {
+        if (days == 0) return ""
+        val y = days / 365
+        val m = (days % 365) / 30
+        val d = (days % 365) % 30
+        
+        val sb = StringBuilder()
+        if (y > 0) sb.append("${y}y")
+        if (m > 0) sb.append("${m}m")
+        if (d > 0 || (y == 0 && m == 0)) sb.append("${d}d")
+        return sb.toString()
+    }
+
     private fun createReminderTicker(reminder: DailyReminder): TextView {
         val textView = TextView(requireContext())
-        textView.text = reminder.text
+        var displayText = reminder.text
+        if (reminder.countStreak) {
+            val cal = Calendar.getInstance()
+            val currentEpochDay = (cal.timeInMillis + cal.timeZone.getOffset(cal.timeInMillis)) / (1000 * 60 * 60 * 24L)
+            val missed = (currentEpochDay > reminder.lastCompletedEpochDay + 1) && reminder.lastCompletedEpochDay > 0
+            val displayStreak = if (missed) 0 else reminder.streakCount
+            
+            if (displayStreak > 0) {
+                displayText += " 🔥" + formatStreak(displayStreak)
+            }
+        }
+        textView.text = displayText
         textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, resources.getDimension(R.dimen.text_small))
         textView.setTextColor(requireContext().getColorFromAttr(R.attr.primaryColor))
         textView.setBackgroundResource(R.drawable.rounded_rect_shade_color)
@@ -472,7 +496,24 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         val list = prefs.dailyReminders.toMutableList()
         val index = list.indexOfFirst { it.id == reminder.id }
         if (index != -1) {
-            list[index].lastCompletedDay = Calendar.getInstance().get(Calendar.DAY_OF_YEAR)
+            val cal = Calendar.getInstance()
+            val currentDay = cal.get(Calendar.DAY_OF_YEAR)
+            val currentEpochDay = (cal.timeInMillis + cal.timeZone.getOffset(cal.timeInMillis)) / (1000 * 60 * 60 * 24L)
+            
+            val updatedReminder = list[index]
+            updatedReminder.lastCompletedDay = currentDay
+            
+            if (updatedReminder.countStreak) {
+                if (updatedReminder.lastCompletedEpochDay == currentEpochDay - 1) {
+                    updatedReminder.streakCount += 1
+                } else if (updatedReminder.lastCompletedEpochDay != currentEpochDay) {
+                    updatedReminder.streakCount = 1
+                }
+            } else {
+                updatedReminder.streakCount = 0
+            }
+            updatedReminder.lastCompletedEpochDay = currentEpochDay
+            
             prefs.dailyReminders = list
         }
         binding.quickRemindersContainer.removeView(view)
