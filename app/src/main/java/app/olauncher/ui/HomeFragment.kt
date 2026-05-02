@@ -455,9 +455,11 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         val paddingV = 8.dpToPx()
         textView.setPadding(paddingH, paddingV, paddingH, paddingV)
 
-        textView.setOnTouchListener(getViewSwipeTouchListener(requireContext(), textView) {
-            markQuickReminderAsCompleted(textView, text)
-        })
+        textView.setOnTouchListener(getViewSwipeTouchListener(
+            requireContext(), 
+            textView,
+            customOnClick = { markQuickReminderAsCompleted(textView, text) }
+        ))
 
         return textView
     }
