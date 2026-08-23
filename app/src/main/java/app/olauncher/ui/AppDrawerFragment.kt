@@ -137,7 +137,7 @@ class AppDrawerFragment : Fragment() {
     private fun onAppClicked(it: AppModel) {
         if (it.appPackage.isEmpty()) return
         viewModel.selectedApp(it, flag)
-        if (flag == Constants.FLAG_LAUNCH_APP || flag == Constants.FLAG_HIDDEN_APPS || flag == Constants.FLAG_ANTIDOOM_APPS)
+        if (flag == Constants.FLAG_LAUNCH_APP || flag == Constants.FLAG_HIDDEN_APPS || flag == Constants.FLAG_ANTIDOOM_APPS || flag == Constants.FLAG_QUARANTINED_APPS)
             findNavController().popBackStack(R.id.mainFragment, false)
         else
             findNavController().popBackStack()
