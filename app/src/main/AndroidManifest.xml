@@ -47,6 +47,15 @@
         </activity>
 
         <activity
+            android:name=".PinShortcutActivity"
+            android:excludeFromRecents="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.content.pm.action.CONFIRM_PIN_SHORTCUT" />
+            </intent-filter>
+        </activity>
+
+        <activity
             android:name=".helper.FakeHomeActivity"
             android:enabled="false"
             android:exported="false"
