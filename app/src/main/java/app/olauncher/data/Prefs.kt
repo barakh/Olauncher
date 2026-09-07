@@ -55,6 +55,7 @@ class Prefs(context: Context) {
     private val QUICK_REMINDERS = "QUICK_REMINDERS"
     private val SHOW_DAILY_REMINDER = "SHOW_DAILY_REMINDER"
     private val DAILY_REMINDERS = "DAILY_REMINDERS"
+    private val FUTURE_REMINDERS = "FUTURE_REMINDERS"
     private val SHOW_CALENDAR_EVENTS = "SHOW_CALENDAR_EVENTS"
     private val SELECTED_CALENDARS = "SELECTED_CALENDARS"
     private val CALENDAR_EVENTS_NUM = "CALENDAR_EVENTS_NUM"
@@ -281,6 +282,26 @@ class Prefs(context: Context) {
             val jsonArray = org.json.JSONArray()
             value.forEach { jsonArray.put(it.toJson()) }
             prefs.edit().putString(DAILY_REMINDERS, jsonArray.toString()).apply()
+        }
+
+    var futureReminders: List<FutureReminder>
+        get() {
+            val jsonString = prefs.getString(FUTURE_REMINDERS, "[]") ?: "[]"
+            val list = mutableListOf<FutureReminder>()
+            try {
+                val jsonArray = org.json.JSONArray(jsonString)
+                for (i in 0 until jsonArray.length()) {
+                    list.add(FutureReminder.fromJson(jsonArray.getString(i)))
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+            return list
+        }
+        set(value) {
+            val jsonArray = org.json.JSONArray()
+            value.forEach { jsonArray.put(it.toJson()) }
+            prefs.edit().putString(FUTURE_REMINDERS, jsonArray.toString()).apply()
         }
 
     fun getLastClickedTime(appPackage: String, user: String): Long {

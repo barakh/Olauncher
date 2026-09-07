@@ -167,8 +167,11 @@
     <string name="unpin_app">Unpin app</string>
     <string name="select_app">Select app</string>
     <string name="daily_reminder">Daily reminder</string>
-    <string name="daily_reminders">Daily reminders</string>
-    <string name="no_daily_reminders">No daily reminders yet</string>
+    <string name="scheduled">Scheduled</string>
+    <string name="scheduled_reminder">Scheduled reminder</string>
+    <string name="reminders">Reminders</string>
+    <string name="no_reminders">No reminders yet</string>
+    <string name="reminder_date">Reminder date</string>
     <string name="reminder_text_placeholder">Remind me to...</string>
     <string name="reminder_time">Reminder time</string>
     <string name="reminder_completed">Reminder completed!</string>
