@@ -30,4 +30,14 @@
         android:textSize="14sp"
         android:textColor="?attr/primaryColor" />
 
+    <TextView
+        android:id="@+id/btnHistorySettings"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:padding="8dp"
+        android:text="⚙️"
+        android:textSize="18sp"
+        android:textColor="?attr/primaryColor" />
+
 </LinearLayout>

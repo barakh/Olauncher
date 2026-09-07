@@ -1,5 +1,6 @@
 package app.olauncher.ui
 
+import android.app.TimePickerDialog
 import android.app.admin.DevicePolicyManager
 import android.content.Context
 import android.content.Intent
@@ -212,6 +213,8 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
                 onSetDefaultLauncherLongClick()
             }
 
+            R.id.btnAddQuickReminder -> showDailyRemindersDialog()
+
             else -> {
                 try {
                     findNavController().navigate(R.id.action_mainFragment_to_settingsFragment)
@@ -383,33 +386,228 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         binding.btnAddQuickReminder.setOnClickListener(this)
     }
 
+    private fun showDailyRemindersDialog() {
+        val reminders = prefs.dailyReminders
+        if (reminders.isEmpty()) {
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle(R.string.daily_reminders)
+                .setMessage(R.string.no_daily_reminders)
+                .setPositiveButton(R.string.okay, null)
+                .show()
+            return
+        }
+
+        val items = reminders.map { "${it.text}  ·  ${it.time}" }
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.daily_reminders)
+            .setItems(items.toTypedArray()) { _, which ->
+                showEditReminderDialog(reminders[which])
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
     private fun showAddQuickReminderDialog() {
         val editText = androidx.appcompat.widget.AppCompatEditText(requireContext())
         editText.hint = getString(R.string.reminder_text_placeholder)
         editText.isSingleLine = true
-        val padding = 16.dpToPx()
-        val container = FrameLayout(requireContext())
-        container.setPadding(padding, padding / 2, padding, 0)
-        container.addView(editText)
+
+        val settingsBtn = createReminderSettingsButton()
+        val inputRow = createQuickReminderInputRow(editText, settingsBtn)
+        val advanced = createReminderAdvancedPanel()
+
+        val container = LinearLayout(requireContext())
+        container.orientation = LinearLayout.VERTICAL
+        container.addView(inputRow)
+        container.addView(advanced.panel)
 
         val dialog = com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.add_reminder)
             .setView(container)
             .setPositiveButton(R.string.okay) { _, _ ->
-                val text = editText.text.toString()
-                if (text.isNotBlank()) {
-                    val list = prefs.quickReminders.toMutableList()
-                    list.add(text)
-                    prefs.quickReminders = list
-                    populateReminders()
-                }
+                saveReminderFromAddDialog(editText, advanced)
             }
             .setNegativeButton(R.string.not_now, null)
             .create()
-        
+
+        settingsBtn.setOnClickListener {
+            advanced.panel.isVisible = !advanced.panel.isVisible
+        }
+
         dialog.window?.setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
         dialog.show()
         editText.requestFocus()
+    }
+
+    private class AdvancedReminderViews(
+        val panel: LinearLayout,
+        val switchDaily: android.widget.Switch,
+        val tvTime: TextView,
+        val switchCountStreak: android.widget.Switch
+    )
+
+    private fun createReminderAdvancedPanel(): AdvancedReminderViews {
+        val panel = LinearLayout(requireContext())
+        panel.orientation = LinearLayout.VERTICAL
+
+        val switchDaily = android.widget.Switch(requireContext())
+        switchDaily.text = getString(R.string.daily_reminder)
+        switchDaily.layoutParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        )
+
+        val tvTime = TextView(requireContext())
+        tvTime.text = "08:00"
+        tvTime.setTextSize(TypedValue.COMPLEX_UNIT_PX, resources.getDimension(R.dimen.text_large))
+        tvTime.setTextColor(requireContext().getColorFromAttr(R.attr.primaryColor))
+        tvTime.setPadding(0, 8.dpToPx(), 0, 8.dpToPx())
+        tvTime.setOnClickListener {
+            val timeParts = tvTime.text.split(":")
+            TimePickerDialog(requireContext(), { _, h, m ->
+                tvTime.text = String.format("%02d:%02d", h, m)
+            }, timeParts[0].toInt(), timeParts[1].toInt(), true).show()
+        }
+
+        val switchCountStreak = android.widget.Switch(requireContext())
+        switchCountStreak.text = getString(R.string.count_streak)
+
+        panel.addView(switchDaily)
+        panel.addView(tvTime)
+        panel.addView(switchCountStreak)
+        panel.isVisible = false
+        return AdvancedReminderViews(panel, switchDaily, tvTime, switchCountStreak)
+    }
+
+    private fun saveReminderFromAddDialog(editText: android.widget.EditText, advanced: AdvancedReminderViews) {
+        val text = editText.text.toString()
+        if (text.isNotBlank()) {
+            if (advanced.switchDaily.isChecked) {
+                val reminder = DailyReminder(
+                    text = text,
+                    time = advanced.tvTime.text.toString(),
+                    countStreak = advanced.switchCountStreak.isChecked
+                )
+                val list = prefs.dailyReminders.toMutableList()
+                list.add(reminder)
+                prefs.dailyReminders = list
+            } else {
+                val list = prefs.quickReminders.toMutableList()
+                list.add(text)
+                prefs.quickReminders = list
+            }
+            populateReminders()
+            viewModel.refreshHome(true)
+        }
+    }
+
+    private fun createReminderSettingsButton(): TextView {
+        val btn = TextView(requireContext())
+        btn.text = "⚙️"
+        btn.setTextSize(TypedValue.COMPLEX_UNIT_PX, resources.getDimension(R.dimen.text_small))
+        btn.setTextColor(requireContext().getColorFromAttr(R.attr.primaryColor))
+        btn.setBackgroundResource(R.drawable.rounded_rect_shade_color)
+        val padding = 10.dpToPx()
+        btn.setPadding(padding, padding, padding, padding)
+        return btn
+    }
+
+    private fun createQuickReminderInputRow(editText: android.widget.EditText, settingsBtn: TextView): LinearLayout {
+        val padding = 16.dpToPx()
+        val row = LinearLayout(requireContext())
+        row.orientation = LinearLayout.HORIZONTAL
+        row.setPadding(padding, padding / 2, padding, 0)
+        editText.layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f)
+        settingsBtn.layoutParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            LinearLayout.LayoutParams.MATCH_PARENT
+        )
+        row.addView(editText)
+        row.addView(settingsBtn)
+        return row
+    }
+
+    private fun showEditReminderDialog(
+        reminder: DailyReminder,
+        isNew: Boolean = false,
+        onCommitted: (() -> Unit)? = null
+    ) {
+        val view = layoutInflater.inflate(R.layout.dialog_edit_reminder, null)
+        val etText = view.findViewById<android.widget.EditText>(R.id.etReminderText)
+        val tvTime = view.findViewById<TextView>(R.id.tvReminderTime)
+        val switchCountStreak = view.findViewById<android.widget.Switch>(R.id.switchCountStreak)
+        val btnDelete = view.findViewById<TextView>(R.id.btnDeleteReminder)
+        btnDelete.isVisible = !isNew
+
+        etText.setText(reminder.text)
+        tvTime.text = reminder.time
+        switchCountStreak.isChecked = reminder.countStreak
+
+        tvTime.setOnClickListener {
+            val timeParts = tvTime.text.split(":")
+            TimePickerDialog(requireContext(), { _, h, m ->
+                tvTime.text = String.format("%02d:%02d", h, m)
+            }, timeParts[0].toInt(), timeParts[1].toInt(), true).show()
+        }
+
+        val dialog = com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+            .setTitle(if (isNew) R.string.add_reminder else R.string.daily_reminder)
+            .setView(view)
+            .setPositiveButton(R.string.okay) { _, _ ->
+                saveReminderEdit(reminder, etText, tvTime, switchCountStreak, isNew, onCommitted)
+            }
+            .setNegativeButton(R.string.not_now, null)
+            .create()
+
+        showDeleteReminderDialog(btnDelete, dialog, reminder, onCommitted)
+        dialog.show()
+    }
+
+    private fun saveReminderEdit(
+        reminder: DailyReminder,
+        etText: android.widget.EditText,
+        tvTime: TextView,
+        switchCountStreak: android.widget.Switch,
+        isNew: Boolean,
+        onCommitted: (() -> Unit)?
+    ) {
+        reminder.text = etText.text.toString()
+        reminder.time = tvTime.text.toString()
+        reminder.countStreak = switchCountStreak.isChecked
+
+        val list = prefs.dailyReminders.toMutableList()
+        if (isNew) {
+            list.add(reminder)
+        } else {
+            val index = list.indexOfFirst { it.id == reminder.id }
+            if (index != -1) list[index] = reminder
+        }
+        prefs.dailyReminders = list
+        viewModel.refreshHome(true)
+        onCommitted?.invoke()
+    }
+
+    private fun showDeleteReminderDialog(
+        btnDelete: TextView,
+        dialog: androidx.appcompat.app.AlertDialog,
+        reminder: DailyReminder,
+        onCommitted: (() -> Unit)?
+    ) {
+        btnDelete.setOnClickListener {
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle(R.string.delete_reminder)
+                .setMessage(reminder.text)
+                .setPositiveButton(R.string.delete) { _, _ ->
+                    val list = prefs.dailyReminders.toMutableList()
+                    list.removeAll { it.id == reminder.id }
+                    prefs.dailyReminders = list
+                    dialog.dismiss()
+                    viewModel.refreshHome(true)
+                    onCommitted?.invoke()
+                }
+                .setNegativeButton(android.R.string.cancel, null)
+                .show()
+        }
     }
 
     private fun populateReminders() {
@@ -634,9 +832,20 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         val displayStreak = if ((currentEpochDay > reminder.lastCompletedEpochDay + 1) && reminder.lastCompletedEpochDay > 0) 0 else reminder.streakCount
         tvStats.text = "Streak: $displayStreak 🔥  •  30-Day Total: $thirtyDayTotal"
 
-        com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+        showHistoryDialogWithSettings(view, reminder)
+    }
+
+    private fun showHistoryDialogWithSettings(view: View, reminder: DailyReminder) {
+        val dialog = com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
             .setView(view)
-            .show()
+            .create()
+
+        view.findViewById<TextView>(R.id.btnHistorySettings).setOnClickListener {
+            dialog.dismiss()
+            showEditReminderDialog(reminder)
+        }
+
+        dialog.show()
     }
 
     private fun createCalendarEventTextView(event: CalendarEventModel): TextView {
