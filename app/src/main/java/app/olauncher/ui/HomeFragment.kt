@@ -1030,25 +1030,89 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         for (i in 0 until 30) {
             val epochDay = currentEpochDay - 29 + i
             val tv = TextView(requireContext())
-            tv.text = "●"
             tv.textSize = 24f
             tv.gravity = Gravity.CENTER
             tv.setPadding(8, 8, 8, 8)
             
-            if (reminder.completedEpochDays.contains(epochDay)) {
-                tv.setTextColor(requireContext().getColorFromAttr(R.attr.primaryColor))
-                thirtyDayTotal++
-            } else {
-                tv.text = "○"
-                tv.setTextColor(requireContext().getColorFromAttr(R.attr.primaryColor).let { Color.argb(64, Color.red(it), Color.green(it), Color.blue(it)) })
+            val completed = reminder.completedEpochDays.contains(epochDay)
+            if (completed) thirtyDayTotal++
+            setDayCellAppearance(tv, completed)
+            tv.setOnClickListener {
+                toggleReminderHistoryDay(reminder.id, epochDay, tv, tvStats, currentEpochDay)
             }
             gridHistory.addView(tv)
         }
 
-        val displayStreak = if ((currentEpochDay > reminder.lastCompletedEpochDay + 1) && reminder.lastCompletedEpochDay > 0) 0 else reminder.streakCount
-        tvStats.text = "Streak: $displayStreak 🔥  •  30-Day Total: $thirtyDayTotal"
+        tvStats.text = buildReminderHistoryStats(reminder, currentEpochDay, thirtyDayTotal)
 
         showHistoryDialogWithSettings(view, reminder)
+    }
+
+    private fun setDayCellAppearance(view: TextView, completed: Boolean) {
+        if (completed) {
+            view.text = "●"
+            view.setTextColor(requireContext().getColorFromAttr(R.attr.primaryColor))
+        } else {
+            view.text = "○"
+            view.setTextColor(requireContext().getColorFromAttr(R.attr.primaryColor).let { Color.argb(64, Color.red(it), Color.green(it), Color.blue(it)) })
+        }
+    }
+
+    private fun buildReminderHistoryStats(reminder: DailyReminder, currentEpochDay: Long, thirtyDayTotal: Int): String {
+        val displayStreak = if ((currentEpochDay > reminder.lastCompletedEpochDay + 1) && reminder.lastCompletedEpochDay > 0) 0 else reminder.streakCount
+        return "Streak: $displayStreak 🔥  •  30-Day Total: $thirtyDayTotal"
+    }
+
+    private fun recomputeReminderStreak(reminder: DailyReminder) {
+        val sorted = reminder.completedEpochDays.sorted()
+        if (sorted.isEmpty()) {
+            reminder.lastCompletedEpochDay = 0L
+            reminder.lastCompletedDay = -1
+            reminder.streakCount = 0
+            return
+        }
+        val latest = sorted.last()
+        var streak = 1
+        var cursor = latest
+        for (i in sorted.size - 2 downTo 0) {
+            if (sorted[i] == cursor - 1) {
+                streak++
+                cursor--
+            } else break
+        }
+        reminder.lastCompletedEpochDay = latest
+        reminder.streakCount = streak
+
+        val cal = Calendar.getInstance()
+        val dayInMillis = latest * (1000 * 60 * 60 * 24L)
+        cal.timeInMillis = dayInMillis - cal.timeZone.getOffset(dayInMillis)
+        reminder.lastCompletedDay = cal.get(Calendar.DAY_OF_YEAR)
+    }
+
+    private fun toggleReminderHistoryDay(reminderId: String, epochDay: Long, cell: TextView, tvStats: TextView, currentEpochDay: Long) {
+        val list = prefs.dailyReminders.toMutableList()
+        val index = list.indexOfFirst { it.id == reminderId }
+        if (index == -1) return
+        val reminder = list[index]
+
+        val days = reminder.completedEpochDays.toMutableList()
+        if (days.contains(epochDay)) {
+            days.remove(epochDay)
+        } else {
+            days.add(epochDay)
+        }
+
+        // Prune records older than 40 days to prevent DB bloat
+        val fortyDaysAgo = currentEpochDay - 40
+        reminder.completedEpochDays = days.filter { it >= fortyDaysAgo }
+
+        recomputeReminderStreak(reminder)
+        prefs.dailyReminders = list
+        viewModel.refreshHome(true)
+
+        setDayCellAppearance(cell, reminder.completedEpochDays.contains(epochDay))
+        val total = reminder.completedEpochDays.count { it in (currentEpochDay - 29)..currentEpochDay }
+        tvStats.text = buildReminderHistoryStats(reminder, currentEpochDay, total)
     }
 
     private fun showHistoryDialogWithSettings(view: View, reminder: DailyReminder) {
