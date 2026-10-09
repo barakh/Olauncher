@@ -15,6 +15,7 @@ import android.os.BatteryManager
 import android.os.Build
 import android.os.Bundle
 import android.os.UserHandle
+import android.content.res.ColorStateList
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -23,6 +24,7 @@ import android.view.ViewGroup
 import android.view.WindowInsets
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.FrameLayout
+import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -421,45 +423,16 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         return SimpleDateFormat("EEE, d MMM", Locale.getDefault()).format(Date(timestamp))
     }
 
-    private fun showAddQuickReminderDialog() {
-        val editText = androidx.appcompat.widget.AppCompatEditText(requireContext())
-        editText.hint = getString(R.string.reminder_text_placeholder)
-        editText.isSingleLine = true
-
-        val settingsBtn = createReminderSettingsButton()
-        val inputRow = createQuickReminderInputRow(editText, settingsBtn)
-        val advanced = createReminderAdvancedPanel()
-
-        val container = LinearLayout(requireContext())
-        container.orientation = LinearLayout.VERTICAL
-        container.addView(inputRow)
-        container.addView(advanced.panel)
-
-        val dialog = com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.add_reminder)
-            .setView(container)
-            .setPositiveButton(R.string.okay) { _, _ ->
-                saveReminderFromAddDialog(editText, advanced)
-            }
-            .setNegativeButton(R.string.not_now, null)
-            .create()
-
-        settingsBtn.setOnClickListener {
-            advanced.panel.isVisible = !advanced.panel.isVisible
-        }
-
-        dialog.window?.setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
-        dialog.show()
-        editText.requestFocus()
-    }
-
     private class AdvancedReminderViews(
         val panel: LinearLayout,
-        val switchDaily: android.widget.Switch,
-        val switchScheduled: android.widget.Switch,
+        val switchDaily: com.google.android.material.switchmaterial.SwitchMaterial,
+        val switchScheduled: com.google.android.material.switchmaterial.SwitchMaterial,
         val tvDate: TextView,
         val tvTime: TextView,
-        val switchCountStreak: android.widget.Switch,
+        val switchCountStreak: com.google.android.material.switchmaterial.SwitchMaterial,
+        val pickerDateRow: LinearLayout,
+        val pickerTimeRow: LinearLayout,
+        val settingsBtn: ImageButton,
         var year: Int,
         var month: Int,
         var day: Int,
@@ -474,17 +447,21 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         }
     }
 
-    private fun createReminderAdvancedPanel(): AdvancedReminderViews {
-        val panel = LinearLayout(requireContext())
-        panel.orientation = LinearLayout.VERTICAL
+    private fun showAddQuickReminderDialog() {
+        val view = layoutInflater.inflate(R.layout.dialog_add_reminder, null)
+        val editText = view.findViewById<android.widget.EditText>(R.id.etReminderText)
         val now = Calendar.getInstance()
+
         val advanced = AdvancedReminderViews(
-            panel = panel,
-            switchDaily = createReminderSwitch(getString(R.string.daily_reminder)),
-            switchScheduled = createReminderSwitch(getString(R.string.scheduled)),
-            tvDate = createReminderPickerText(),
-            tvTime = createReminderPickerText(),
-            switchCountStreak = createReminderSwitch(getString(R.string.count_streak)),
+            panel = view.findViewById(R.id.reminderAdvancedPanel),
+            switchDaily = view.findViewById(R.id.switchDaily),
+            switchScheduled = view.findViewById(R.id.switchScheduled),
+            tvDate = view.findViewById(R.id.tvReminderDate),
+            tvTime = view.findViewById(R.id.tvReminderTime),
+            switchCountStreak = view.findViewById(R.id.switchStreak),
+            pickerDateRow = view.findViewById(R.id.pickerDateRow),
+            pickerTimeRow = view.findViewById(R.id.pickerTimeRow),
+            settingsBtn = view.findViewById(R.id.btnReminderSettings),
             year = now.get(Calendar.YEAR),
             month = now.get(Calendar.MONTH),
             day = now.get(Calendar.DAY_OF_MONTH),
@@ -495,8 +472,14 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         updateDateText(advanced)
         advanced.tvTime.text = String.format("%02d:%02d", advanced.hour, advanced.minute)
 
+        setSwitchAccentTint(advanced.switchDaily)
+        setSwitchAccentTint(advanced.switchScheduled)
+        setSwitchAccentTint(advanced.switchCountStreak)
+
         advanced.tvDate.setOnClickListener { showDatePicker(advanced) }
         advanced.tvTime.setOnClickListener { showTimePicker(advanced) }
+        advanced.pickerDateRow.setOnClickListener { showDatePicker(advanced) }
+        advanced.pickerTimeRow.setOnClickListener { showTimePicker(advanced) }
         advanced.switchDaily.setOnCheckedChangeListener { _, checked ->
             if (checked) advanced.switchScheduled.isChecked = false
             updateAdvancedPanelVisibility(advanced)
@@ -506,32 +489,34 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
             updateAdvancedPanelVisibility(advanced)
         }
 
-        panel.addView(advanced.switchDaily)
-        panel.addView(advanced.switchScheduled)
-        panel.addView(advanced.tvDate)
-        panel.addView(advanced.tvTime)
-        panel.addView(advanced.switchCountStreak)
-        panel.isVisible = false
-        updateAdvancedPanelVisibility(advanced)
-        return advanced
+        val dialog = com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+            .setView(view)
+            .setPositiveButton(R.string.okay) { _, _ ->
+                saveReminderFromAddDialog(editText, advanced)
+            }
+            .setNegativeButton(R.string.not_now, null)
+            .create()
+
+        advanced.settingsBtn.setOnClickListener {
+            advanced.panel.isVisible = !advanced.panel.isVisible
+            dialog.window?.setLayout(
+                android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
+                android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        }
+
+        dialog.window?.setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
+        dialog.show()
+        editText.requestFocus()
     }
 
-    private fun createReminderSwitch(text: String): android.widget.Switch {
-        val switch = android.widget.Switch(requireContext())
-        switch.text = text
-        switch.layoutParams = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
+    private fun setSwitchAccentTint(switch: com.google.android.material.switchmaterial.SwitchMaterial) {
+        val context = requireContext()
+        val tint = context.getColorFromAttr(android.R.attr.colorAccent)
+        switch.thumbTintList = android.content.res.ColorStateList.valueOf(tint)
+        switch.trackTintList = ColorStateList.valueOf(
+            Color.argb(88, Color.red(tint), Color.green(tint), Color.blue(tint))
         )
-        return switch
-    }
-
-    private fun createReminderPickerText(): TextView {
-        val tv = TextView(requireContext())
-        tv.setTextSize(TypedValue.COMPLEX_UNIT_PX, resources.getDimension(R.dimen.text_large))
-        tv.setTextColor(requireContext().getColorFromAttr(R.attr.primaryColor))
-        tv.setPadding(0, 8.dpToPx(), 0, 8.dpToPx())
-        return tv
     }
 
     private fun updateDateText(advanced: AdvancedReminderViews) {
@@ -543,8 +528,8 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     private fun updateAdvancedPanelVisibility(advanced: AdvancedReminderViews) {
         val scheduled = advanced.switchScheduled.isChecked
         val daily = advanced.switchDaily.isChecked
-        advanced.tvDate.isVisible = scheduled
-        advanced.tvTime.isVisible = scheduled || daily
+        advanced.pickerDateRow.isVisible = scheduled
+        advanced.pickerTimeRow.isVisible = scheduled || daily
         advanced.switchCountStreak.isVisible = daily
     }
 
@@ -596,32 +581,6 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         }
     }
 
-    private fun createReminderSettingsButton(): TextView {
-        val btn = TextView(requireContext())
-        btn.text = "⚙️"
-        btn.setTextSize(TypedValue.COMPLEX_UNIT_PX, resources.getDimension(R.dimen.text_small))
-        btn.setTextColor(requireContext().getColorFromAttr(R.attr.primaryColor))
-        btn.setBackgroundResource(R.drawable.rounded_rect_shade_color)
-        val padding = 10.dpToPx()
-        btn.setPadding(padding, padding, padding, padding)
-        return btn
-    }
-
-    private fun createQuickReminderInputRow(editText: android.widget.EditText, settingsBtn: TextView): LinearLayout {
-        val padding = 16.dpToPx()
-        val row = LinearLayout(requireContext())
-        row.orientation = LinearLayout.HORIZONTAL
-        row.setPadding(padding, padding / 2, padding, 0)
-        editText.layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f)
-        settingsBtn.layoutParams = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.WRAP_CONTENT,
-            LinearLayout.LayoutParams.MATCH_PARENT
-        )
-        row.addView(editText)
-        row.addView(settingsBtn)
-        return row
-    }
-
     private fun showEditReminderDialog(
         reminder: DailyReminder,
         isNew: Boolean = false,
@@ -630,20 +589,24 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         val view = layoutInflater.inflate(R.layout.dialog_edit_reminder, null)
         val etText = view.findViewById<android.widget.EditText>(R.id.etReminderText)
         val tvTime = view.findViewById<TextView>(R.id.tvReminderTime)
-        val switchCountStreak = view.findViewById<android.widget.Switch>(R.id.switchCountStreak)
+        val switchCountStreak = view.findViewById<com.google.android.material.switchmaterial.SwitchMaterial>(R.id.switchCountStreak)
         val btnDelete = view.findViewById<TextView>(R.id.btnDeleteReminder)
         btnDelete.isVisible = !isNew
 
         etText.setText(reminder.text)
         tvTime.text = reminder.time
         switchCountStreak.isChecked = reminder.countStreak
+        setSwitchAccentTint(switchCountStreak)
 
-        tvTime.setOnClickListener {
+        val pickerTimeRow = view.findViewById<LinearLayout>(R.id.pickerTimeRow)
+        val openTimePicker: () -> Unit = {
             val timeParts = tvTime.text.split(":")
             TimePickerDialog(requireContext(), { _, h, m ->
                 tvTime.text = String.format("%02d:%02d", h, m)
             }, timeParts[0].toInt(), timeParts[1].toInt(), true).show()
         }
+        tvTime.setOnClickListener { openTimePicker() }
+        pickerTimeRow.setOnClickListener { openTimePicker() }
 
         val dialog = com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
             .setTitle(if (isNew) R.string.add_reminder else R.string.daily_reminder)
@@ -662,7 +625,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         reminder: DailyReminder,
         etText: android.widget.EditText,
         tvTime: TextView,
-        switchCountStreak: android.widget.Switch,
+        switchCountStreak: com.google.android.material.switchmaterial.SwitchMaterial,
         isNew: Boolean,
         onCommitted: (() -> Unit)?
     ) {
@@ -804,6 +767,8 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         val tvDate = view.findViewById<TextView>(R.id.tvReminderDate)
         val tvTime = view.findViewById<TextView>(R.id.tvReminderTime)
         val btnDelete = view.findViewById<TextView>(R.id.btnDeleteReminder)
+        val pickerDateRow = view.findViewById<LinearLayout>(R.id.pickerDateRow)
+        val pickerTimeRow = view.findViewById<LinearLayout>(R.id.pickerTimeRow)
         val cal = Calendar.getInstance()
         cal.timeInMillis = reminder.timestamp
 
@@ -811,14 +776,14 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         updateFutureReminderDateText(tvDate, cal)
         updateFutureReminderTimeText(tvTime, cal)
 
-        tvDate.setOnClickListener {
+        val openDatePicker: () -> Unit = {
             DatePickerDialog(requireContext(), { _, y, m, d ->
                 cal.set(y, m, d)
                 reminder.timestamp = cal.timeInMillis
                 updateFutureReminderDateText(tvDate, cal)
             }, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH)).show()
         }
-        tvTime.setOnClickListener {
+        val openTimePicker: () -> Unit = {
             TimePickerDialog(requireContext(), { _, h, min ->
                 cal.set(Calendar.HOUR_OF_DAY, h)
                 cal.set(Calendar.MINUTE, min)
@@ -826,6 +791,10 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
                 updateFutureReminderTimeText(tvTime, cal)
             }, cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE), true).show()
         }
+        tvDate.setOnClickListener { openDatePicker() }
+        tvTime.setOnClickListener { openTimePicker() }
+        pickerDateRow.setOnClickListener { openDatePicker() }
+        pickerTimeRow.setOnClickListener { openTimePicker() }
 
         val dialog = com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.scheduled_reminder)

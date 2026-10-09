@@ -177,6 +177,8 @@
     <string name="reminder_completed">Reminder completed!</string>
     <string name="daily_reminder_ticker">Daily reminder ticker</string>
     <string name="add_reminder">Add reminder</string>
+    <string name="schedule">Schedule</string>
+    <string name="reminder_settings">Reminder settings</string>
     <string name="delete_reminder">Delete reminder</string>
     <string name="calendar_agenda">Calendar agenda</string>
     <string name="calendar_events_num">Events to show: %d</string>

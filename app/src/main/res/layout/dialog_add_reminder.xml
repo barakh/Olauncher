@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:animateLayoutChanges="true"
+    android:orientation="vertical"
+    android:paddingHorizontal="24dp"
+    android:paddingTop="20dp"
+    android:paddingBottom="4dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:fontFamily="sans-serif-medium"
+            android:text="@string/add_reminder"
+            android:textColor="?attr/primaryColor"
+            android:textSize="22sp" />
+
+        <ImageButton
+            android:id="@+id/btnReminderSettings"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/bg_shade_circular"
+            android:contentDescription="@string/reminder_settings"
+            android:padding="9dp"
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/ic_settings"
+            app:tint="?attr/primaryColor" />
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/etReminderText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="14dp"
+        android:background="@drawable/bg_edittext_rounded"
+        android:fontFamily="sans-serif"
+        android:hint="@string/reminder_text_placeholder"
+        android:importantForAutofill="no"
+        android:inputType="textCapSentences"
+        android:maxLines="4"
+        android:minHeight="52dp"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="12dp"
+        android:textColor="?attr/primaryColor"
+        android:textColorHint="?attr/primaryColorTrans50"
+        android:textSize="17sp" />
+
+    <LinearLayout
+        android:id="@+id/reminderAdvancedPanel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:fontFamily="sans-serif-medium"
+            android:text="@string/schedule"
+            android:textColor="?attr/primaryColorTrans80"
+            android:textSize="13sp" />
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switchDaily"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:fontFamily="sans-serif"
+            android:minHeight="48dp"
+            android:text="@string/daily_reminder"
+            android:textColor="?attr/primaryColor"
+            android:textSize="16sp"
+            app:useMaterialThemeColors="false" />
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switchScheduled"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:fontFamily="sans-serif"
+            android:minHeight="48dp"
+            android:text="@string/scheduled"
+            android:textColor="?attr/primaryColor"
+            android:textSize="16sp"
+            app:useMaterialThemeColors="false" />
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switchStreak"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:fontFamily="sans-serif"
+            android:minHeight="48dp"
+            android:text="@string/count_streak"
+            android:textColor="?attr/primaryColor"
+            android:textSize="16sp"
+            app:useMaterialThemeColors="false" />
+
+        <LinearLayout
+            android:id="@+id/pickerDateRow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/bg_picker_rounded"
+            android:gravity="center_vertical"
+            android:minHeight="54dp"
+            android:orientation="horizontal"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp">
+
+            <ImageView
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:contentDescription="@string/reminder_date"
+                android:src="@drawable/ic_calendar_day"
+                app:tint="?attr/primaryColorTrans80" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:fontFamily="sans-serif"
+                android:text="@string/reminder_date"
+                android:textColor="?attr/primaryColorTrans80"
+                android:textSize="14sp" />
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
+
+            <TextView
+                android:id="@+id/tvReminderDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-medium"
+                android:textColor="?attr/primaryColor"
+                android:textSize="16sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/pickerTimeRow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/bg_picker_rounded"
+            android:gravity="center_vertical"
+            android:minHeight="54dp"
+            android:orientation="horizontal"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp">
+
+            <ImageView
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:contentDescription="@string/reminder_time"
+                android:src="@drawable/ic_clock"
+                app:tint="?attr/primaryColorTrans80" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:fontFamily="sans-serif"
+                android:text="@string/reminder_time"
+                android:textColor="?attr/primaryColorTrans80"
+                android:textSize="14sp" />
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
+
+            <TextView
+                android:id="@+id/tvReminderTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-medium"
+                android:textColor="?attr/primaryColor"
+                android:textSize="16sp" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>
