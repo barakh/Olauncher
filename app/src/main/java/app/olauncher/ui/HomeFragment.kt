@@ -716,8 +716,8 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         textView.setTextColor(requireContext().getColorFromAttr(R.attr.primaryColor))
         textView.setBackgroundResource(R.drawable.rounded_rect_shade_color)
 
-        val paddingH = 16.dpToPx()
-        val paddingV = 8.dpToPx()
+        val paddingH = 10.dpToPx()
+        val paddingV = 4.dpToPx()
         textView.setPadding(paddingH, paddingV, paddingH, paddingV)
 
         textView.setOnTouchListener(getViewSwipeTouchListener(
@@ -736,8 +736,8 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         textView.setTextColor(requireContext().getColorFromAttr(R.attr.primaryColor))
         textView.setBackgroundResource(R.drawable.rounded_rect_shade_color)
 
-        val paddingH = 16.dpToPx()
-        val paddingV = 8.dpToPx()
+        val paddingH = 10.dpToPx()
+        val paddingV = 4.dpToPx()
         textView.setPadding(paddingH, paddingV, paddingH, paddingV)
 
         textView.setOnTouchListener(getViewSwipeTouchListener(
@@ -893,8 +893,8 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         textView.text = displayText
         textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, resources.getDimension(R.dimen.text_small))
 
-        val paddingH = 16.dpToPx()
-        val paddingV = 8.dpToPx()
+        val paddingH = 10.dpToPx()
+        val paddingV = 4.dpToPx()
         textView.setPadding(paddingH, paddingV, paddingH, paddingV)
 
         if (isCompletedToday) {
