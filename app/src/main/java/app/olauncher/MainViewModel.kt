@@ -404,11 +404,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
                 cursor?.use {
                     val events = mutableListOf<CalendarEventModel>()
+                    val seen = mutableSetOf<String>()
                     val maxEvents = prefs.calendarEventsNum
                     while (it.moveToNext() && events.size < maxEvents) {
                         val eventId = it.getLong(0)
                         val title = it.getString(1)
                         val start = it.getLong(2)
+
+                        val dedupKey = "$title|$start"
+                        if (!seen.add(dedupKey)) continue
 
                         val timeStr = DateUtils.formatDateTime(
                             appContext,
@@ -467,11 +471,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
                 cursor?.use {
                     val events = mutableListOf<CalendarEventModel>()
+                    val seen = mutableSetOf<String>()
                     val maxEvents = prefs.calendarEventsNum
                     while (it.moveToNext() && events.size < maxEvents) {
                         val eventId = it.getLong(0)
                         val title = it.getString(1)
                         val start = it.getLong(2)
+
+                        val dedupKey = "$title|$start"
+                        if (!seen.add(dedupKey)) continue
 
                         val isToday = android.text.format.DateUtils.isToday(start)
                         val flags = if (isToday) {
