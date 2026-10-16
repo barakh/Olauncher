@@ -1,6 +1,8 @@
 package app.olauncher.ui
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -46,6 +48,16 @@ class AppDrawerFragment : Fragment() {
     private val viewModel: MainViewModel by activityViewModels()
     private var _binding: FragmentAppDrawerBinding? = null
     private val binding get() = _binding!!
+
+    private val timerHandler = Handler(Looper.getMainLooper())
+    private val timerRunnable = object : Runnable {
+        override fun run() {
+            if (_binding != null) {
+                adapter.updateTimers()
+                timerHandler.postDelayed(this, 1000)
+            }
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -344,14 +356,17 @@ class AppDrawerFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
+        timerHandler.postDelayed(timerRunnable, 1000)
     }
 
     override fun onStop() {
+        timerHandler.removeCallbacks(timerRunnable)
         binding.search.hideKeyboard()
         super.onStop()
     }
 
     override fun onDestroyView() {
+        timerHandler.removeCallbacks(timerRunnable)
         super.onDestroyView()
         _binding = null
     }

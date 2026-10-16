@@ -41,11 +41,37 @@ class AppDrawerAdapter(
     var appsList: MutableList<AppModel> = mutableListOf()
     var appFilteredList: MutableList<AppModel> = mutableListOf()
     private var myUserHandle = android.os.Process.myUserHandle()
+    private val activeTimers = mutableSetOf<String>()
+
+    companion object {
+        private const val TIMER_PAYLOAD = "antiDoomTimer"
+    }
 
     fun setAppList(list: MutableList<AppModel>) {
         appsList = list
         appFilteredList = list
+        activeTimers.clear()
         notifyDataSetChanged()
+    }
+
+    fun updateTimers() {
+        val stillActive = mutableSetOf<String>()
+        for (i in appFilteredList.indices) {
+            val appModel = appFilteredList[i]
+            if (appModel.appPackage.isEmpty()) continue
+            val user = appModel.user.toString()
+            val key = "${appModel.appPackage}|$user"
+            val isQuarantined = prefs.isAntiDoomApp(appModel.appPackage, user) &&
+                prefs.isAppTemporarilyHidden(appModel.appPackage, user)
+            if (isQuarantined) {
+                stillActive.add(key)
+                notifyItemChanged(i, TIMER_PAYLOAD)
+            } else if (activeTimers.contains(key)) {
+                notifyItemChanged(i, TIMER_PAYLOAD)
+            }
+        }
+        activeTimers.clear()
+        activeTimers.addAll(stillActive)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -67,6 +93,13 @@ class AppDrawerAdapter(
             appAntiDoomListener,
             isAppHidden
         )
+    }
+
+    override fun onBindViewHolder(holder: ViewHolder, position: Int, payloads: MutableList<Any>) {
+        if (payloads.contains(TIMER_PAYLOAD))
+            holder.updateTimer(prefs, appFilteredList[position])
+        else
+            super.onBindViewHolder(holder, position, payloads)
     }
 
     override fun getItemCount(): Int {
@@ -124,6 +157,7 @@ class AppDrawerAdapter(
             setupInitialVisibility()
             setupAppTitle(appModel, prefs)
             setupAppTitleColor(appModel, prefs)
+            setupAntiDoomTimer(appModel, prefs)
 
             if (appModel.appPackage.isEmpty()) {
                 appTitle.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null)
@@ -138,10 +172,15 @@ class AppDrawerAdapter(
             setupAppActions(appModel, appInfoListener, appDeleteListener, appHideListener, appAntiDoomListener, bindingAdapterPosition)
         }
 
+        fun updateTimer(prefs: Prefs, appModel: AppModel) = with(binding) {
+            setupAntiDoomTimer(appModel, prefs)
+        }
+
         private fun AdapterAppDrawerBinding.setupInitialVisibility() {
             appHideLayout.visibility = View.GONE
             renameLayout.visibility = View.GONE
             appTitle.visibility = View.VISIBLE
+            tvTimer.visibility = View.GONE
         }
 
         private fun AdapterAppDrawerBinding.setupAppTitle(appModel: AppModel, prefs: Prefs) {
@@ -164,6 +203,33 @@ class AppDrawerAdapter(
                     appTitle.setTextColor(typedValue.data)
                 }
             }
+        }
+
+        private fun AdapterAppDrawerBinding.setupAntiDoomTimer(appModel: AppModel, prefs: Prefs) {
+            if (appModel.appPackage.isEmpty()) return
+            val user = appModel.user.toString()
+            val isQuarantined = prefs.isAntiDoomApp(appModel.appPackage, user) &&
+                prefs.isAppTemporarilyHidden(appModel.appPackage, user)
+            if (isQuarantined) {
+                val remainingMinutes = prefs.getAntiDoomRemainingMinutes(appModel.appPackage, user)
+                val color = if (remainingMinutes < 10) R.color.light_red else R.color.red
+                tvTimer.setTextColor(root.context.getColor(color))
+                tvTimer.text = formatRemainingTime(prefs.getAntiDoomHiddenUntil(appModel.appPackage, user))
+                tvTimer.visibility = View.VISIBLE
+            } else {
+                tvTimer.visibility = View.GONE
+            }
+        }
+
+        private fun formatRemainingTime(hiddenUntil: Long): String {
+            val remainingSeconds = ((hiddenUntil - System.currentTimeMillis()) / 1000).coerceAtLeast(0L)
+            val hours = remainingSeconds / 3600
+            val minutes = (remainingSeconds % 3600) / 60
+            val seconds = remainingSeconds % 60
+            return if (hours > 0)
+                String.format(Locale.ROOT, "%d:%02d:%02d", hours, minutes, seconds)
+            else
+                String.format(Locale.ROOT, "%d:%02d", minutes, seconds)
         }
 
         private fun AdapterAppDrawerBinding.setupAppIcons(

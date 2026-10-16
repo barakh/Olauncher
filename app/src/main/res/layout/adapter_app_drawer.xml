@@ -6,15 +6,35 @@
     android:layout_height="wrap_content"
     android:animateLayoutChanges="true">
 
-    <TextView
-        android:id="@+id/appTitle"
-        style="@style/TextLarge"
+    <LinearLayout
+        android:id="@+id/mainRow"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:maxLines="1"
-        android:paddingHorizontal="20dp"
-        android:paddingVertical="@dimen/app_padding_vertical"
-        android:text="@string/app" />
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/appTitle"
+            style="@style/TextLarge"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:maxLines="1"
+            android:paddingHorizontal="20dp"
+            android:paddingVertical="@dimen/app_padding_vertical"
+            android:text="@string/app" />
+
+        <TextView
+            android:id="@+id/tvTimer"
+            style="@style/TextSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="4dp"
+            android:paddingEnd="20dp"
+            android:visibility="gone"
+            tools:text="59:59"
+            tools:visibility="visible" />
+    </LinearLayout>
 
     <ImageView
         android:id="@+id/otherProfileIndicator"
